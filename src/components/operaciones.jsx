@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import operacionService from '../services/operaciones';
 import BtnCrear from './buttons/BtnCrear.jsx';
+import  '../components/Style/formStyles.css';
 
 const Operaciones = () => {
   const navigate = useNavigate()
@@ -20,7 +21,7 @@ const Operaciones = () => {
           <h2>Operaciones</h2>
           <p>Registra y gestiona las operaciones de campo</p>
         </div>
-        <div style={{ display: 'flex', gap: '10px' }}>
+        <div className="menu-buttons" >
           <BtnCrear
             to="/nueva-operacion"
             titulo="Nueva Operación"

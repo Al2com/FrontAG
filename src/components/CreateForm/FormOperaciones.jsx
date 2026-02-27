@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import usuariosService from '../../services/usuarios'
-import usuariosService from '../../services/parcela'
+// import parcelaService from '../../services/parcela'
 import axios from 'axios'
 
 import '../Style/formStyles.css'
