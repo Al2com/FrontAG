@@ -1,0 +1,54 @@
+/* global.css - estilos compartidos entre todas las vistas */
+
+.primeraSeccion {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  padding: 20px;
+}
+
+.card {
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.texto {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.value {
+  font-size: 28px;
+  font-weight: 600;
+  margin-top: 10px;
+}
+
+.menuExplo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .primeraSeccion {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .primeraSeccion {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .primeraSeccion {
+    grid-template-columns: 1fr;
+  }
+}

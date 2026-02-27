@@ -1,0 +1,32 @@
+.BtnCard {
+  border: 3px solid #bdc0c4;
+  border-radius: 12px;
+  padding: 20px;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 10px 0;
+}
+
+.BtnCardHeader {
+  display: flex;
+  justify-content: space-between; 
+  align-items: center;
+  margin-bottom: 10px; 
+}
+
+.BtnCardHeader h5 {
+  margin: 0;
+}
+
+.BtnCardHeader button {
+  padding: 5px 15px;
+}
+
+.BtnCard p {
+  margin: 0;
+}
+
+.BtnParcelaNew button{
+  background-color: black;
+  color: white;
+}

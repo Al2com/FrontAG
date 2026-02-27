@@ -1,0 +1,15 @@
+ .card1{
+  background-color: #ffffff;
+  border: 3px solid #bdc0c4;
+  border-radius: 12px;
+  padding: 20px;
+  width: 310px;
+  margin:10px;
+  
+}
+
+.card1 p{
+    color:black;
+    display: inline;
+    color:grey;
+}
