@@ -9,6 +9,7 @@ import Operaciones from './components/operaciones.jsx'
 import FormOperaciones from './components/CreateForm/FormOperaciones.jsx'
 import Recoleccion from './components/recoleccion.jsx'
 import Almacen from './components/almacen.jsx'
+import FormFumigacion from './components/CreateForm/FormFumigacion.jsx'
 
 import './App.css'
 
@@ -42,6 +43,8 @@ function App() {
               <Route path="/nueva-explotacion" element={<FormExplotacion />} />
               <Route path="/nueva-parcela" element={<FormParcela />} />
               <Route path="/nueva-operacion" element={<FormOperaciones />} />
+              <Route path="/nueva-fumigacion" element={<FormFumigacion />} />
+
             </Routes>
           </main>
         </div>
