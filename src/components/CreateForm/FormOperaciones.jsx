@@ -9,7 +9,7 @@ import '../Style/formStyles.css'
 
 
 const FormOperacion = () => {
-  const navigate = useNavigate()
+ 
 
   const [parcelas, setParcelas] = useState([])
   const [usuarios, setUsuarios] = useState([])
@@ -24,9 +24,13 @@ const FormOperacion = () => {
   })
 
   const [errors, setErrors] = useState({
+    parcela_id: '',
+    usuario_id: '',
+    tipo_operacion: '',
+    hora_inicio: '',
     duracion_minutos: '',
-    descripcion: ''
-  })
+    descripcion: '' 
+});
 
   useEffect(() => {
     parcelasService.getLista()
@@ -38,32 +42,84 @@ const FormOperacion = () => {
       .catch(err => console.error('Error cargando usuarios:', err))
   }, [])
 
-  const handleChange = (e) => {
-    const { name, value } = e.target
-    setFormData({ ...formData, [name]: value })
+    const navigate = useNavigate()
+
+//regex validar
+    const regexDuracion = /^[0-9]{1,4}$/;
+    const regexDescripcion = /^.{10,}$/;
+
+
+  const validarCampos = (name, value) => {
+      let mensaje = '';
+      let comprobar = true;
+
+      if (name === 'duracion_minutos' && !regexDuracion.test(value)) {
+        mensaje = 'Debe ser un número (máx. 4 cifras)';
+        comprobar = false;
+      }
+
+      if (name === 'descripcion' && !regexDescripcion.test(value)) {
+        mensaje = 'Mínimo 10 caracteres';
+        comprobar = false;
+      }
+
+     if ((name === 'usuario_id' || name === 'parcela_id' || name === 'tipo_operacion') && value === "") {
+        mensaje = 'Debes seleccionar una opción';
+        comprobar = false;
   }
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
+      if (name === 'hora_inicio' && value === "") {
+        mensaje = 'La fecha y hora son obligatorias';
+        comprobar = false;
+      }
 
-    if (!formData.parcela_id || !formData.usuario_id || !formData.hora_inicio ||
-        !formData.duracion_minutos || !formData.descripcion) {
-      console.log('Faltan campos obligatorios')
-      return
+       setErrors(prevErrors => ({ ...prevErrors, [name]: mensaje })); 
+    
+       return comprobar;
     }
 
-    operacionesService.postCrear(formData)
-      .then((response) => {  
-        console.log('respuesta:', response)
-        navigate('/operaciones')
-      })
+      const handleChange = (e) => {
+        const { name, value } = e.target
+        setFormData({ ...formData, [name]: value })
+        validarCampos(name, value);
   }
+
+  const enviarFormulario = (e) => {
+    e.preventDefault();
+
+    const usuarioOk = validarCampos('usuario_id', formData.usuario_id);
+    const parcelaOk = validarCampos('parcela_id', formData.parcela_id);
+    const fechaOk = validarCampos('hora_inicio', formData.hora_inicio); 
+    const duracionOk = validarCampos('duracion_minutos', formData.duracion_minutos);
+    const tipoOk = validarCampos('tipo_operacion', formData.tipo_operacion); 
+    const descripcionOk = validarCampos('descripcion', formData.descripcion);
+
+
+   
+   if (duracionOk && descripcionOk && usuarioOk && parcelaOk && tipoOk && fechaOk &&
+        formData.duracion_minutos !== "" && formData.descripcion !== "" &&
+        formData.parcela_id !== "" && formData.usuario_id !== "" && 
+        formData.hora_inicio !== "" && formData.tipo_operacion !== "") {
+      
+      
+      operacionesService.postCrear(formData)
+        .then((response) => {  
+          console.log('respuesta:', response);
+          navigate('/operaciones');
+        })
+        .catch(err => console.error('Error del servidor:', err));
+
+    } else {
+     
+      console.log('formulario inválido', { duracionOk, descripcionOk, fechaOk, tipoOk, formData });
+    }
+};
 
   return (
     <div className="form-container">
       <h1>Nueva Operación</h1>
 
-      <form onSubmit={handleSubmit} className="form-grid">
+      <form onSubmit={enviarFormulario} className="form-grid">
 
         {/* Parcela */}
         <div className="form-grupo">
@@ -73,10 +129,9 @@ const FormOperacion = () => {
             name="parcela_id"
             value={formData.parcela_id}
             onChange={handleChange}
-            // className={errors.parcela.id ? 'input-error' : ''} 
+            
           >
-          {/* {errors.parcela_id && <span className="mensaje-error">{errors.parcela_id}</span>} */}
-
+        
             <option value="">Selecciona una parcela</option>
             {parcelas.map(parcela => (
               <option key={parcela.id} value={parcela.id}>
@@ -84,6 +139,7 @@ const FormOperacion = () => {
               </option>
             ))}
           </select>
+          {errors.parcela_id && <span className="mensaje-error">{errors.parcela_id}</span>}
         </div>
 
         {/* Usuario */}
@@ -94,12 +150,8 @@ const FormOperacion = () => {
             name="usuario_id"
             value={formData.usuario_id}
             onChange={handleChange}
-            // className={errors.usuario.id ? 'input-error' : ''} 
-
+            className={errors.usuario_id ? 'input-error' : ''}
           >
-
-          {/* {errors.usuario_id && <span className="mensaje-error">{errors.usuario_id}</span>} */}
-
             <option value="">Selecciona un usuario</option>
             {usuarios.map(usuario => (
               <option key={usuario.id} value={usuario.id}>
@@ -107,6 +159,7 @@ const FormOperacion = () => {
               </option>
             ))}
           </select>
+           {errors.usuario_id && <span className="mensaje-error">{errors.usuario_id}</span>}
         </div>
 
         {/* Tipo de Operación */}
@@ -119,13 +172,13 @@ const FormOperacion = () => {
             onChange={handleChange}
             className={errors.tipo_operacion ? 'input-error' : ''}
           >
-          {errors.tipo_operacion && <span className="mensaje-error">{errors.tipo_operacion}</span>}
-
-            <option value="riego">Riego</option>
             <option value="poda">Poda</option>
+            <option value="riego">Riego</option>
+            <option value="abonado">Abonado</option>
             <option value="mantenimiento">Mantenimiento</option>
-            <option value="pulverizar">Pulverizar</option>
+            
           </select>
+          {errors.tipo_operacion && <span className="mensaje-error">{errors.tipo_operacion}</span>}
         </div>
 
         {/* Hora de Inicio */}
