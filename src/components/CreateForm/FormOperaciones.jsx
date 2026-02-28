@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import usuariosService from '../../services/usuarios'
-// import parcelaService from '../../services/parcela'
-import axios from 'axios'
+import parcelasService from '../../services/parcelas'
+import operacionesService from '../../services/operaciones'
 
 import '../Style/formStyles.css'
 
@@ -52,9 +52,11 @@ const FormOperacion = () => {
       return
     }
 
-    axios.post(`${baseUrl}/operaciones/crear`, formData)
-      .then(() => navigate('/operaciones'))
-      .catch(err => console.error('Error al crear operación:', err))
+    operacionesService.postCrear(formData)
+      .then((response) => {  
+        console.log('respuesta:', response)
+        navigate('/operaciones')
+      })
   }
 
   return (
@@ -71,8 +73,10 @@ const FormOperacion = () => {
             name="parcela_id"
             value={formData.parcela_id}
             onChange={handleChange}
-            required
+            // className={errors.parcela.id ? 'input-error' : ''} 
           >
+          {/* {errors.parcela_id && <span className="mensaje-error">{errors.parcela_id}</span>} */}
+
             <option value="">Selecciona una parcela</option>
             {parcelas.map(parcela => (
               <option key={parcela.id} value={parcela.id}>
@@ -90,8 +94,12 @@ const FormOperacion = () => {
             name="usuario_id"
             value={formData.usuario_id}
             onChange={handleChange}
-            required
+            // className={errors.usuario.id ? 'input-error' : ''} 
+
           >
+
+          {/* {errors.usuario_id && <span className="mensaje-error">{errors.usuario_id}</span>} */}
+
             <option value="">Selecciona un usuario</option>
             {usuarios.map(usuario => (
               <option key={usuario.id} value={usuario.id}>
@@ -109,8 +117,10 @@ const FormOperacion = () => {
             name="tipo_operacion"
             value={formData.tipo_operacion}
             onChange={handleChange}
-            required
+            className={errors.tipo_operacion ? 'input-error' : ''}
           >
+          {errors.tipo_operacion && <span className="mensaje-error">{errors.tipo_operacion}</span>}
+
             <option value="riego">Riego</option>
             <option value="poda">Poda</option>
             <option value="mantenimiento">Mantenimiento</option>
@@ -127,8 +137,10 @@ const FormOperacion = () => {
             name="hora_inicio"
             value={formData.hora_inicio}
             onChange={handleChange}
-            required
+            className={errors.hora_inicio ? 'input-error' : ''}
           />
+          {errors.hora_inicio && <span className="mensaje-error">{errors.hora_inicio}</span>}
+
         </div>
 
         {/* Duración */}
@@ -142,7 +154,7 @@ const FormOperacion = () => {
             onChange={handleChange}
             placeholder="Ej: 120"
             min="1"
-            required
+            className={errors.duracion_minutos ? 'input-error' : ''} // si no cumple regex pone la clase y sale el mensaje de bajo
           />
           {errors.duracion_minutos && <span className="mensaje-error">{errors.duracion_minutos}</span>}
         </div>
@@ -158,6 +170,7 @@ const FormOperacion = () => {
             rows="4"
             placeholder="Detalles de la operación..."
             required
+            className={errors.descripcion ? 'input-error' : ''} 
           />
           {errors.descripcion && <span className="mensaje-error">{errors.descripcion}</span>}
         </div>
