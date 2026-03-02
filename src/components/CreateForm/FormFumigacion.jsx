@@ -10,6 +10,7 @@ import productoService from '../../services/productos'
 const FormFumigacion = () =>{
 
   const [parcelas,setParcelas] = useState([]);
+  const [productos,setProductos] = useState([]);
   const [formData, setFormData] = useState({
              parcela_id : "",
             //  usuario_id : "",
@@ -17,17 +18,19 @@ const FormFumigacion = () =>{
              metodo_aplicacion : "",
              hora_inicio : "",
              duracion_minutos : "",
-             descripcion : "",
+             producto:"",
+             dosis_introducida : "",
   });
 
   const [errors, setErrors] = useState({
              parcela_id : "",
             //  usuario_id : "",
-             operario : "",
+             operario_id : "",
              metodo_aplicacion : "",
              hora_inicio : "",
              duracion_minutos : "",
-             descripcion : "",
+             producto:"",
+             dosis_introducida : "",
   });
 
 
@@ -38,8 +41,7 @@ const FormFumigacion = () =>{
 
      productoService.getProductos()
       .then(data => setProductos(data))
-      .catch(err => console.error('Error cargando parcelas:', err))
-
+      .catch(err => console.error('Error cargando productos:', err))
 
    }, [])
 
@@ -159,26 +161,28 @@ const FormFumigacion = () =>{
 
          
 
-          {/* Producto */}
+       {/* Producto */}
         <div className="form-grupo">
           <label htmlFor="producto_id">Producto *</label>
           <select
             id="producto_id"
             name="producto_id"
-            // value={formData.usuario_id}
-            // onChange={handleChange}
-            // className={errors.usuario_id ? 'input-error' : ''}
+            value={formData.producto_id || ''}
+            onChange={handleChange}
+            className={errors.producto_id ? 'input-error' : ''}
           >
-            {/* <option value="">Selecciona un usuario</option>
-            {usuarios.map(usuario => (
-              <option key={usuario.id} value={usuario.id}>
-                {usuario.name}
+            <option value="">Selecciona un producto</option>
+            {productos.map(producto => (
+              <option key={producto.id} value={producto.id}>
+                {producto.nombre}-{producto.unidad}
               </option>
-            ))} */}
+            ))}
           </select>
-           {/* {errors.usuario_id && <span className="mensaje-error">{errors.usuario_id}</span>} */}
-        </div>
 
+          {errors.producto_id && (
+            <span className="mensaje-error">{errors.producto_id}</span>
+          )}
+        </div>
          {/* Cantidad */}
         <div className="form-grupo">
           <label htmlFor="cantidad">Cantidad Recomendada /1500 *</label>
