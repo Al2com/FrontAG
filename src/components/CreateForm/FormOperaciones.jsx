@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import usuariosService from '../../services/usuarios'
+// import usuariosService from '../../services/usuarios'
 import parcelasService from '../../services/parcelas'
 import operacionesService from '../../services/operaciones'
 
@@ -12,11 +12,11 @@ const FormOperacion = () => {
  
 
   const [parcelas, setParcelas] = useState([])
-  const [usuarios, setUsuarios] = useState([])
 
   const [formData, setFormData] = useState({
     parcela_id: '',
-    usuario_id: '',
+    // usuario : "",
+    operario: '',
     tipo_operacion: 'riego',
     hora_inicio: '',
     duracion_minutos: '',
@@ -25,7 +25,8 @@ const FormOperacion = () => {
 
   const [errors, setErrors] = useState({
     parcela_id: '',
-    usuario_id: '',
+    usuario : "",
+    operario: '',
     tipo_operacion: '',
     hora_inicio: '',
     duracion_minutos: '',
@@ -37,9 +38,9 @@ const FormOperacion = () => {
       .then(data => setParcelas(data))
       .catch(err => console.error('Error cargando parcelas:', err))
 
-    usuariosService.getUsuarios()
-      .then(data => setUsuarios(data.usuarios))
-      .catch(err => console.error('Error cargando usuarios:', err))
+    // usuariosService.getUsuarios()
+    //   .then(data => setUsuarios(data.usuarios))
+    //   .catch(err => console.error('Error cargando usuarios:', err))
   }, [])
 
     const navigate = useNavigate()
@@ -53,6 +54,8 @@ const FormOperacion = () => {
       let mensaje = '';
       let comprobar = true;
 
+      
+
       if (name === 'duracion_minutos' && !regexDuracion.test(value)) {
         mensaje = 'Debe ser un número (máx. 4 cifras)';
         comprobar = false;
@@ -63,10 +66,10 @@ const FormOperacion = () => {
         comprobar = false;
       }
 
-     if ((name === 'usuario_id' || name === 'parcela_id' || name === 'tipo_operacion') && value === "") {
+     if ((/*name === 'usuario_id' || */ name === 'parcela_id' || name === 'tipo_operacion' || name === 'operario') && value === "") {
         mensaje = 'Debes seleccionar una opción';
         comprobar = false;
-  }
+     }
 
       if (name === 'hora_inicio' && value === "") {
         mensaje = 'La fecha y hora son obligatorias';
@@ -87,7 +90,8 @@ const FormOperacion = () => {
   const enviarFormulario = (e) => {
     e.preventDefault();
 
-    const usuarioOk = validarCampos('usuario_id', formData.usuario_id);
+    // const usuarioOk = validarCampos('usuario_id', formData.usuario_id);
+    const operarioOk = validarCampos('operario', formData.operario);
     const parcelaOk = validarCampos('parcela_id', formData.parcela_id);
     const fechaOk = validarCampos('hora_inicio', formData.hora_inicio); 
     const duracionOk = validarCampos('duracion_minutos', formData.duracion_minutos);
@@ -96,22 +100,26 @@ const FormOperacion = () => {
 
 
    
-   if (duracionOk && descripcionOk && usuarioOk && parcelaOk && tipoOk && fechaOk &&
+   if (duracionOk && descripcionOk  && /* usuarioOk  && */ operarioOk && parcelaOk && tipoOk && fechaOk &&
         formData.duracion_minutos !== "" && formData.descripcion !== "" &&
-        formData.parcela_id !== "" && formData.usuario_id !== "" && 
+        formData.parcela_id !== "" && /*formData.usuario_id !== "" && */ 
         formData.hora_inicio !== "" && formData.tipo_operacion !== "") {
       
       
       operacionesService.postCrear(formData)
+    
         .then((response) => {  
           console.log('respuesta:', response);
           navigate('/operaciones');
         })
-        .catch(err => console.error('Error del servidor:', err));
+        // .catch(err => console.error('Error del servidor:', err));
+        .catch(err => {
+  console.error('Error del servidor:', err.response?.data);
+});
 
     } else {
      
-      console.log('formulario inválido', { duracionOk, descripcionOk, fechaOk, tipoOk, formData });
+      console.log('formulario inválido', { operarioOk, duracionOk, descripcionOk, fechaOk, tipoOk, formData });
     }
 };
 
@@ -142,24 +150,27 @@ const FormOperacion = () => {
           {errors.parcela_id && <span className="mensaje-error">{errors.parcela_id}</span>}
         </div>
 
-        {/* Usuario */}
+        {/* Operario */}
         <div className="form-grupo">
-          <label htmlFor="usuario_id">Usuario *</label>
+          <label htmlFor="operario">Operario *</label>
           <select
-            id="usuario_id"
-            name="usuario_id"
-            value={formData.usuario_id}
+            id="operario"
+            name="operario"
+            value={formData.operario}
             onChange={handleChange}
-            className={errors.usuario_id ? 'input-error' : ''}
+            className={errors.operario ? 'input-error' : ''}
           >
-            <option value="">Selecciona un usuario</option>
+             <option value="">Selecciona un usuario</option>
+             <option value="Luis Pérez">Luis Perez</option>
+             <option value="Pepe Martinez">Pepe Matinez</option>
+            {/* <option value="">Selecciona un usuario</option>
             {usuarios.map(usuario => (
               <option key={usuario.id} value={usuario.id}>
                 {usuario.name}
               </option>
-            ))}
+            ))} */}
           </select>
-           {errors.usuario_id && <span className="mensaje-error">{errors.usuario_id}</span>}
+           {errors.operario && <span className="mensaje-error">{errors.operario}</span>}
         </div>
 
         {/* Tipo de Operación */}

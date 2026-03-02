@@ -1,12 +1,80 @@
 import '../Style/formStyles.css'
-// import { useState } from 'react';
+import { useEffect, useState } from 'react';
 // import { useNavigate } from 'react-router-dom';
-// import { useEffect } from 'react';
+import parcelasService from '../../services/parcelas'
+import productoService from '../../services/productos'
 // import explotacionService from '../../services/explotaciones';
 // import usuariosService from '../../services/usuarios';
 // import propietariosService from '../../services/propietarios';
 
 const FormFumigacion = () =>{
+
+  const [parcelas,setParcelas] = useState([]);
+  const [formData, setFormData] = useState({
+             parcela_id : "",
+            //  usuario_id : "",
+             operario : "",
+             metodo_aplicacion : "",
+             hora_inicio : "",
+             duracion_minutos : "",
+             descripcion : "",
+  });
+
+  const [errors, setErrors] = useState({
+             parcela_id : "",
+            //  usuario_id : "",
+             operario : "",
+             metodo_aplicacion : "",
+             hora_inicio : "",
+             duracion_minutos : "",
+             descripcion : "",
+  });
+
+
+ useEffect(() => {
+     parcelasService.getLista()
+       .then(data => setParcelas(data))
+       .catch(err => console.error('Error cargando parcelas:', err))
+
+     productoService.getProductos()
+      .then(data => setProductos(data))
+      .catch(err => console.error('Error cargando parcelas:', err))
+
+
+   }, [])
+
+
+
+   function validarCampos(){
+
+      let mensaje = '';
+      let comprobar = true;
+
+      
+
+     if ((/*name === 'usuario_id' || */ name === 'parcela_id' || name === 'metodo_aplicacion' ) && value === "") {
+        mensaje = 'Debes seleccionar una opción';
+        comprobar = false;
+     }
+
+      if (name === 'hora_inicio' && value === "") {
+        mensaje = 'La fecha y hora son obligatorias';
+        comprobar = false;
+      }
+
+       setErrors(prevErrors => ({ ...prevErrors, [name]: mensaje })); 
+    
+       return comprobar;
+   }
+
+
+  
+
+        const handleChange = (e) => {
+        const { name, value } = e.target
+        setFormData({ ...formData, [name]: value })
+        validarCampos(name, value);
+  }
 
 
     return(
@@ -15,41 +83,63 @@ const FormFumigacion = () =>{
         {/* Parcela */}
           <label htmlFor="parcela_id">Parcela *</label>
           <select
-            // id="parcela_id"
-            // name="parcela_id"
-            // value={formData.parcela_id}
-            // onChange={handleChange}
+            id="parcela_id"
+            name="parcela_id"
+            value={formData.parcela_id}
+            onChange={handleChange}
             
           >
-        
-            {/* <option value="">Selecciona una parcela</option>
+            <option value="">Selecciona una parcela</option>
             {parcelas.map(parcela => (
               <option key={parcela.id} value={parcela.id}>
                 {parcela.poligono} - {parcela.parcela} ({parcela.variedad})
               </option>
-            ))} */}
+            ))} 
           </select>
-          {/* {errors.parcela_id && <span className="mensaje-error">{errors.parcela_id}</span>} */}
+           {errors.parcela_id && <span className="mensaje-error">{errors.parcela_id}</span>}
 
-        {/* Usuario */}
+
+          {/* Metodo */}
         <div className="form-grupo">
-          <label htmlFor="usuario_id">Usuario *</label>
+          <label htmlFor="metodo_aplicacion">Método aplicacón *</label>
           <select
-            id="usuario_id"
-            name="usuario_id"
-            // value={formData.usuario_id}
-            // onChange={handleChange}
-            // className={errors.usuario_id ? 'input-error' : ''}
+            id="metodo_aplicacion"
+            name="metodo_aplicacion"
+            value={formData.metodo_aplicacion}
+            onChange={handleChange}
+            className={errors.metodo_aplicacion ? 'input-error' : ''}
           >
-            {/* <option value="">Selecciona un usuario</option>
-            {usuarios.map(usuario => (
-              <option key={usuario.id} value={usuario.id}>
-                {usuario.name}
-              </option>
-            ))} */}
+             <option value="">Selecciona método aplicación</option>
+             <option value="mochila">Mochila</option>
+             <option value="tractor">Tractor</option>
+          
           </select>
-           {/* {errors.usuario_id && <span className="mensaje-error">{errors.usuario_id}</span>} */}
+           {errors.metodo_aplicacion && <span className="mensaje-error">{errors.metodo_aplicacion}</span>}
         </div>
+         
+         
+         
+         
+         
+         {/* Operario */}
+
+         {formData.metodo_aplicacion === 'mochila' && (
+        <div className="form-grupo">
+          <label htmlFor="operario">Operario *</label>
+          <select
+            id="operario"
+            name="operario"
+            value={formData.operario}
+            onChange={handleChange}
+            className={errors.operario ? 'input-error' : ''}
+          >
+             <option value="">Selecciona un usuario</option>
+             <option value="Luis Pérez">Luis Perez</option>
+             <option value="Pepe Martinez">Pepe Matinez</option>
+          </select>
+           {errors.operario && <span className="mensaje-error">{errors.operario}</span>}
+        </div>
+          )}
 
 
          {/* Hora de Inicio */}
@@ -59,33 +149,15 @@ const FormFumigacion = () =>{
             type="datetime-local"
             id="hora_inicio"
             name="hora_inicio"
-            // value={formData.hora_inicio}
-            // onChange={handleChange}
-            // className={errors.hora_inicio ? 'input-error' : ''}
+            value={formData.hora_inicio}
+            onChange={handleChange}
+            className={errors.hora_inicio ? 'input-error' : ''}
           />
-          {/* {errors.hora_inicio && <span className="mensaje-error">{errors.hora_inicio}</span>} */}
+          {errors.hora_inicio && <span className="mensaje-error">{errors.hora_inicio}</span>}
 
         </div>
 
-          {/* Metodo */}
-        <div className="form-grupo">
-          <label htmlFor="metodo_aplicacion">Método aplicacón *</label>
-          <select
-            id="metodo_aplicacion"
-            name="metodo_aplicacion"
-            // value={formData.usuario_id}
-            // onChange={handleChange}
-            // className={errors.usuario_id ? 'input-error' : ''}
-          >
-            {/* <option value="">Selecciona un usuario</option>
-            {usuarios.map(usuario => (
-              <option key={usuario.id} value={usuario.id}>
-                {usuario.name}
-              </option>
-            ))} */}
-          </select>
-           {/* {errors.usuario_id && <span className="mensaje-error">{errors.usuario_id}</span>} */}
-        </div>
+         
 
           {/* Producto */}
         <div className="form-grupo">
