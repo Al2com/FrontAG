@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 // import { useNavigate } from 'react-router-dom';
 import parcelasService from '../../services/parcelas'
 import productoService from '../../services/productos'
+import { data } from 'react-router-dom';
 // import explotacionService from '../../services/explotaciones';
 // import usuariosService from '../../services/usuarios';
 // import propietariosService from '../../services/propietarios';
@@ -11,6 +12,7 @@ const FormFumigacion = () =>{
 
   const [parcelas,setParcelas] = useState([]);
   const [productos,setProductos] = useState([]);
+  const [dosis_recomendada,setDosisRecomendada] = useState([]);
   const [formData, setFormData] = useState({
              parcela_id : "",
             //  usuario_id : "",
@@ -40,12 +42,16 @@ const FormFumigacion = () =>{
        .catch(err => console.error('Error cargando parcelas:', err))
 
      productoService.getProductos()
-      .then(data => setProductos(data))
-      .catch(err => console.error('Error cargando productos:', err))
+      .then(data => {setProductos(data)
+                     setDosisRecomendada(data)
+      }) 
+       
 
+      .catch(err => console.error('Error cargando productos:', err))
+  
    }, [])
 
-
+ 
 
    function validarCampos(){
 
@@ -124,7 +130,6 @@ const FormFumigacion = () =>{
          
          
          {/* Operario */}
-
          {formData.metodo_aplicacion === 'mochila' && (
         <div className="form-grupo">
           <label htmlFor="operario">Operario *</label>
@@ -165,11 +170,11 @@ const FormFumigacion = () =>{
         <div className="form-grupo">
           <label htmlFor="producto_id">Producto *</label>
           <select
-            id="producto_id"
-            name="producto_id"
-            value={formData.producto_id || ''}
+            id="producto"
+            name="producto"
+            value={formData.producto || ''}
             onChange={handleChange}
-            className={errors.producto_id ? 'input-error' : ''}
+            className={errors.producto ? 'input-error' : ''}
           >
             <option value="">Selecciona un producto</option>
             {productos.map(producto => (
@@ -179,35 +184,17 @@ const FormFumigacion = () =>{
             ))}
           </select>
 
-          {errors.producto_id && (
-            <span className="mensaje-error">{errors.producto_id}</span>
-          )}
+          {errors.producto && ( <span className="mensaje-error">{errors.producto}</span>)}
         </div>
-         {/* Cantidad */}
-        <div className="form-grupo">
-          <label htmlFor="cantidad">Cantidad Recomendada /1500 *</label>
-          <select
-            id="cantidad"
-            name="cantidad"
-            // value={formData.usuario_id}
-            // onChange={handleChange}
-            // className={errors.usuario_id ? 'input-error' : ''}
-          >
-            {/* <option value="">Selecciona un usuario</option>
-            {usuarios.map(usuario => (
-              <option key={usuario.id} value={usuario.id}>
-                {usuario.name}
-              </option>
-            ))} */}
-          </select>
-           {/* {errors.usuario_id && <span className="mensaje-error">{errors.usuario_id}</span>} */}
-        </div>
+       {/* Dosis Recomendada (Automática) */}
+{/* Dosis Recomendada */}
 
+{/* //No se como hacer para que aparezca la dosis decomendada */}
 
          {/* Dosis Introducida */}
         <div className="form-grupo">
           <label htmlFor="dosis_introducida">Dosis Intoducida *</label>
-          <select
+          {/* <select
             id="dosis_introducida"
             name="dosis_introducida"
             // value={formData.usuario_id}
@@ -219,8 +206,8 @@ const FormFumigacion = () =>{
               <option key={usuario.id} value={usuario.id}>
                 {usuario.name}
               </option>
-            ))} */}
-          </select>
+            ))}
+          </select> */}
            {/* {errors.usuario_id && <span className="mensaje-error">{errors.usuario_id}</span>} */}
         </div>
 
