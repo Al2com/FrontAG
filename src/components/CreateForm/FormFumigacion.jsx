@@ -21,6 +21,9 @@ const FormFumigacion = () =>{
              duracion_minutos : "",
              producto_id:"",
              dosis_introducida : "",
+             mochilas : "",
+             turbos : "",
+             descripcion :""
   });
 
   const [errors, setErrors] = useState({
@@ -32,6 +35,9 @@ const FormFumigacion = () =>{
              duracion_minutos : "",
              producto_id:"",
              dosis_introducida : "",
+             mochilas : "",
+             turbos : "",
+             descripcion :""
   });
 
 
@@ -87,6 +93,10 @@ const FormFumigacion = () =>{
     const productoSeleccionado =productos.find(item => item.id === Number(formData.producto_id))
 
 
+    const  enviarFormulario = (e) =>{
+
+
+    }
     
 
 
@@ -94,10 +104,11 @@ const FormFumigacion = () =>{
 
 
       <div className="form-container">
+         <h1>Nueva Fumigación (seleciona metodo aplicación)</h1>
+
+      <form onSubmit={enviarFormulario} className="form-grid"></form>
 
         <form >
-
-
        <div className="form-grupo">
         {/* Parcela */}
           <label htmlFor="parcela_id">Parcela *</label>
@@ -203,9 +214,7 @@ const FormFumigacion = () =>{
               <label htmlFor="dosis_recomendada" >Dosis Recomendada</label> 
                 {productoSeleccionado && <p>{productoSeleccionado.dosis_recomendada}</p>}
             </div>
-
-
-
+        
 
          {/* Dosis Introducida */}
         <div className="form-grupo">
@@ -222,7 +231,94 @@ const FormFumigacion = () =>{
            {/* {errors.usuario_id && <span className="mensaje-error">{errors.usuario_id}</span>} */}
         </div>
 
+        
+        {/* Duración */}
+         {formData.metodo_aplicacion === 'mochila' && (
+        <div className="form-grupo">
+          <label htmlFor="duracion_minutos">Duración (minutos) *</label>
+          <input
+            type="number"
+            id="duracion_minutos"
+            name="duracion_minutos"
+            value={formData.duracion_minutos}
+            onChange={handleChange}
+            placeholder="Ej: 120"
+            min="1"
+            className={errors.duracion_minutos ? 'input-error' : ''} // si no cumple regex pone la clase y sale el mensaje de bajo
+          />
+          {errors.duracion_minutos && <span className="mensaje-error">{errors.duracion_minutos}</span>}
+        </div>    
+         )}
+
+         {/* Cantidad Mochilas */}
+         {formData.metodo_aplicacion === 'mochila' && (
+        <div className="form-grupo">
+          <label htmlFor="mochilas">Cantidad de mochilas *</label>
+          <input
+            type="number"
+            id="mochilas"
+            name="mochilas"
+            value={formData.mochilas}
+            onChange={handleChange}
+            placeholder="Ej: 2"
+            min="1"
+            className={errors.mochilas ? 'input-error' : ''} // si no cumple regex pone la clase y sale el mensaje de bajo
+          />
+          {errors.mochilas && <span className="mensaje-error">{errors.duracion_minutos}</span>}
+        </div>    
+         )}
+
+         {/* Cantidad Turbos */}
+         {formData.metodo_aplicacion !== 'mochila' && (
+        <div className="form-grupo">
+          <label htmlFor="turbos">Cantidad de Turbos(tanques tractor) *</label>
+          <input
+            type="number"
+            id="turbos"
+            name="turbos"
+            value={formData.turbos}
+            onChange={handleChange}
+            placeholder="Ej: 2"
+            min="1"
+            className={errors.mochilas ? 'input-error' : ''} // si no cumple regex pone la clase y sale el mensaje de bajo
+          />
+          {errors.turbos && <span className="mensaje-error">{errors.turbos}</span>}
+        </div>    
+         )}
+
+
+
+         {/* Descripción */}
+        <div className="form-grupo full-width">
+          <label htmlFor="descripcion">Descripción *</label>
+          <textarea
+            id="descripcion"
+            name="descripcion"
+            value={formData.descripcion}
+            onChange={handleChange}
+            rows="4"
+            placeholder="Detalles de la operación..."
+            required
+            className={errors.descripcion ? 'input-error' : ''} 
+          />
+          {errors.descripcion && <span className="mensaje-error">{errors.descripcion}</span>}
+        </div>
+
+
       </div>
+
+      {/* Botones */}
+        <div className="form-actions full-width">
+          <button
+            type="button"
+            onClick={() => navigate('/operaciones')}
+            className="btn-cancel"
+          >
+            Cancelar
+          </button>
+          <button type="submit">Guardar Operación</button>
+        </div>
+
     </form>
   </div>
 
