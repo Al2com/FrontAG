@@ -19,12 +19,16 @@ const FormFumigacion = () =>{
              metodo_aplicacion : "",
              hora_inicio : "",
              duracion_minutos : "",
-             producto_id:"",
-             dosis_introducida : "",
+            //  producto_id:"",
+            //  dosis_introducida : "",
              mochilas : "",
              turbos : "",
              descripcion :""
   });
+
+  const [productosAñadidos, setProductoAñadidos] = useState([
+    {producto_id :'' ,dosis_introducida : ''}
+  ])
 
   const [errors, setErrors] = useState({
              parcela_id : "",
@@ -87,11 +91,22 @@ const FormFumigacion = () =>{
         const { name, value } = e.target
         setFormData({ ...formData, [name]: value })
         validarCampos(name, value);
-        console.log('name:', name, 'value:', value)
+       
     }
+
+
+    const handleChangeProducto =(e,index) => {
+        e === index ? { ...item, [e.target.name]: e.target.value } : item
+        
+    }
+
+    const  añadirFila =(e) =>{
+//estoy en añadir producto mañana seguire o después
+    }
+
 //busca el producto selecionado para sacar la dosis recomendada
     const productoSeleccionado =productos.find(item => item.id === Number(formData.producto_id))
-
+    
 
     const  enviarFormulario = (e) =>{
 
@@ -189,25 +204,35 @@ const FormFumigacion = () =>{
          
 
        {/* Producto */}
-        <div className="form-grupo">
-          <label htmlFor="producto_id">Producto *</label>
-          <select
-            id="producto_id"
+       {productosAñadidos.map((item, index) => (
+    <div key={index} className="form-grupo">
+        
+        {/* Select de producto - muestra los productos del backend */}
+        <select
             name="producto_id"
-            value={formData.producto_id || ''}
-            onChange={handleChange}
-            className={errors.producto ? 'input-error' : ''}
-          >
+            value={item.producto_id}
+            onChange={(e) => handleChangeProducto(e, index)}
+        >
             <option value="">Selecciona un producto</option>
             {productos.map(producto => (
-              <option key={producto.id} value={producto.id}>
-                {producto.nombre}-{producto.unidad}
-              </option>
+                <option key={producto.id} value={producto.id}>
+                    {producto.nombre} - {producto.unidad}
+                </option>
             ))}
-          </select>
+        </select>
 
-          {errors.producto && ( <span className="mensaje-error">{errors.producto}</span>)}
-        </div>
+        {/* Input de dosis */}
+        <input
+            name="dosis_introducida"
+            value={item.dosis_introducida}
+            onChange={(e) => handleChangeProducto(e, index)}
+        />
+
+    </div>
+))}
+
+{/* Botón para añadir fila */}
+<button type="button" onClick={añadirFila}>+ Añadir producto</button>
       
          {/* Dosis Recomendada */}
             <div className="form-grupo">
