@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 // import { useNavigate } from 'react-router-dom';
 import parcelasService from '../../services/parcelas'
 import productoService from '../../services/productos'
-import { data } from 'react-router-dom';
+
 // import explotacionService from '../../services/explotaciones';
 // import usuariosService from '../../services/usuarios';
 // import propietariosService from '../../services/propietarios';
@@ -12,7 +12,6 @@ const FormFumigacion = () =>{
 
   const [parcelas,setParcelas] = useState([]);
   const [productos,setProductos] = useState([]);
-  const [dosis_recomendada,setDosisRecomendada] = useState([]);
   const [formData, setFormData] = useState({
              parcela_id : "",
             //  usuario_id : "",
@@ -20,7 +19,7 @@ const FormFumigacion = () =>{
              metodo_aplicacion : "",
              hora_inicio : "",
              duracion_minutos : "",
-             producto:"",
+             producto_id:"",
              dosis_introducida : "",
   });
 
@@ -31,7 +30,7 @@ const FormFumigacion = () =>{
              metodo_aplicacion : "",
              hora_inicio : "",
              duracion_minutos : "",
-             producto:"",
+             producto_id:"",
              dosis_introducida : "",
   });
 
@@ -43,7 +42,7 @@ const FormFumigacion = () =>{
 
      productoService.getProductos()
       .then(data => {setProductos(data)
-                     setDosisRecomendada(data)
+                    //  setDosisRecomendada(data)
       }) 
        
 
@@ -53,7 +52,7 @@ const FormFumigacion = () =>{
 
  
 
-   function validarCampos(){
+   function validarCampos(name,value){
 
       let mensaje = '';
       let comprobar = true;
@@ -78,14 +77,26 @@ const FormFumigacion = () =>{
 
   
 
-        const handleChange = (e) => {
+    const handleChange = (e) => {
         const { name, value } = e.target
         setFormData({ ...formData, [name]: value })
         validarCampos(name, value);
-  }
+        console.log('name:', name, 'value:', value)
+    }
+//busca el producto selecionado para sacar la dosis recomendada
+    const productoSeleccionado =productos.find(item => item.id === Number(formData.producto_id))
+
+
+    
 
 
     return(
+
+
+      <div className="form-container">
+
+        <form >
+
 
        <div className="form-grupo">
         {/* Parcela */}
@@ -170,9 +181,9 @@ const FormFumigacion = () =>{
         <div className="form-grupo">
           <label htmlFor="producto_id">Producto *</label>
           <select
-            id="producto"
-            name="producto"
-            value={formData.producto || ''}
+            id="producto_id"
+            name="producto_id"
+            value={formData.producto_id || ''}
             onChange={handleChange}
             className={errors.producto ? 'input-error' : ''}
           >
@@ -186,42 +197,34 @@ const FormFumigacion = () =>{
 
           {errors.producto && ( <span className="mensaje-error">{errors.producto}</span>)}
         </div>
-       {/* Dosis Recomendada (Automática) */}
-{/* Dosis Recomendada */}
+      
+         {/* Dosis Recomendada */}
+            <div className="form-grupo">
+              <label htmlFor="dosis_recomendada" >Dosis Recomendada</label> 
+                {productoSeleccionado && <p>{productoSeleccionado.dosis_recomendada}</p>}
+            </div>
 
-{/* //No se como hacer para que aparezca la dosis decomendada */}
+
+
 
          {/* Dosis Introducida */}
         <div className="form-grupo">
           <label htmlFor="dosis_introducida">Dosis Intoducida *</label>
-          {/* <select
+
+          <input 
             id="dosis_introducida"
-            name="dosis_introducida"
-            // value={formData.usuario_id}
-            // onChange={handleChange}
-            // className={errors.usuario_id ? 'input-error' : ''}
+            value={FormData.dosis_introducida}
+            onChange={handleChange}
           >
-            {/* <option value="">Selecciona un usuario</option>
-            {usuarios.map(usuario => (
-              <option key={usuario.id} value={usuario.id}>
-                {usuario.name}
-              </option>
-            ))}
-          </select> */}
+
+          </input>
+           
            {/* {errors.usuario_id && <span className="mensaje-error">{errors.usuario_id}</span>} */}
         </div>
 
-
-
-
-
-
-
-
-
-
-
-</div>
+      </div>
+    </form>
+  </div>
 
         
 
@@ -229,7 +232,7 @@ const FormFumigacion = () =>{
 
 
 
-    )
+  )
 }
 
 export default FormFumigacion
