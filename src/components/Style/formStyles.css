@@ -71,6 +71,12 @@
   align-items: center;
 }
 
+.form-dosisProduct{
+  border:2px black solid; 
+  margin:10px;
+  padding:10px
+}
+
 
 
 /* Responsive */
