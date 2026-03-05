@@ -1,6 +1,6 @@
 import '../Style/formStyles.css'
 import { useEffect, useState } from 'react';
-// import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import parcelasService from '../../services/parcelas'
 import productoService from '../../services/productos'
 import fumigacionService from '../../services/fumigaciones'
@@ -59,7 +59,7 @@ const FormFumigacion = () =>{
   
    }, [])
 
- 
+ const navigate = useNavigate()
 
       const regexDuracion = /^[0-9]{1,4}$/;
       const regexDescripcion = /^.{10,}$/;
@@ -162,10 +162,12 @@ const FormFumigacion = () =>{
         fumigacionService.postCrearFumigacion(datos)
             .then((response) => {
                 console.log('respuesta:', response);
-                navigate('/fumigaciones');
+                navigate('/operaciones');
             })
             .catch(err => {
-                console.error('Error del servidor:', err.response?.data);
+                console.error('Error del servidor:', err.response);
+                console.error('Status:', err.response?.status);
+                console.error('Data:', err.response?.data);
             });
 
     } else {
