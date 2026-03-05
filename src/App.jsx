@@ -22,7 +22,7 @@ function App() {
       
           <header className="top-header">
             <div className="header-left">
-              <img className='user-login' src="/logo_inicio.gif" alt="Inicio"/>
+             
             </div>
             
             <div className="header-right">
