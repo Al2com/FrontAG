@@ -24,6 +24,8 @@ const Dashboard = () => {
       .then(data =>{
         setnumParcelas(data.total)
       })
+
+    
   
     }, [])
 
@@ -54,6 +56,13 @@ const Dashboard = () => {
           iconImg="./iconOperaciones.svg"
           altText="operaciones"
           texto="Operaciones"
+          valor="34"
+          comentario="Total Operaciones"
+        />
+          <InfoPanel
+          iconImg="./fumigar1.svg"
+          altText="operaciones"
+          texto="Fumigaciones"
           valor="34"
           comentario="Total Operaciones"
         />

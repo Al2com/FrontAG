@@ -18,12 +18,11 @@ h1 , p{
 .texto {
   color: #1B4332;
 }
-.cardinfo-icon,
- .explo-icon{
+.cardinfo-icon {
   width: 30px;
   height: 30px;
- 
-}
+  object-fit:contain;
+filter: invert(15%) sepia(40%) saturate(800%) hue-rotate(110deg) brightness(80%);}
 .card {
   background-color: #f4fdf2;
   border: 1px solid #8a8a8a;

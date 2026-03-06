@@ -1,6 +1,6 @@
 
 
-const InfoPanel = ({ texto, iconImg, altText, valor, comentario}) => {
+const InfoPanel = ({ texto, iconImg, altText, valor}) => {
   return (
     <div className="card">
       <div className="texto">
