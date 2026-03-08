@@ -1,12 +1,14 @@
 import '../Style/barraBusqueda.css';
 
-const BarraBusqueda = ({iconImg,altText,texto}) => {
+const BarraBusqueda = ({iconImg,altText, onChange}) => {
 
 
     return(
         
-        <div className="barraMenu">
+        <div className="barra-search">
             <img src={iconImg} alt={altText}/>
+            <input onChange={onChange} placeholder="buscar" /> 
+                        
         </div>
         
     )

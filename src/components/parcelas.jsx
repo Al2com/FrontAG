@@ -58,7 +58,7 @@ const Parcela = () => {
     <div className="primeraSeccion">
         
         <CardInfo
-          iconImg="./iconParcelas.svg"
+          iconImg="./parcela.svg"
           altText="menu"
           texto="Total Parcelas"
           valor={numParcelas}
@@ -66,7 +66,7 @@ const Parcela = () => {
         />
 
         <CardInfo
-          iconImg="./superficie.png"
+          iconImg="./dimension.svg"
           altText="Menu"
           texto="Total hectarias"
           valor={totalHng}
@@ -75,7 +75,7 @@ const Parcela = () => {
 
         <CardInfo
           altText="Total Riego Manta"
-          iconImg="./riego-manta.png"
+          iconImg="./riego.svg"
           texto="Riego Manta"
           valor={parcelaMan}
           
@@ -83,7 +83,7 @@ const Parcela = () => {
         />
          <CardInfo
           altText="Parcelas Riego Goteo"
-          iconImg="./riego-goteo.png"
+          iconImg="./riegoGoteo.svg"
           texto="Riego Goteo"
           valor={parcelaGot}
         
@@ -102,7 +102,7 @@ const Parcela = () => {
           <div key={index}>
             <ParcelaCard
                pol_parcela= { parcelas.pol_parcela}
-               iconImg="./iconUbicacion.svg"
+               iconImg="./explotaciones.svg"
                altText="pick"
                explotacion={parcelas.explotacion.nombre}
                dimension_hanegadas={parcelas.dimension_hanegadas}

@@ -21,7 +21,8 @@ h1 , p{
 .cardinfo-icon {
   width: 30px;
   height: 30px;
-  object-fit:contain;
+  object-fit: contain;
+  overflow: hidden;
 filter: invert(15%) sepia(40%) saturate(800%) hue-rotate(110deg) brightness(80%);}
 .card {
   background-color: #f4fdf2;
@@ -119,4 +120,10 @@ button:hover {
 
 .btn-nueva-explotacion:hover {
   background-color: #333333;
+}
+
+.filtro-explo {
+  display: flex;
+  align-items: center;
+  padding: 10px 20px;
 }

@@ -13,16 +13,13 @@ const Operaciones = () => {
 
   useEffect(() => {
     operacionService.getLista()
-      .then(data => setOperaciones(data))
+      .then(data => setOperaciones(data.operaciones))
       .catch(err => console.error('Error cargando operaciones:', err))
 
     fumigacionService.getLista()
-  .then(data => {
-    // console.log('fumigaciones:', data)
-    setFumigaciones(data)
-  })
-  .catch(err => console.error('Error cargando fumigaciones:', err))
-  }, [])
+      .then(data => { setFumigaciones(data.fumigaciones)})
+      .catch(err => console.error('Error cargando fumigaciones:', err))
+      }, [])
 
   return (
     <div>

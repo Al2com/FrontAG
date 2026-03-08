@@ -29,7 +29,7 @@ const BarraMenu = () => {
         />
         <MenuBar
           to="/explotaciones"
-          iconImg="./iconExplotacion.svg"
+          iconImg="./explotaciones.svg"
           altText="Explotaciones"
           texto="Explotaciones" 
           isSeleccionado={botonActivo === 'Explotaciones'} 
@@ -37,7 +37,7 @@ const BarraMenu = () => {
         />
         <MenuBar
           to="/parcelas"
-          iconImg="./iconParcelas.svg"
+          iconImg="./parcela.svg"
           altText="Parcelas"
           texto="Parcelas" 
           isSeleccionado={botonActivo === 'Parcelas'} 
@@ -45,7 +45,7 @@ const BarraMenu = () => {
         />
         <MenuBar 
           to="/operaciones"
-          iconImg="./iconOperaciones.svg"
+          iconImg="./operaciones.svg"
           altText="Operaciones"
           texto="Operaciones"
           isSeleccionado={botonActivo === 'Operaciones'} 

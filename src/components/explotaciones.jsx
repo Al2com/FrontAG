@@ -4,8 +4,9 @@ import explotacionService from '../services/explotaciones.js';
 import parcelasService from '../services/parcelas.js';
 import BtnCrear from './buttons/BtnCrear.jsx';
 import BarraBusqueda from './BarraBusqueda/BarraBusqueda.jsx';
-import ExplotacionCard from './InfoPanel/ExplotacionCard .jsx'
-import BtnSubmit from './buttons/BtnSubmit.jsx'
+import ExplotacionCard from './InfoPanel/ExplotacionCard .jsx';
+import BtnSubmit from './buttons/BtnSubmit.jsx';
+import SelectComp from './BarraBusqueda/SelectComp.jsx'
 import './Style/ComponetsNavStyle.css';
 
 
@@ -17,7 +18,7 @@ const Explotaciones = () =>{
   const [parcelaGot,setParGot] = useState(0);
   const [parcelaMan,setParMan] = useState(0);
 
-  const [nomExplo ,setnomExplo] = useState([]);
+ 
 
   const [resumen,setResumen] = useState([]);
 
@@ -29,7 +30,7 @@ const Explotaciones = () =>{
       explotacionService.getCount()
         .then(data => {
           setNumExplo(data.total)
-          setnomExplo(data.nom)
+        
      })
 
       parcelasService.getCount()
@@ -49,6 +50,11 @@ const Explotaciones = () =>{
          .catch(err => console.error('Error al obtener resumen:', err))
     }, [])
 
+
+
+    function handleFiltroTamaño(){
+
+    }
 return(
 
        <div>
@@ -77,14 +83,14 @@ return(
        
       <div className="primeraSeccion">
         <InfoPanel
-          iconImg="./iconExplotacion.svg"
+          iconImg="./explotaciones.svg"
           altText="menu"
           texto="Explotaciones"
           valor={numExplo}
         />
 
         <InfoPanel
-          iconImg="./superficie.png"
+          iconImg="./dimension.svg"
           altText="Menu"
           texto="Total hangadas"
           valor={totalHng}
@@ -92,30 +98,64 @@ return(
 
         <InfoPanel
           altText="Total parcelas"
-          iconImg="./riego-manta.png"
+          iconImg="./riego.svg"
           texto="Riego Manta"
           valor={parcelaMan}
 
         />
         <InfoPanel
           altText="Parcelas Riego Goteo"
-          iconImg="./riego-goteo.png"
-          texto="Total Parcelas"
+          iconImg="./riegoGoteo.svg"
+          texto="Riego Goteo"
           valor={parcelaGot}
+
+        />
+
+         <InfoPanel
+          altText="Total parcelas"
+          iconImg="./parcela.svg"
+          texto="Total parcelas"
+          valor={numParcelas}
 
         />
 
       </div>
 
-      <div className="filtroExplo">
+
+      <div className="filtro-explo">
+      
+          <div className="filtro-search">
             <BarraBusqueda 
-            texto="Filtra las Explotaciones"
-            iconImg="./lupa.png"
+            iconImg="./search.svg"
             altText="fotoLupa"
             />
-         </div>
+          </div>
 
+          <div className="filtro-select">
+          <SelectComp 
+            onChange={handleFiltroTamaño}
+            value="Explotaciones"
+            value1="maximo"
+            value2="minimo"
+            nombre1="Mayor tamaño"
+            nombre2="Menor tamaño"
+          />
 
+           </div>
+
+           <div className="filtro-select">
+          <SelectComp 
+            onChange={handleFiltroTamaño}
+            value="Parcelas"
+            value1="cantidad Parcelas"
+            value2=""
+            nombre1="Mas parcelas"
+            nombre2="Menos parcelas"
+          />
+
+           </div>
+
+      </div>
 
       <div className="seccion-explo">
         
@@ -124,7 +164,7 @@ return(
         <ExplotacionCard 
     
            nombre={explotacion.nombre}
-           iconImg="./iconUbicacion.svg" altText="Ubicacion"  
+           iconImg="./explotaciones.svg" altText="Ubicacion"  
            ubicacion={explotacion.ubicacion}
            TotalHngExplo={explotacion.parcelas_sum_dimension_hanegadas}
            numParcelas={explotacion.parcelas_count}

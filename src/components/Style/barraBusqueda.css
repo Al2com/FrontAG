@@ -1,7 +1,40 @@
-.barraMenu{
-    border:1px rgb(137, 137, 137) solid;
+.barra-search{
+    border:1px rgb(139, 136, 136) solid;
     border-radius: 10px;
     width: 20%;
     height: 40px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 300px;
   
 }
+
+.barra-search img{
+   margin-left: 20px;
+  
+}
+
+.barra-search input  {
+  border: none;
+  outline: none;
+  background: transparent;
+}
+.barra-select select {
+   border: none;
+  outline: none;
+  background: transparent;  
+}
+
+.barra-select{
+    border:1px rgb(139, 136, 136) solid;
+    border-radius: 10px;
+    width: 20%;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: 20px;
+    width: 120px;
+}
+

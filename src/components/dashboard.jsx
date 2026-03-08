@@ -5,7 +5,11 @@ import Card2 from './InfoPanel/InfoPanel2.jsx';
 import Btn1 from './buttons/BtnCrear.jsx';
 import explotacionService from '../services/explotaciones.js';
 import parcelasService from '../services/parcelas.js';
+import operacionesService from '../services/operaciones.js'
+import fumigacionesService from '../services/fumigaciones.js'
 import { useEffect , useState } from 'react';
+import { data } from 'react-router-dom';
+import fumigaciones from '../services/fumigaciones.js';
 
 //darle una vuelta a los nombre,es decir descriptivos los nombres de los componente
 const Dashboard = () => {
@@ -13,6 +17,8 @@ const Dashboard = () => {
 
   const [numExplo, setNumExplo] = useState(0);//explotaciones
   const [numParcelas, setnumParcelas] = useState(0);//parcelas
+  const [operaciones,setTotalOperacicones] = useState(0);
+  const [fumigaciones,setTotalFumigaciones] = useState(0);
 
 //useEfect 
    useEffect(() => {
@@ -24,6 +30,19 @@ const Dashboard = () => {
       .then(data =>{
         setnumParcelas(data.total)
       })
+
+    operacionesService.getLista()
+    
+      .then(data =>{setTotalOperacicones(data.total)
+     
+      })
+
+    fumigacionesService.getLista()
+
+      .then(data => {
+        setTotalFumigaciones(data.totalFumigaciones)
+      })
+    
 
     
   
@@ -37,7 +56,7 @@ const Dashboard = () => {
 
       <div className="primeraSeccion">
         <InfoPanel
-          iconImg="./iconExplotacion.svg"
+          iconImg="./explotaciones.svg"
           altText="Explotaciones"
           texto="Explotaciones"
           valor={numExplo}
@@ -45,7 +64,7 @@ const Dashboard = () => {
         />
 
         <InfoPanel
-          iconImg="./iconParcelas.svg"
+          iconImg="./parcela.svg"
           altText="parcelas"
           texto="Parcelas"
           valor={numParcelas}
@@ -53,22 +72,22 @@ const Dashboard = () => {
         />
 
         <InfoPanel
-          iconImg="./iconOperaciones.svg"
+          iconImg="./operaciones.svg"
           altText="operaciones"
           texto="Operaciones"
-          valor="34"
+          valor={operaciones}
           comentario="Total Operaciones"
         />
           <InfoPanel
           iconImg="./fumigar1.svg"
           altText="operaciones"
           texto="Fumigaciones"
-          valor="34"
+          valor={fumigaciones}
           comentario="Total Operaciones"
         />
 
         <InfoPanel
-          iconImg="./iconAlmacen.svg"
+          iconImg="./almacen.svg"
           altText="Almacen"
           texto="Productos"
           valor="9"
