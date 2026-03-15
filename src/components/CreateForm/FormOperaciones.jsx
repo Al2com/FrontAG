@@ -15,7 +15,7 @@ const FormOperacion = () => {
 
   const [formData, setFormData] = useState({
     parcela_id: '',
-    // usuario : "",
+    usuario : "",
     operario: '',
     tipo_operacion: 'riego',
     hora_inicio: '',
@@ -114,7 +114,7 @@ const FormOperacion = () => {
         })
         // .catch(err => console.error('Error del servidor:', err));
         .catch(err => {
-  console.error('Error del servidor:', err.response?.data);
+           console.error('Error del servidor:', err.response?.data);
 });
 
     } else {
@@ -187,6 +187,7 @@ const FormOperacion = () => {
             <option value="riego">Riego</option>
             <option value="abonado">Abonado</option>
             <option value="mantenimiento">Mantenimiento</option>
+            <option value="tractor">Tractor</option>
             
           </select>
           {errors.tipo_operacion && <span className="mensaje-error">{errors.tipo_operacion}</span>}

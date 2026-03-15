@@ -50,7 +50,7 @@ const Explotaciones = () =>{
          .catch(err => console.error('Error al obtener resumen:', err))
     }, [])
 
-
+        // const explotacionesFiltradas = resumen.filter(exp => exp.nombre.includes(busqueda))
 
     function handleFiltroTamaño(){
 
@@ -161,6 +161,8 @@ return(
         
         {resumen.map((explotacion,index) => (
           <div className='seccion-explo-part' key={index}>
+
+            
         <ExplotacionCard 
     
            nombre={explotacion.nombre}

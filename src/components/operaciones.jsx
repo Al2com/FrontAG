@@ -52,11 +52,11 @@ const Operaciones = () => {
             <div key={op.id} className="explotacionCard">
               <h4><strong>Operación</strong></h4>
               <p><strong>Tipo:</strong> {op.tipo_operacion}</p>
-              <p><strong>Parcela:</strong> {op.operario}</p>
-              <p><strong>Operario:</strong> {op.hora_inicio}</p>
-              <p><strong>Inicio:</strong> {op.duracion_minutos} min</p>
-              <p><strong>Duración:</strong> {op.descripcion} </p>
-              <p><strong>Descripción:</strong> {op.metodo_aplicacion}</p>
+              <p><strong>Parcela:</strong> {op.parcela_id}</p>
+              <p><strong>Operario:</strong> {op.operario}</p>
+              <p><strong>Inicio:</strong> {op.hora_inicio} min</p>
+              <p><strong>Duración:</strong> {op.duracion_minutos} </p>
+              <p><strong>Descripción:</strong> {op.descripcion}</p>
             </div>
           ))
         )}
