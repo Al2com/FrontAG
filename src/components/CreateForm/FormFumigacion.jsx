@@ -228,7 +228,7 @@ const FormFumigacion = () =>{
          
          
          
-          {/* Operario */}
+          {/* Operario, si la condicion muestra TRUE muestra "div de operario" el form si es FALSE nada */}
               {formData.metodo_aplicacion === 'mochila' && (
               <div className="form-grupo">
                 <label htmlFor="operario">Operario *</label>
@@ -264,7 +264,7 @@ const FormFumigacion = () =>{
             </div >
 
 
-          {/* duracion_minutos */}
+          {/* duracion_minutos  aqui igual que en operario */}
                 {formData.metodo_aplicacion === 'mochila' && (
                 <div className="form-grupo">
                 <label htmlFor="duracion_minutos"> Duracion en minutos*</label>

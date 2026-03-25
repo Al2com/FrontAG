@@ -108,7 +108,8 @@ const Parcela = () => {
                dimension_hanegadas={parcelas.dimension_hanegadas}
                rol={parcelas.rol}
                variedad={parcelas.variedad}
-              //  explotacion={parcelas.explotacion.nombre}
+               num_arboles = {parcelas.num_arboles}
+               fecha_plantacion = {parcelas.fecha_plantacion}
               >
                  <BtnSubmit texto="Editar" to={`/parcelas/${parcelas.id}`} />
               </ParcelaCard>

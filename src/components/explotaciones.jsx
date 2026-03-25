@@ -11,176 +11,153 @@ import './Style/ComponetsNavStyle.css';
 
 
 const Explotaciones = () =>{
-// useState es un hook que permite crear y manejar estado (datos que pueden cambiar) en un componente funcional.
-  const [numExplo, setNumExplo] = useState(0);//explotaciones
+
+  const [numExplo, setNumExplo] = useState(0);
   const [numParcelas, setNumParcelas] = useState(0);
   const [totalHng,setTotalHng] = useState(0);
   const [parcelaGot,setParGot] = useState(0);
   const [parcelaMan,setParMan] = useState(0);
-
- 
-
   const [resumen,setResumen] = useState([]);
 
+  // 1. Estado para la búsqueda por nombre
+  const [busqueda, setBusqueda] = useState('');
+  const [filtroTamaño, setFiltroTamaño] = useState('todos');
+  const [filtroParcelas, setFiltroParcelas] = useState('todos');
 
-  //useEffect es un hook que ejecuta código cuando el componente se monta, actualiza o desmonta.
-  
-     useEffect(() => {
+  useEffect(() => {
       
-      explotacionService.getCount()
-        .then(data => {
-          setNumExplo(data.total)
-        
-     })
+    explotacionService.getCount()
+      .then(data => {
+        setNumExplo(data.total)
+    })
 
-      parcelasService.getCount()
-        .then(data => {
-          setNumParcelas(data.total)
-          setTotalHng(data.totalHng)
-          setParGot(data.parcelasgoteo)
-          setParMan(data.parcelasmanta)
-          
-        })
-         .catch(err => console.error('Error al obtener resumen:', err))
-         
-        explotacionService.getResumen()
-         .then(data => {
-           setResumen(data)
-         })
-         .catch(err => console.error('Error al obtener resumen:', err))
-    }, [])
+    parcelasService.getCount()
+      .then(data => {
+        setNumParcelas(data.total)
+        setTotalHng(data.totalHng)
+        setParGot(data.parcelasgoteo)
+        setParMan(data.parcelasmanta)
+      })
+      .catch(err => console.error('Error al obtener resumen:', err))
+       
+    explotacionService.getResumen()
+      .then(data => {
+        setResumen(data)
+      })
+      .catch(err => console.error('Error al obtener resumen:', err))
 
-        // const explotacionesFiltradas = resumen.filter(exp => exp.nombre.includes(busqueda))
+  }, [])
 
-    function handleFiltroTamaño(){
+  // 2. Filtrar y ordenar antes del return
+  const explotacionesFiltradas = resumen
+    .filter(exp => exp.nombre.toLowerCase().includes(busqueda.toLowerCase()))
+    .sort((a, b) => {
+      if (filtroTamaño === 'maximo') return b.parcelas_sum_dimension_hanegadas - a.parcelas_sum_dimension_hanegadas;
+      if (filtroTamaño === 'minimo') return a.parcelas_sum_dimension_hanegadas - b.parcelas_sum_dimension_hanegadas;
+      return 0;
+    })
+    .sort((a, b) => {
+      if (filtroParcelas === 'masParcelas') return b.parcelas_count - a.parcelas_count;
+      if (filtroParcelas === 'menosParcelas') return a.parcelas_count - b.parcelas_count;
+      return 0;
+    });
 
-    }
 return(
 
-       <div>
-        <h1>Explotaciones</h1>
-          <div className='menuExplo'>
-            <p>Gestiona tus fincas y propiedades</p>  
+     <div>
+      <h1>Explotaciones</h1>
+        <div className='menuExplo'>
+          <p>Gestiona tus fincas y propiedades</p>  
+              <BtnCrear
+                to='/nueva-explotacion'
+                titulo="Crear Explotacion"
+                iconIng="./plusNegro.png"
+                className="btn-nueva-explotacion"
+              />
+          </div> 
 
+    <div className="primeraSeccion">
+      <InfoPanel
+        iconImg="./explotaciones.svg"
+        altText="menu"
+        texto="Explotaciones"
+        valor={numExplo}
+      />
+      <InfoPanel
+        iconImg="./dimension.svg"
+        altText="Menu"
+        texto="Total hangadas"
+        valor={totalHng}
+      />
+      <InfoPanel
+        altText="Total parcelas"
+        iconImg="./riego.svg"
+        texto="Riego Manta"
+        valor={parcelaMan}
+      />
+      <InfoPanel
+        altText="Parcelas Riego Goteo"
+        iconImg="./riegoGoteo.svg"
+        texto="Riego Goteo"
+        valor={parcelaGot}
+      />
+      <InfoPanel
+        altText="Total parcelas"
+        iconImg="./parcela.svg"
+        texto="Total parcelas"
+        valor={numParcelas}
+      />
+    </div>
 
-      
-            
-                <BtnCrear
-                  to='/nueva-explotacion'
-                  titulo="Crear Explotacion"
-                  iconIng="./plusNegro.png"
-                  className="btn-nueva-explotacion"
-                  
-                />
-        
-            </div> 
-
-       
-      
-      
-
-         
-       
-      <div className="primeraSeccion">
-        <InfoPanel
-          iconImg="./explotaciones.svg"
-          altText="menu"
-          texto="Explotaciones"
-          valor={numExplo}
-        />
-
-        <InfoPanel
-          iconImg="./dimension.svg"
-          altText="Menu"
-          texto="Total hangadas"
-          valor={totalHng}
-        />
-
-        <InfoPanel
-          altText="Total parcelas"
-          iconImg="./riego.svg"
-          texto="Riego Manta"
-          valor={parcelaMan}
-
-        />
-        <InfoPanel
-          altText="Parcelas Riego Goteo"
-          iconImg="./riegoGoteo.svg"
-          texto="Riego Goteo"
-          valor={parcelaGot}
-
-        />
-
-         <InfoPanel
-          altText="Total parcelas"
-          iconImg="./parcela.svg"
-          texto="Total parcelas"
-          valor={numParcelas}
-
-        />
-
-      </div>
-
-
-      <div className="filtro-explo">
-      
-          <div className="filtro-search">
-            <BarraBusqueda 
+    <div className="filtro-explo">
+        <div className="filtro-search">
+          {/* 3. BarraBusqueda conectada al estado busqueda */}
+          <BarraBusqueda 
             iconImg="./search.svg"
             altText="fotoLupa"
-            />
-          </div>
+            onChange={(e) => setBusqueda(e.target.value)}
+          />
+        </div>
 
-          <div className="filtro-select">
+        <div className="filtro-select">
           <SelectComp 
-            onChange={handleFiltroTamaño}
-            value="Explotaciones"
+            onChange={(e) => setFiltroTamaño(e.target.value)}
             value1="maximo"
             value2="minimo"
             nombre1="Mayor tamaño"
             nombre2="Menor tamaño"
           />
+        </div>
 
-           </div>
-
-           <div className="filtro-select">
+        <div className="filtro-select">
           <SelectComp 
-            onChange={handleFiltroTamaño}
-            value="Parcelas"
-            value1="cantidad Parcelas"
-            value2=""
+            onChange={(e) => setFiltroParcelas(e.target.value)}
+            value1="masParcelas"
+            value2="menosParcelas"
             nombre1="Mas parcelas"
             nombre2="Menos parcelas"
           />
+        </div>
+    </div>
 
-           </div>
+    <div className="seccion-explo">
+      {/* 4. Map usando explotacionesFiltradas en lugar de resumen */}
+      {explotacionesFiltradas.map((explotacion,index) => (
+        <div className='seccion-explo-part' key={index}>
+          <ExplotacionCard 
+            nombre={explotacion.nombre}
+            iconImg="./explotaciones.svg" altText="Ubicacion"  
+            ubicacion={explotacion.ubicacion}
+            TotalHngExplo={explotacion.parcelas_sum_dimension_hanegadas}
+            numParcelas={explotacion.parcelas_count}
+          >
+            <BtnSubmit texto="Editar" to={`/explotacion/${explotacion.id}`} />
+          </ExplotacionCard>
+        </div>
+      ))}
+    </div>
 
       </div>
-
-      <div className="seccion-explo">
-        
-        {resumen.map((explotacion,index) => (
-          <div className='seccion-explo-part' key={index}>
-
-            
-        <ExplotacionCard 
-    
-           nombre={explotacion.nombre}
-           iconImg="./explotaciones.svg" altText="Ubicacion"  
-           ubicacion={explotacion.ubicacion}
-           TotalHngExplo={explotacion.parcelas_sum_dimension_hanegadas}
-           numParcelas={explotacion.parcelas_count}
-        >
-         <BtnSubmit texto="Editar" to={`/explotacion/${explotacion.id}`} />
-        </ExplotacionCard>
-        </div>
-          ))}
-      </div>
-
-        </div>
-
-
-    
 )
 } 
 

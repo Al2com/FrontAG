@@ -1,12 +1,10 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import operacionService from '../services/operaciones';
 import fumigacionService from '../services/fumigaciones.js'
 import BtnCrear from './buttons/BtnCrear.jsx';
 import  '../components/Style/formStyles.css';
 
 const Operaciones = () => {
-  const navigate = useNavigate()
   const [operaciones, setOperaciones] = useState([])
   const [fumigaciones, setFumigaciones] = useState([])
   
