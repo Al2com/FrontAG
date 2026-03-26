@@ -5,12 +5,18 @@ import { useEffect } from 'react';
 import explotacionService from '../../services/explotaciones';
 import usuariosService from '../../services/usuarios';
 import propietariosService from '../../services/propietarios';
+import Modal from '../Modal/Modal';
+import '../Style/Modal.css'
 
 const FormExplotacion = () => {
 
 
   const [usuarios, setUsers] = useState([]);
   const [propietarios, setPropietario] = useState([]);
+
+  // Estado para que se muestre el modal
+  const[modalError, setModalError] = useState({visible:false, mensaje:""})
+
 
 
 useEffect(() => {
@@ -127,16 +133,27 @@ const enviarFormulario = (e) => {
         console.log('respuesta:', response)
         navigate('/explotaciones')
       })
-      .catch(err => console.error(err))
+      .catch(err => {
+          if (err.response?.status === 422) {
+            setModalError({ visible: true, mensaje: 'Error del servidor, inténtalo de nuevo' })
+          } else {
+              setModalError({ visible: true, mensaje: 'Ya existe una explotación con ese nombre' })
+          }
+    })
 
   } else {
     console.log('formulario inválido', {nombreOk, ubicacionOk, descripcionOk, formData})
   }
 };
 
+//Función para cerrarlo
+  const cerrarModal = () => setModalError({ visible: false, mensaje: '' })
+
   return (
     <div className="form-container">
       <h1>Nueva Explotación</h1>
+
+              {modalError.visible && <Modal mesajeError={modalError.mensaje} cerrarModal={cerrarModal} />}  
 
       <form className="form-grid" onSubmit={enviarFormulario}>
 
@@ -217,7 +234,7 @@ const enviarFormulario = (e) => {
         <div className="form-actions full-width">
           <button type="submit">Guardar</button>
         </div>
-
+              
       </form>
     </div>
   );

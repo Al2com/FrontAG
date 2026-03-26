@@ -11,7 +11,7 @@ import './Style/ComponetsNavStyle.css';
 
 
 const Explotaciones = () =>{
-
+// Estado para las infopanel (informacion sobre parcelas etc..)
   const [numExplo, setNumExplo] = useState(0);
   const [numParcelas, setNumParcelas] = useState(0);
   const [totalHng,setTotalHng] = useState(0);
@@ -19,10 +19,12 @@ const Explotaciones = () =>{
   const [parcelaMan,setParMan] = useState(0);
   const [resumen,setResumen] = useState([]);
 
-  // 1. Estado para la búsqueda por nombre
+  // Estado para la busqueda por nombre
   const [busqueda, setBusqueda] = useState('');
   const [filtroTamaño, setFiltroTamaño] = useState('todos');
   const [filtroParcelas, setFiltroParcelas] = useState('todos');
+
+  
 
   useEffect(() => {
       
@@ -48,7 +50,9 @@ const Explotaciones = () =>{
 
   }, [])
 
-  // 2. Filtrar y ordenar antes del return
+  
+
+  // Filtrar y ordenar antes del return
   const explotacionesFiltradas = resumen
     .filter(exp => exp.nombre.toLowerCase().includes(busqueda.toLowerCase()))
     .sort((a, b) => {

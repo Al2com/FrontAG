@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import parcelaService from '../../services/parcelas';
 import explotacionesService from "../../services/explotaciones";
 import propietariosService from "../../services/propietarios"
+import Modal from '../Modal/Modal';
+import '../Style/Modal.css'
 
 const FormParcela = () => {
 
@@ -18,6 +20,9 @@ const FormParcela = () => {
   //datos select
   const [explotaciones,setExplotaciones] = useState([]);
   const [propietarios, setPropietario] = useState([]);
+
+  // Estado para que se muestre el modal
+  const[modalError, setModalError] = useState({visible:false, mensaje:""})
 
   useEffect(() => {
     explotacionesService.getCount()
@@ -93,7 +98,13 @@ const FormParcela = () => {
         .then((response) => {
           navigate('/parcelas')
         })
-        .catch(err => console.error(err))
+         .catch(err => {
+              if (err.response?.status === 422) {
+                setModalError({ visible: true, mensaje: 'Error del servidor, inténtalo de nuevo' })
+              } else {
+                  setModalError({ visible: true, mensaje: 'Ya existe una parcela con ese poligono y poarcela' })
+              }
+         })
      }
 
      }
@@ -135,12 +146,16 @@ const FormParcela = () => {
   }
 
 
-
+    //Función para cerrarlo
+  const cerrarModal = () => setModalError({ visible: false, mensaje: '' })
 
   return(
 
      <div className="form-container">
       <h1>Nueva Parcela</h1>
+        {/* muestra el modal si hay error en el server */}
+        {modalError.visible && <Modal mesajeError={modalError.mensaje} cerrarModal={cerrarModal} />}  
+
       
       <form  className="form-grid" onSubmit={enviarFormulario}>
         
@@ -203,7 +218,7 @@ const FormParcela = () => {
                 <div className="form-grupo">
                   <label htmlFor="pol_parcela">Polígono*</label>
                   <input
-                    type="text"
+                    type="number"
                     id="poligono"
                     name="poligono"
                     value={formData.poligono}
@@ -216,7 +231,7 @@ const FormParcela = () => {
                 <div className="form-grupo">
                   <label htmlFor="parcela">Parcela*</label>
                   <input
-                    type="text"
+                    type="number"
                     id="parcela"
                     name="parcela"
                     value={formData.parcela}

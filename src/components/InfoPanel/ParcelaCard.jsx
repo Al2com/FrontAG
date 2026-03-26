@@ -1,10 +1,10 @@
 import '../Style/ExplotacionCard.css';
-const ParcelaCard = ({pol_parcela,iconImg,altText,variedad,num_arboles,explotacion,dimension_hanegadas,fecha_plantacion,rol,children}) =>{
+const ParcelaCard = ({poligono,parcela,iconImg,altText,variedad,num_arboles,explotacion,dimension_hanegadas,fecha_plantacion,rol,children}) =>{
 
     return(
         <div>
             <div className="explotacionCard ">
-                <h3>Poligono-parcela: {pol_parcela}</h3>
+                <h3>Poligono-parcela: {poligono}/{parcela}</h3>
                 <div className="cabecera-cardExplo">
                     <img className="explo-icon" src={iconImg} alt={altText}/>
                    <span>{explotacion}</span>

@@ -101,7 +101,8 @@ const Parcela = () => {
          {parResumen.map((parcelas,index)=>(
           <div key={index}>
             <ParcelaCard
-               pol_parcela= { parcelas.pol_parcela}
+               poligono= { parcelas.poligono} parcela={parcelas.parcela}
+               
                iconImg="./explotaciones.svg"
                altText="pick"
                explotacion={parcelas.explotacion.nombre}
