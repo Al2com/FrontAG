@@ -10,6 +10,7 @@ import FormOperaciones from './components/CreateForm/FormOperaciones.jsx'
 import Recoleccion from './components/recoleccion.jsx'
 import Almacen from './components/almacen.jsx'
 import FormFumigacion from './components/CreateForm/FormFumigacion.jsx'
+import FormLogin from './components/CreateForm/FormLogin.jsx'
 
 import './App.css'
 
@@ -33,7 +34,7 @@ function App() {
      
           <main className="content">
             <Routes>
-              <Route path="/" element={<Dashboard />} />
+              {/* <Route path="/" element={<Dashboard />} /> */}
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/explotaciones" element={<Explotaciones />} />
               <Route path="/parcelas" element={<Parcelas />} />
@@ -44,6 +45,7 @@ function App() {
               <Route path="/nueva-parcela" element={<FormParcela />} />
               <Route path="/nueva-operacion" element={<FormOperaciones />} />
               <Route path="/nueva-fumigacion" element={<FormFumigacion />} />
+              <Route path="/" element={< FormLogin/>}/>
 
             </Routes>
           </main>
