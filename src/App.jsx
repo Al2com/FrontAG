@@ -16,26 +16,20 @@ import './App.css'
 
 function App() {
   return (
-    <Router>
-      <div className="app-container">
-        <BarraMenu />
-        <div className="main-content">
-      
-          <header className="top-header">
-            <div className="header-left">
-             
-            </div>
-            
-            <div className="header-right">
-              <img className='user-avatar' src="/usuario.png" alt="Usuario"/>
-              <span className="user-name">Usuario</span>
-            </div>
-          </header>
-     
-          <main className="content">
-            <Routes>
-              {/* <Route path="/" element={<Dashboard />} /> */}
-              <Route path="/dashboard" element={<Dashboard />} />
+   <Router>
+      <Routes>
+        {/* Ruta login - para que se vea solo el login */}
+        <Route path="/" element={<FormLogin />} />
+        
+        {/* Resto de rutas */}
+        <Route path="/*" element={
+          <div className="app-container">
+            <BarraMenu />
+            <div className="main-content">
+              <header className="top-header">...</header>
+              <main className="content">
+                <Routes>
+                   <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/explotaciones" element={<Explotaciones />} />
               <Route path="/parcelas" element={<Parcelas />} />
               <Route path="/operaciones" element={<Operaciones />} />
@@ -45,14 +39,18 @@ function App() {
               <Route path="/nueva-parcela" element={<FormParcela />} />
               <Route path="/nueva-operacion" element={<FormOperaciones />} />
               <Route path="/nueva-fumigacion" element={<FormFumigacion />} />
-              <Route path="/" element={< FormLogin/>}/>
-
-            </Routes>
-          </main>
-        </div>
-      </div>
+                </Routes>
+              </main>
+            </div>
+          </div>
+        } />
+      </Routes>
     </Router>
   )
 }
+  
 
 export default App
+
+      {/* <Route path="/" element={<Dashboard />} /> */}
+             
