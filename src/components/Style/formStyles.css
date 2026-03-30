@@ -77,6 +77,60 @@
   padding:10px
 }
 
+.login {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f4fdf2;
+}
+
+.form-login {
+  background: white;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-login label {
+  display: block;
+  margin-bottom: 6px;
+  color: #1B4332;
+  font-weight: 600;
+}
+
+.form-login input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.form-login input:focus {
+  border-color: #1B4332;
+}
+
+.form-login button {
+  width: 100%;
+  padding: 12px;
+  background-color: #1B4332;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.form-login button:hover {
+  background-color: #40916C;
+}
+
 
 
 /* Responsive */
