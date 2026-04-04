@@ -29,7 +29,7 @@ function App() {
               <header className="top-header">...</header>
               <main className="content">
                 <Routes>
-                   <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/explotaciones" element={<Explotaciones />} />
               <Route path="/parcelas" element={<Parcelas />} />
               <Route path="/operaciones" element={<Operaciones />} />
@@ -52,5 +52,5 @@ function App() {
 
 export default App
 
-      {/* <Route path="/" element={<Dashboard />} /> */}
+  
              

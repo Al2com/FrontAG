@@ -68,8 +68,10 @@ const enviarFormulario = (e) => {
     
     authService.postLogin(credencials)
      .then((response) => {
+            console.log('respuesta login:', response)
             sessionStorage.setItem('token', response.token)
             sessionStorage.setItem('usuario', JSON.stringify(response.usuario))
+            sessionStorage.setItem('rol', response.rol)
             navigate('/dashboard')
         })
       .catch(err => {
@@ -82,6 +84,9 @@ const enviarFormulario = (e) => {
 
   } else {
     console.log('formulario inválido', {emailOk, passwordOk})
+    console.log('password valor:', credencials.password)
+console.log('longitud:', credencials.password.length)
+ 
   }
 };
 
