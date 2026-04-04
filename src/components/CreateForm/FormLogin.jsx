@@ -1,10 +1,9 @@
-import { useState } from "react"
-import { useNavigate } from "react-router-dom"
 import Modal from "../Modal/Modal.jsx"
 import authService from '../../services/auth'
 import '../Style/formStyles.css'
+import { useState } from "react"
 
-const FormLogin = () =>{
+const FormLogin = ({setUser}) =>{
 
 const [credencials,setCredencials] = useState({
     email:'',
@@ -16,7 +15,7 @@ const [credencials,setCredencials] = useState({
 const [errors, setErrors] = useState({ email: '', password: '' })
 const [modalError, setModalError] = useState({ visible: false, mensaje: '' })
 
-const navigate = useNavigate()
+
 
 
 //regex comprobación correo y password
@@ -72,7 +71,9 @@ const enviarFormulario = (e) => {
             sessionStorage.setItem('token', response.token)
             sessionStorage.setItem('usuario', JSON.stringify(response.usuario))
             sessionStorage.setItem('rol', response.rol)
-            navigate('/dashboard')
+
+            setUser(response.usuario)
+        
         })
       .catch(err => {
          if (err.response?.status === 401) {

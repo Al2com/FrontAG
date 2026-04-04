@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react' 
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import BarraMenu from './components/menuNav.jsx'
 import FormExplotacion from './components/CreateForm/FormExplotacion.jsx'
@@ -11,19 +12,32 @@ import Recoleccion from './components/recoleccion.jsx'
 import Almacen from './components/almacen.jsx'
 import FormFumigacion from './components/CreateForm/FormFumigacion.jsx'
 import FormLogin from './components/CreateForm/FormLogin.jsx'
-
 import './App.css'
 
+
 function App() {
+
+  const [user , setUser]= useState(null);
+
+
+  useEffect(() => {
+    const token= sessionStorage.getItem('token')
+
+    if (token) {
+        // 3. Recupero el usuario y actualizo el estado
+        const usuarioGuardado = JSON.parse(sessionStorage.getItem('usuario'))
+        setUser(usuarioGuardado)
+    }
+
+  }, [])
+
+
   return (
    <Router>
-      <Routes>
-        {/* Ruta login - para que se vea solo el login */}
-        <Route path="/" element={<FormLogin />} />
-        
-        {/* Resto de rutas */}
-        <Route path="/*" element={
-          <div className="app-container">
+      {user===null
+
+        ?<FormLogin setUser={setUser} />
+        : <div className="app-container">
             <BarraMenu />
             <div className="main-content">
               <header className="top-header">...</header>
@@ -43,8 +57,7 @@ function App() {
               </main>
             </div>
           </div>
-        } />
-      </Routes>
+        } 
     </Router>
   )
 }
