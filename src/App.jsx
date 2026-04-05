@@ -24,12 +24,20 @@ function App() {
     const token= sessionStorage.getItem('token')
 
     if (token) {
-        // 3. Recupero el usuario y actualizo el estado
+        // si el usuario esta en sesion storage todavia lo recupera, es decir si hay token lo recupera
         const usuarioGuardado = JSON.parse(sessionStorage.getItem('usuario'))
-        setUser(usuarioGuardado)
+        setUser(usuarioGuardado)//lo re-renderiza setUser
     }
 
   }, [])
+
+
+  const logout = () => {
+    sessionStorage.removeItem('token')
+    sessionStorage.removeItem('usuario')
+    sessionStorage.removeItem('rol')
+    setUser(null)
+}
 
 
   return (
@@ -40,7 +48,12 @@ function App() {
         : <div className="app-container">
             <BarraMenu />
             <div className="main-content">
-              <header className="top-header">...</header>
+            <header className="top-header">
+              <img className="user-avatar" src="/usuario.png" alt="Usuario"/>
+              <span className="user-name">{user.name}</span>
+              <span className="user-rol">{user.rol}</span>
+              <button className="btn-logout" onClick={logout}>Cerrar sesión</button>
+            </header>
               <main className="content">
                 <Routes>
               <Route path="/dashboard" element={<Dashboard />} />

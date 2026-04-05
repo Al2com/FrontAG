@@ -19,8 +19,9 @@ const [modalError, setModalError] = useState({ visible: false, mensaje: '' })
 
 
 //regex comprobación correo y password
-
+//uno o mas caracteres que no sean ni espacion ni @ , debe tener la @ del correo , despues el punto
 const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+//cualquier caracter minimo 6 caracteres
 const regexPassword = /^.{6,}$/;
 
 //actualiza los imputs
@@ -67,17 +68,19 @@ const enviarFormulario = (e) => {
     
     authService.postLogin(credencials)
      .then((response) => {
-            console.log('respuesta login:', response)
+            // console.log('respuesta login:', response)
+            //aqui se trae del back con el response y se guardan usuario token y rol en sesionStorage
             sessionStorage.setItem('token', response.token)
+            //aqui lo convierte a string porque es un objeto y sesionstorage no guarda objetos
             sessionStorage.setItem('usuario', JSON.stringify(response.usuario))
             sessionStorage.setItem('rol', response.rol)
-
+            //se actualiza el usuario que se pasa por prop
             setUser(response.usuario)
         
         })
       .catch(err => {
          if (err.response?.status === 401) {
-                setModalError({ visible: true, mensaje: 'Credenciales incorrectas' })
+                setModalError({ visible: true, mensaje: 'El email o el password son incorrectos' })
             } else {
                 setModalError({ visible: true, mensaje: 'Error del servidor' })
             }
