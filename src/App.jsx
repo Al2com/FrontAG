@@ -12,6 +12,7 @@ import Recoleccion from './components/recoleccion.jsx'
 import Almacen from './components/almacen.jsx'
 import FormFumigacion from './components/CreateForm/FormFumigacion.jsx'
 import FormLogin from './components/CreateForm/FormLogin.jsx'
+import Tareas from './components/tareas.jsx'
 import './App.css'
 
 
@@ -66,6 +67,7 @@ function App() {
               <Route path="/nueva-parcela" element={<FormParcela />} />
               <Route path="/nueva-operacion" element={<FormOperaciones />} />
               <Route path="/nueva-fumigacion" element={<FormFumigacion />} />
+              <Route path="/tareas" element={<Tareas />} />
                 </Routes>
               </main>
             </div>

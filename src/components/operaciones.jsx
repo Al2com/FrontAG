@@ -39,6 +39,15 @@ const Operaciones = () => {
             iconIng="./plusNegro.png"
             className="btn-nueva-explotacion"
           />
+
+          <BtnCrear
+            to="/tareas"
+            titulo="Tareas"
+            iconIng="./operaciones.svg"
+            className="btn-nueva-explotacion"
+          />
+
+
         </div>
       </div>
 
