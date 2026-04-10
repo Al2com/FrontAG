@@ -10,12 +10,35 @@ const tareas = () => {
 
     useEffect(() => {
         tareasService.getLista()
-            .then(data => { setOperaciones(data.operaciones)
+            .then(data => {console.log('data:', data)
+                            setOperaciones(data.operaciones)
                             setFumigaciones(data.fumigaciones)
 
             })
     }, [])
 
+
+
+    const marcarRealizada = (tipo, id) => {
+        tareasService.marcarRealizada(tipo, id)
+            .then(() => {
+                tareasService.getLista()
+                    .then(data => {
+                        setOperaciones(data.operaciones)
+                        setFumigaciones(data.fumigaciones)
+                    })
+        
+            })
+}
+
+    const marcarRevisada = (tipo, id) => {
+        tareasService.marcarRevisada(tipo, id)
+            .then(() => {
+                // recargar la lista
+            })
+}
+
+const rol = sessionStorage.getItem('rol')
    return(
     <div>
         <h2>Operaciones</h2>
@@ -32,7 +55,19 @@ const tareas = () => {
                         <p><strong>Inicio:</strong> {op.hora_inicio}</p>
                         <p><strong>Duración:</strong> {op.duracion_minutos} min</p>
                         <p><strong>Descripción:</strong> {op.descripcion}</p>
-                        <p><strong>Estado:</strong> {op.estado}</p>
+                        <p ><strong>Estado:</strong> {op.estado}</p>
+
+                         {op.estado === 'pendiente' && (
+                            <button onClick={() => marcarRealizada('operacion', op.id)}>
+                                Marcar como realizada
+                            </button>
+                        )}
+
+                        {op.estado === 'realizada' && rol !== 'trabajador' && (
+                            <button onClick={() => marcarRevisada('operacion', op.id)}>
+                                Marcar como revisada
+                            </button>
+                        )}
                     </div>
                 ))
             )}
@@ -53,6 +88,18 @@ const tareas = () => {
                         <p><strong>Duración:</strong> {fum.duracion_minutos} min</p>
                         <p><strong>Descripción:</strong> {fum.descripcion}</p>
                         <p><strong>Estado:</strong> {fum.estado}</p>
+
+                        {fum.estado === 'pendiente' && (
+                            <button onClick={() => marcarRealizada('fumigacion', fum.id)}>
+                                Marcar como realizada
+                            </button>
+                        )}
+
+                        {fum.estado === 'realizada' && rol !== 'trabajador' && (
+                            <button onClick={() => marcarRevisada('fumigacion', fum.id)}>
+                                Marcar como revisada
+                            </button>
+                        )}
                     </div>
                 ))
             )}

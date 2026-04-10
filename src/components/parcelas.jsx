@@ -39,6 +39,9 @@ const Parcela = () => {
       .catch(err => console.error('Error al obtener resumen:', err))
    },[])
 
+     const rol = sessionStorage.getItem('rol')
+
+
     return (
    
       <div>
@@ -46,13 +49,14 @@ const Parcela = () => {
           <div className='menuExplo'>
             <p>Gestiona las parcelas de tus explotaciones</p> 
 
-
+                  {rol !=='trabajador' &&(
                   < BtnCrear 
                     to="/nueva-parcela"
                     titulo="Crear Parcela"
                     iconIng="./plusNegro.png"
                     className="btn-nueva-explotacion"
                   />
+                  )}
           </div> 
 
     <div className="primeraSeccion">
