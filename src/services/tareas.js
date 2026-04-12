@@ -13,4 +13,10 @@ const marcarRealizada = (tipo, id) => {
 }
 
 
-export default { getLista,marcarRealizada };
+const marcarRevisada = (tipo, id) => {
+    const request = axios.put(`${baseUrl}/${tipo}/${id}/revisada`)
+    return request.then(response => response.data)
+}
+
+
+export default { getLista,marcarRealizada, marcarRevisada };

@@ -3,6 +3,7 @@ import tareasService from '../services/tareas'
 import BtnCrear from './buttons/BtnCrear.jsx';
 import  '../components/Style/formStyles.css';
 
+
 const Operaciones = () => {
   const [operaciones, setOperaciones] = useState([])
   const [fumigaciones, setFumigaciones] = useState([])
@@ -13,9 +14,8 @@ const Operaciones = () => {
               .then(data => {console.log('data:', data)
                               setOperaciones(data.operaciones)
                               setFumigaciones(data.fumigaciones)
-              .catch(err => console.error('Error cargando datos:', err))
-  
               })
+              .catch(err => console.error('Error cargando lista:', err))
       }, [])
 
       const marcarRealizada = (tipo, id) => {
@@ -26,15 +26,20 @@ const Operaciones = () => {
                               setOperaciones(data.operaciones)
                               setFumigaciones(data.fumigaciones)
                           })
-              
                   })
+                  .catch(err => console.error('Error cargando Realizada:', err))
       }
       
           const marcarRevisada = (tipo, id) => {
               tareasService.marcarRevisada(tipo, id)
                   .then(() => {
-                      // recargar la lista
+                      tareasService.getLista()
+                        .then(data => {
+                            setOperaciones(data.operaciones)
+                            setFumigaciones(data.fumigaciones)
+                        })
                   })
+                   .catch(err => console.error('Error cargando Revisada:', err))
       }
 
       const rol = sessionStorage.getItem('rol')
@@ -63,14 +68,6 @@ const Operaciones = () => {
             className="btn-nueva-explotacion"
           />
           )}
-          {/* {rol==='trabajador' && (
-          <BtnCrear
-            to="/tareas"
-            titulo="Tareas"
-            iconIng="./operaciones.svg"
-            className="btn-nueva-explotacion"
-          />
-          )} */}
 
         </div>
       </div>
@@ -129,6 +126,12 @@ const Operaciones = () => {
                         )}
 
                         {fum.estado === 'realizada' && rol !== 'trabajador' && (
+                            <button onClick={() => marcarRevisada('fumigacion', fum.id)}>
+                                Marcar como revisada
+                            </button>
+                        )}
+
+                        {fum.estado === 'revisada' && rol !== 'trabajador' && (
                             <button onClick={() => marcarRevisada('fumigacion', fum.id)}>
                                 Marcar como revisada
                             </button>

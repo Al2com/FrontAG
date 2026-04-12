@@ -12,7 +12,8 @@ import Recoleccion from './components/recoleccion.jsx'
 import Almacen from './components/almacen.jsx'
 import FormFumigacion from './components/CreateForm/FormFumigacion.jsx'
 import FormLogin from './components/CreateForm/FormLogin.jsx'
-import Tareas from './components/tareas.jsx'
+import FormProducto from './components/CreateForm/FormProducto.jsx'
+
 import './App.css'
 
 
@@ -57,6 +58,7 @@ function App() {
             </header>
               <main className="content">
                 <Routes>
+              <Route path="/" element={<Dashboard />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/explotaciones" element={<Explotaciones />} />
               <Route path="/parcelas" element={<Parcelas />} />
@@ -67,7 +69,7 @@ function App() {
               <Route path="/nueva-parcela" element={<FormParcela />} />
               <Route path="/nueva-operacion" element={<FormOperaciones />} />
               <Route path="/nueva-fumigacion" element={<FormFumigacion />} />
-              <Route path="/tareas" element={<Tareas />} />
+              <Route path="/nuevo-producto" element={<FormProducto />} />
                 </Routes>
               </main>
             </div>
