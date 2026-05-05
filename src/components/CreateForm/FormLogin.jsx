@@ -87,9 +87,10 @@ const enviarFormulario = (e) => {
     })
 
   } else {
-    console.log('formulario inválido', {emailOk, passwordOk})
-    console.log('password valor:', credencials.password)
-console.log('longitud:', credencials.password.length)
+        setErrors({
+                email: !emailOk ? 'El email debe tener el formato correcto (alvaro@daw.com)' : '',
+                password: !passwordOk ? 'La contraseña debe tener mínimo 6 caracteres' : ''
+            })
  
   }
 };
@@ -110,17 +111,13 @@ const cerrarModal = () => setModalError({ visible: false, mensaje: '' })
                 <div className="form-login">
                     <div>
                         <label htmlFor="">Correo Electronico</label>
-                        <input 
-                        name="email"
-                        value={credencials.email}
-                        onChange={handleChange}/>
+                        <input name="email" value={credencials.email} onChange={handleChange}/>
+                        {errors.email && <p className="error">{errors.email}</p>}
                      </div>
                      <div>
                         <label htmlFor="">Contraseña</label>
-                        <input 
-                        name="password"
-                        value={credencials.password}
-                        onChange={handleChange}/> 
+                        <input name="password" value={credencials.password} onChange={handleChange}/> 
+                        {errors.password && <p className="error">{errors.password}</p>}
                         </div>
                
 
