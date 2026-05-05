@@ -103,31 +103,31 @@ const cerrarModal = () => setModalError({ visible: false, mensaje: '' })
 
 
     return(
-
-        <div className="login">
-
-              {modalError.visible && <Modal mesajeError={modalError.mensaje} cerrarModal={cerrarModal} />}  
-            <form onSubmit={enviarFormulario}>
-                <div className="form-login">
-                    <div>
-                        <label htmlFor="">Correo Electronico</label>
-                        <input name="email" value={credencials.email} onChange={handleChange}/>
-                        {errors.email && <p className="error">{errors.email}</p>}
-                     </div>
-                     <div>
-                        <label htmlFor="">Contraseña</label>
-                        <input name="password" value={credencials.password} onChange={handleChange}/> 
-                        {errors.password && <p className="error">{errors.password}</p>}
-                        </div>
-               
-
-                      <button type="submit">Iniciar Sesión</button>
-                 </div>
-            </form>
-
-        </div>
-
-    )
+    <>
+     
+    <div className="login">
+        {modalError.visible && <Modal mesajeError={modalError.mensaje} cerrarModal={cerrarModal} />}
+        <form onSubmit={enviarFormulario}>
+            <div className="form-login">
+                <div className="header-login">
+                    <img src="./LogoAgroControl.webp" alt="Logo AgroControl" />
+                </div>
+                <div>
+                    <label>Correo Electronico</label>
+                    <input name="email" value={credencials.email} onChange={handleChange}/>
+                    {errors.email && <p className="error">{errors.email}</p>}
+                </div>
+                <div>
+                    <label>Contraseña</label>
+                    <input name="password" value={credencials.password} onChange={handleChange}/>
+                    {errors.password && <p className="error">{errors.password}</p>}
+                </div>
+                <button type="submit">Iniciar Sesión</button>
+            </div>
+        </form>
+    </div>
+    </>
+)
 }
 
 export default FormLogin
