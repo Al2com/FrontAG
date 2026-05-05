@@ -67,7 +67,7 @@ const Explotaciones = () =>{
     });
 
 
-   const rol = sessionStorage.getItem('rol')
+  
 
 
 return(
@@ -77,14 +77,12 @@ return(
         <div className='menuExplo'>
           <p>Gestiona tus fincas y propiedades</p>  
 
-          {rol!=='trabajador' && (
               <BtnCrear
                 to='/nueva-explotacion'
                 titulo="Crear Explotacion"
                 iconIng="./plusNegro.png"
                 className="btn-nueva-explotacion"
               />
-            )}
           </div> 
 
     <div className="primeraSeccion">
