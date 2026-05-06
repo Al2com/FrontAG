@@ -1,5 +1,5 @@
 import '../Style/ExplotacionCard.css';
-const ParcelaCard = ({poligono,parcela,iconImg,altText,variedad,num_arboles,explotacion,dimension_hanegadas,fecha_plantacion,rol,children}) =>{
+const ParcelaCard = ({poligono,parcela,iconImg,altText,variedad,num_arboles,explotacion,dimension_hanegadas,fecha_plantacion,rol,nombre,children}) =>{
 
     return(
         <div>
@@ -15,6 +15,7 @@ const ParcelaCard = ({poligono,parcela,iconImg,altText,variedad,num_arboles,expl
                     <p>Variedad: {variedad}</p>
                     <p>Cantidad Arboles:{num_arboles}</p>
                     <p>Año plantacion:{fecha_plantacion}</p>
+                    <p>Nombre parcela : {nombre}</p>
                     {children}
                 </div>
             </div>

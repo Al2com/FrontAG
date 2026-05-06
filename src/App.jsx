@@ -14,7 +14,7 @@ import FormFumigacion from './components/CreateForm/FormFumigacion.jsx'
 import FormLogin from './components/CreateForm/FormLogin.jsx'
 import FormProducto from './components/CreateForm/FormProducto.jsx'
 import EditarExplotacion from './components/CreateForm/EditarExplotacion.jsx'
-
+import EditarParcela from './components/CreateForm/EditarParcela.jsx'
 import './App.css'
 
 
@@ -72,6 +72,7 @@ function App() {
               <Route path="/nueva-fumigacion" element={<FormFumigacion />} />
               <Route path="/nuevo-producto" element={<FormProducto />} />
               <Route path="/explotacion/:id" element={<EditarExplotacion />} />
+              <Route path="/parcela/:id" element={<EditarParcela/>} />
                 </Routes>
               </main>
             </div>

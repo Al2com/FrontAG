@@ -109,8 +109,9 @@ const Parcela = () => {
                variedad={parcela.variedad}
                num_arboles={parcela.num_arboles}
                fecha_plantacion={parcela.fecha_plantacion}
+               nombre={parcela.nombre}
              >
-               <BtnSubmit texto="Editar" to={`/parcelas/${parcela.id}`} />
+               <BtnSubmit texto="Editar" to={`/parcela/${parcela.id}`} />
              </ParcelaCard>
            </div>
          ))}

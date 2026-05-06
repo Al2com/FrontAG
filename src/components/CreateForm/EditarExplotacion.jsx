@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import explotacionService from '../../services/explotaciones.js';
 
 const EditarExplotacion = () => {
-  const { id } = useParams();
+  const { id } = useParams(); //te lo da dentro del componente para poder usarlo, cuando llamas a la
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
