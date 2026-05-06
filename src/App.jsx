@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react' 
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import BarraMenu from './components/menuNav.jsx'
+import MenuNav from './components/menuNav.jsx'
 import FormExplotacion from './components/CreateForm/FormExplotacion.jsx'
 import FormParcela from './components/CreateForm/FormParcela.jsx'
 import Dashboard from './components/dashboard.jsx'
@@ -13,6 +13,7 @@ import Almacen from './components/almacen.jsx'
 import FormFumigacion from './components/CreateForm/FormFumigacion.jsx'
 import FormLogin from './components/CreateForm/FormLogin.jsx'
 import FormProducto from './components/CreateForm/FormProducto.jsx'
+import EditarExplotacion from './components/CreateForm/EditarExplotacion.jsx'
 
 import './App.css'
 
@@ -48,7 +49,7 @@ function App() {
 
         ?<FormLogin setUser={setUser} />
         : <div className="app-container">
-            <BarraMenu />
+            <MenuNav />
             <div className="main-content">
             <header className="top-header">
               <img className="user-avatar" src="/usuario.png" alt="Usuario"/>
@@ -70,6 +71,7 @@ function App() {
               <Route path="/nueva-operacion" element={<FormOperaciones />} />
               <Route path="/nueva-fumigacion" element={<FormFumigacion />} />
               <Route path="/nuevo-producto" element={<FormProducto />} />
+              <Route path="/explotacion/:id" element={<EditarExplotacion />} />
                 </Routes>
               </main>
             </div>

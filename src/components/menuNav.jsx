@@ -2,7 +2,7 @@ import { useState } from 'react'
 import MenuBar from './BarraBusqueda/MenuBar'
 import './Style/menuNav.css'
 
-const BarraMenu = () => {
+const MenuNav = () => {
 
   const rol = sessionStorage.getItem('rol');
 
@@ -85,10 +85,10 @@ const BarraMenu = () => {
         <MenuBar 
           to="/almacen"
           iconImg="./iconAlmacen.svg"
-          altText="Rentavilidad"
-          texto="Rentavilidad"
-          isSeleccionado={botonActivo === 'Rentavilidad'} 
-          onClick={() => setBotonActivo('Rentavilidad')}
+          altText="Rentabilidad"
+          texto="Rentabilidad"
+          isSeleccionado={botonActivo === 'Rentabilidad'} 
+          onClick={() => setBotonActivo('Rentabilidad')}
         />
          )}
       </div>
@@ -96,4 +96,4 @@ const BarraMenu = () => {
   )
 }
 
-export default BarraMenu
+export default MenuNav
