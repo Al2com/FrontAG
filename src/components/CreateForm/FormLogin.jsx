@@ -1,6 +1,6 @@
 import Modal from "../Modal/Modal.jsx"
 import authService from '../../services/auth'
-import '../Style/formStyles.css'
+import '../Style/forms.css'
 import { useState } from "react"
 
 const FormLogin = ({setUser}) =>{

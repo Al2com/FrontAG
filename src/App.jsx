@@ -1,3 +1,6 @@
+import './components/Style/variables.css'
+import './App.css'
+
 import { useState, useEffect } from 'react' 
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import MenuNav from './components/menuNav.jsx'
@@ -15,7 +18,8 @@ import FormLogin from './components/CreateForm/FormLogin.jsx'
 import FormProducto from './components/CreateForm/FormProducto.jsx'
 import EditarExplotacion from './components/CreateForm/EditarExplotacion.jsx'
 import EditarParcela from './components/CreateForm/EditarParcela.jsx'
-import './App.css'
+
+
 
 
 function App() {

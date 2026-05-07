@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import parcelasService from '../../services/parcelas.js';
+import '../Style/forms.css'
 
 const EditarParcela = () => {
   const { id } = useParams();       

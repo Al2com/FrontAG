@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import parcelasService from '../../services/parcelas'
 import operacionesService from '../../services/operaciones'
 
-import '../Style/formStyles.css'
+import '../Style/forms.css'
 
 
 

@@ -1,4 +1,4 @@
-import '../Style/ExplotacionCard.css';
+
 const ParcelaCard = ({poligono,parcela,iconImg,altText,variedad,num_arboles,explotacion,dimension_hanegadas,fecha_plantacion,rol,nombre,children}) =>{
 
     return(

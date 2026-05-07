@@ -1,0 +1,140 @@
+/* ============================================================
+   forms.css — Formularios generales + pantalla de Login
+   Importar en: FormExplotacion.jsx, FormParcela.jsx,
+                FormOperaciones.jsx, FormFumigacion.jsx,
+                FormProducto.jsx, FormLogin.jsx, operaciones.jsx
+   ============================================================ */
+
+/* -- Contenedor general de formulario ----------------------- */
+.form-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--esp-lg);
+}
+
+.form-container h1 {
+  margin-bottom: var(--esp-2xl);
+  color: var(--c-texto);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--esp-lg);
+}
+
+.form-grupo { display: flex; flex-direction: column; }
+
+.form-grupo label {
+  margin-bottom: var(--esp-xs);
+  font-weight: 600;
+  color: var(--c-texto-etiqueta);
+}
+
+.form-grupo input,
+.form-grupo select,
+.form-grupo textarea {
+  padding: 10px;
+  border: 1px solid var(--c-borde);
+  border-radius: var(--rad-sm);
+  font-size: 16px;
+}
+
+.form-grupo input:focus,
+.form-grupo select:focus,
+.form-grupo textarea:focus {
+  outline: none;
+  border-color: var(--c-primario-medio);
+}
+
+.full-width { grid-column: 1 / -1; }
+
+.form-actions {
+  display: flex;
+  gap: 15px;
+  justify-content: flex-end;
+  margin-top: var(--esp-lg);
+}
+
+.form-actions button { margin-left: 0; }
+
+/* -- Validacion --------------------------------------------- */
+.input-error { border-color: var(--c-peligro) !important; }
+
+.mensaje-error,
+.error {
+  color: var(--c-peligro);
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+/* -- Bloque de dosis (FormFumigacion) ----------------------- */
+.form-dosisProduct {
+  border: 2px solid var(--c-texto);
+  border-radius: var(--rad-md);
+  margin: 10px 0;
+  padding: 10px;
+}
+
+/* -- Login -------------------------------------------------- */
+.login {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: var(--c-fondo-verde);
+}
+
+.form-login {
+  background: white;
+  padding: 40px;
+  border-radius: var(--rad-lg);
+  box-shadow: var(--som-xl);
+  width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-lg);
+}
+
+.form-login label {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--c-primario);
+  font-weight: 600;
+}
+
+.form-login input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--c-borde);
+  border-radius: var(--rad-md);
+  outline: none;
+  box-sizing: border-box;
+}
+
+.form-login input:focus { border-color: var(--c-primario); }
+
+.form-login button {
+  width: 100%;
+  padding: 12px;
+  justify-content: center;
+  margin-left: 0;
+}
+
+.header-login {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.header-login img { width: 150px; }
+
+/* -- Responsive --------------------------------------------- */
+@media (max-width: 768px) {
+  .form-grid { grid-template-columns: 1fr; }
+
+  .form-login {
+    width: 90%;
+    padding: var(--esp-xl);
+  }
+}

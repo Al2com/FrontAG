@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import tareasService from '../services/tareas'
 import BtnCrear from './buttons/BtnCrear.jsx';
-import  '../components/Style/formStyles.css';
+import  './Style/cards.css';
+import './Style/forms.css'
 
 
 const Operaciones = () => {

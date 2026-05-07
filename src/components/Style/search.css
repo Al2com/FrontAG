@@ -1,0 +1,39 @@
+/* ============================================================
+   search.css — Barra de busqueda y selects de filtro
+   Importar en: BarraBusqueda.jsx, SelectComp.jsx
+   ============================================================ */
+
+.barra-search {
+  border: 1px solid rgb(139, 136, 136);
+  border-radius: 10px;
+  width: 300px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  gap: var(--esp-xs);
+}
+
+.barra-search img { margin-left: var(--esp-lg); }
+
+.barra-search input {
+  border: none;
+  outline: none;
+  background: transparent;
+}
+
+.barra-select {
+  border: 1px solid rgb(139, 136, 136);
+  border-radius: 10px;
+  width: 120px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  gap: var(--esp-xs);
+  margin-left: var(--esp-lg);
+}
+
+.barra-select select {
+  border: none;
+  outline: none;
+  background: transparent;
+}

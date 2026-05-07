@@ -1,4 +1,5 @@
-import '../Style/formStyles.css'
+import '../Style/forms.css'
+import '../Style/modal.css'
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import parcelasService from '../../services/parcelas'

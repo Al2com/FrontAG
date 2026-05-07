@@ -1,8 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import almacenService from '../../services/almacen'
-
-import '../Style/formStyles.css'
+import '../Style/forms.css'
 
 const FormProducto = () => {
 

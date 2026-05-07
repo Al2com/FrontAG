@@ -6,6 +6,7 @@ import SelectComp from './BarraBusqueda/SelectComp.jsx';
 import parcelasService from '../services/parcelas.js';
 import ParcelaCard from './InfoPanel/ParcelaCard.jsx';
 import BtnSubmit from './buttons/BtnSubmit.jsx';
+import './Style/cards.css'
 
 
 const Parcela = () => {

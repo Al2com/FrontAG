@@ -1,0 +1,11 @@
+.explotacionCard{   
+    border: 3px solid #bdc0c4;
+    border-radius: 8px;
+    padding: 16px;
+    margin:20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0);
+}
+.cabecera-cardExplo{
+    display: flex;
+    justify-content:flex-start;
+}

@@ -1,0 +1,155 @@
+/* ============================================================
+   cards.css — Estructura de pagina + todas las cards
+   Importar en: dashboard.jsx, explotaciones.jsx,
+                parcelas.jsx, almacen.jsx, operaciones.jsx,
+                ExplotacionCard.jsx, ParcelaCard.jsx, AlmacenCard.jsx
+   ============================================================ */
+
+/* -- Cabecera de seccion: titulo + boton -------------------- */
+.menuExplo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--esp-lg);
+}
+
+.menu-buttons {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.menu-buttons button { margin-left: 0; }
+
+/* -- Grids de contenido ------------------------------------- */
+.primeraSeccion {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--esp-lg);
+  padding: var(--esp-lg);
+}
+
+.filtro-explo {
+  display: flex;
+  align-items: center;
+  padding: 10px var(--esp-lg);
+}
+
+.seccion-explo {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--esp-lg);
+  padding: var(--esp-lg);
+}
+
+.segundaSeccion {
+  display: flex;
+  padding: 10px;
+  justify-content: center;
+  align-items: center;
+}
+
+/* -- Card estadistica (InfoPanel - dashboard y vistas) ------ */
+.card {
+  background-color: var(--c-fondo-verde);
+  border: 1px solid #8a8a8a;
+  border-radius: var(--rad-lg);
+  padding: var(--esp-lg);
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.texto {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--c-primario);
+}
+
+.value {
+  font-size: 30px;
+  font-weight: 600;
+  color: var(--c-primario);
+  margin-top: 10px;
+}
+
+.explo-icon {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  filter: invert(15%) sepia(40%) saturate(800%) hue-rotate(110deg) brightness(80%);
+}
+
+/* -- Card secundaria (alertas y actividad - dashboard) ------ */
+.card2 {
+  border: 3px solid var(--c-borde-oscuro);
+  border-radius: var(--rad-lg);
+  padding: var(--esp-lg);
+  width: 710px;
+  margin: 10px;
+}
+
+.tituloCard2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.tituloCard2 img { width: 20px; }
+
+/* -- Card de entidad: explotaciones, parcelas, almacen ------ */
+/* .seccion-explo-part  se usa como wrapper en explotaciones/parcelas/almacen  */
+/* .explotacionCard     se usa directamente en operaciones y en los Card JSX   */
+.seccion-explo-part,
+.explotacionCard {
+  border: 1px solid var(--c-borde);
+  border-radius: var(--rad-md);
+  padding: var(--esp-md);
+  background-color: var(--c-blanco);
+  box-shadow: var(--som-md);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.seccion-explo-part:hover,
+.explotacionCard:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--som-lg);
+}
+
+.cabecera-cardExplo {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-xs);
+  margin-bottom: var(--esp-sm);
+}
+
+.datos-cardExplo { margin-top: var(--esp-sm); }
+
+.datos-cardExplo p {
+  margin: 6px 0;
+  font-size: 14px;
+  color: var(--c-texto);
+}
+
+/* -- Responsive --------------------------------------------- */
+@media (max-width: 1200px) {
+  .primeraSeccion,
+  .seccion-explo {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .primeraSeccion,
+  .seccion-explo {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .primeraSeccion,
+  .seccion-explo {
+    grid-template-columns: 1fr;
+  }
+}

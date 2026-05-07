@@ -7,7 +7,7 @@ import BarraBusqueda from './BarraBusqueda/BarraBusqueda.jsx';
 import ExplotacionCard from './InfoPanel/ExplotacionCard .jsx';
 import BtnSubmit from './buttons/BtnSubmit.jsx';
 import SelectComp from './BarraBusqueda/SelectComp.jsx'
-import './Style/almacen.css'
+import './Style/cards.css'
 
 
 

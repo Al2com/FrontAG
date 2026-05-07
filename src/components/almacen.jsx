@@ -2,7 +2,7 @@ import BtnCrear from './buttons/BtnCrear.jsx';
 import productosService from '../services/productos.js'
 import AlmacenCard from '../components/InfoPanel/AlmacenCard.jsx'
 import { useEffect ,useState} from 'react';
-import './Style/almacen.css'
+import './Style/cards.css'
 
 
 

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import '../Style/menuNav.css';
+import '../Style/navbar.css';
 
 
 const MenuBar =({to,texto,iconImg,altText,isSeleccionado, onClick}) =>{

@@ -1,4 +1,4 @@
-import '../Style/barraBusqueda.css'
+import '../Style/search.css'
 
 const SelectComp = ({onChange,value1,value2,nombre1,nombre2,value}) => {
 

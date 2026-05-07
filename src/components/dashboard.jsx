@@ -1,4 +1,4 @@
-import './Style/ComponetsNavStyle.css';
+import './Style/cards.css';
 
 import InfoPanel from './InfoPanel/InfoPanel.jsx';
 import Card2 from './InfoPanel/InfoPanel2.jsx';

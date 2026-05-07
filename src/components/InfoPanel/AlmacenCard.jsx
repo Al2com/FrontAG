@@ -1,4 +1,4 @@
-
+import '../Style/cards.css'
 
 
 const AlmacenCard = ({iconImg, altText, nombre, precio, ubicacion, stock_actual, unidad, children}) => {

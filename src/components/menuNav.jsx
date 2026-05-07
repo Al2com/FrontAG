@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import MenuBar from './BarraBusqueda/MenuBar'
-import './Style/menuNav.css'
+import './Style/cards.css'
+import './Style/navbar.css'
 
 const MenuNav = () => {
 

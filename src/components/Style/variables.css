@@ -1,0 +1,41 @@
+/* ============================================================
+   variables.css — Variables globales del proyecto
+   IMPORTAR PRIMERO en App.jsx antes que cualquier otro CSS
+   import './components/Style/variables.css'
+   ============================================================ */
+
+:root {
+  /* Colores */
+  --c-primario:        #1B4332;
+  --c-primario-medio:    #40916C;
+  --c-primario-claro:  #52B788;
+  --c-fondo:             #F8F9FA;
+  --c-fondo-verde:       #f4fdf2;
+  --c-blanco:          #ffffff;
+  --c-borde:         #ddd;
+  --c-borde-oscuro:    #bdc0c4;
+  --c-texto:           #333;
+  --c-texto-apagado:     #666;
+  --c-texto-etiqueta:     #555;
+  --c-peligro:         #dc3545;
+  --c-peligro-hover:   #b02a37;
+
+  /* Espaciado */
+  --esp-xs:  8px;
+  --esp-sm:  12px;
+  --esp-md:  16px;
+  --esp-lg:  20px;
+  --esp-xl:  24px;
+  --esp-2xl: 30px;
+
+  /* Bordes redondeados */
+  --rad-sm: 5px;
+  --rad-md: 8px;
+  --rad-lg: 12px;
+
+  /* Sombras */
+  --som-sm: 0 2px 4px rgba(0, 0, 0, 0.08);
+  --som-md: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --som-lg: 0 4px 8px rgba(0, 0, 0, 0.15);
+  --som-xl: 0 4px 20px rgba(0, 0, 0, 0.1);
+}

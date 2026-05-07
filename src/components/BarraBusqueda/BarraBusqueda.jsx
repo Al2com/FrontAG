@@ -1,4 +1,4 @@
-import '../Style/barraBusqueda.css';
+import '../Style/search.css';
 
 const BarraBusqueda = ({iconImg,altText, onChange}) => {
 

@@ -1,4 +1,4 @@
-import '../Style/formStyles.css'
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
@@ -6,7 +6,10 @@ import explotacionService from '../../services/explotaciones';
 import usuariosService from '../../services/usuarios';
 import propietariosService from '../../services/propietarios';
 import Modal from '../Modal/Modal';
-import '../Style/Modal.css'
+import '../Style/modal.css'
+import '../Style/forms.css'
+import '../Style/modal.css'
+
 
 const FormExplotacion = () => {
 

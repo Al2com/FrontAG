@@ -1,0 +1,32 @@
+/* ============================================================
+   modal.css — Ventana modal de error/confirmacion
+   Importar en: FormExplotacion.jsx, FormParcela.jsx,
+                FormFumigacion.jsx (cualquier form que use Modal)
+   ============================================================ */
+
+.fondo-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: white;
+  border-radius: var(--rad-lg);
+  padding: var(--esp-2xl);
+  width: 400px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.modal button {
+  margin-top: var(--esp-lg);
+  margin-left: auto;
+}

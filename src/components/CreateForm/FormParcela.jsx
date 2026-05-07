@@ -4,7 +4,7 @@ import parcelaService from '../../services/parcelas';
 import explotacionesService from "../../services/explotaciones";
 import propietariosService from "../../services/propietarios"
 import Modal from '../Modal/Modal';
-import '../Style/Modal.css'
+import '../Style/modal.css'
 
 const FormParcela = () => {
 
