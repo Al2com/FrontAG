@@ -153,3 +153,22 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* -- Botón nueva entidad (explotaciones, parcelas, operaciones) */
+/* Hereda el verde global — se asegura que no quede negro del CSS anterior */
+.btn-nueva-explotacion {
+  background-color: var(--c-primario);
+  margin-left: 0;
+}
+
+.btn-nueva-explotacion:hover {
+  background-color: var(--c-primario-medio);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(82, 183, 136, 0.3);
+}
+
+.btn-nueva-explotacion img {
+  width: 20px;
+  height: 20px;
+  filter: brightness(0) invert(1);
+}

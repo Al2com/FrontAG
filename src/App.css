@@ -1,4 +1,10 @@
-/* Reset global */
+/* ============================================================
+   App.css — Reset + Layout principal + Botones globales
+   Las variables están en components/Style/variables.css
+   Importar en: App.jsx (después de variables.css)
+   ============================================================ */
+
+/* -- RESET --------------------------------------------------- */
 * {
   margin: 0;
   padding: 0;
@@ -7,32 +13,34 @@
 
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background-color: #F8F9FA;
+  background-color: var(--c-fondo);
   overflow-x: hidden;
 }
 
-/* Contenedor principal - Grid layout */
+a { text-decoration: none; }
+
+h1, h2 { color: var(--c-primario); }
+
+/* -- LAYOUT PRINCIPAL --------------------------------------- */
 .app-container {
   display: grid;
   grid-template-columns: 260px 1fr;
   height: 100vh;
 }
 
-/* Contenido principal (derecha) */
 .main-content {
   display: flex;
   flex-direction: column;
   overflow-y: auto;
-  background-color: #F8F9FA;
+  background-color: var(--c-fondo);
 }
 
-/* Header superior */
 .top-header {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 24px;
-  background-color: white;
+  gap: var(--esp-sm);
+  padding: var(--esp-sm) var(--esp-xl);
+  background-color: var(--c-blanco);
   border-bottom: 1px solid #E9ECEF;
   position: sticky;
   top: 0;
@@ -43,37 +51,21 @@ body {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  border: 2px solid #52B788;
+  border: 2px solid var(--c-primario-claro);
 }
 
 .user-name {
   font-weight: 600;
-  color: #1B4332;
+  color: var(--c-primario);
   font-size: 15px;
 }
 
 .user-rol {
-  color: #40916C;
+  color: var(--c-primario-medio);
   font-size: 13px;
   text-transform: capitalize;
 }
 
-.btn-logout {
-  margin-left: auto;
-  background-color: #dc3545;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.btn-logout:hover {
-  background-color: #b02a37;
-}
-
-/* Contenido de las páginas */
 .content {
   padding: 30px 40px;
   max-width: 1600px;
@@ -81,14 +73,61 @@ body {
   margin: 0 auto;
 }
 
-/* Tablet - menú compacto */
-@media (max-width: 1024px) {
-  .app-container {
-    grid-template-columns: 80px 1fr;
-  }
+/* -- BOTONES GLOBALES --------------------------------------- */
+button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 24px;
+  background-color: var(--c-primario);
+  color: white;
+  border: none;
+  border-radius: var(--rad-md);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-left: auto;
 }
 
-/* Móvil - menú abajo */
+button img {
+  width: 20px;
+  height: 20px;
+  filter: brightness(0) invert(1);
+}
+
+button:hover {
+  background-color: var(--c-primario-medio);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(82, 183, 136, 0.3);
+}
+
+.btn-logout { background-color: var(--c-peligro); }
+
+.btn-logout:hover {
+  background-color: var(--c-peligro-hover);
+  transform: none;
+  box-shadow: none;
+}
+
+.btn-cancel {
+  background-color: #f5f5f5;
+  border: 1px solid var(--c-borde);
+  color: var(--c-texto);
+  margin-left: 0;
+}
+
+.btn-cancel:hover {
+  background-color: #e0e0e0;
+  transform: none;
+  box-shadow: none;
+}
+
+/* -- MEDIA QUERIES ------------------------------------------ */
+@media (max-width: 1024px) {
+  .app-container { grid-template-columns: 80px 1fr; }
+}
+
 @media (max-width: 768px) {
   .app-container {
     display: flex;
@@ -102,12 +141,10 @@ body {
     padding-bottom: 70px;
   }
 
-  .content {
-    padding: 15px;
-  }
+  .content { padding: 15px; }
 
   .top-header {
     padding: 12px 16px;
-    gap: 8px;
+    gap: var(--esp-xs);
   }
 }
