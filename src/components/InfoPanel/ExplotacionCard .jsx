@@ -1,4 +1,4 @@
-import '../Style/ExplotacionCard.css';
+
 const ExplotacionCard = ({nombre,iconImg,altText,ubicacion,TotalHngExplo,numParcelas,children}) =>{
 
     return(

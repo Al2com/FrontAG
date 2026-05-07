@@ -44,6 +44,7 @@ const FormParcela = () => {
   const [formData,setFormData] = useState ({
     explotacion_id :"",
     propietarios : "",
+    nombre :"",
     rol:"manta",
     poligono:"",
     parcela:"",
@@ -304,6 +305,18 @@ const FormParcela = () => {
           />
             {errors.fecha_plantacion && <span className="mensaje-error">{errors.fecha_plantacion}</span>}
         </div>
+
+        <div className="form-grupo full-width">
+        <label>Nombre de la parcela</label>
+            <input
+              type="text"
+              name="nombre"
+              maxLength={25}
+              value={formData.nombre}
+              onChange={actualizaEstado}
+              placeholder="Nombre de la parcela"
+            />
+      </div>
 
         {/* Descripción */}
         <div className="form-grupo full-width">
