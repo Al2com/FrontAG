@@ -3,7 +3,6 @@ const ExplotacionCard = ({nombre,iconImg,altText,ubicacion,TotalHngExplo,numParc
 
     return(
         <div>
-            <div className="explotacionCard ">
                     <h3>{nombre}</h3>
                 <div className="cabecera-cardExplo">
                     <img className="explo-icon" src={iconImg} alt={altText} />
@@ -16,7 +15,7 @@ const ExplotacionCard = ({nombre,iconImg,altText,ubicacion,TotalHngExplo,numParc
                     {children}
                 </div>
             </div>
-        </div>
+  
 
     )
 }

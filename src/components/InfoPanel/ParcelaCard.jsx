@@ -3,7 +3,6 @@ const ParcelaCard = ({poligono,parcela,iconImg,altText,variedad,num_arboles,expl
 
     return(
         <div>
-            <div className="explotacionCard ">
                 <h3>Poligono-parcela: {poligono}/{parcela}</h3>
                 <div className="cabecera-cardExplo">
                     <img className="explo-icon" src={iconImg} alt={altText}/>
@@ -19,7 +18,6 @@ const ParcelaCard = ({poligono,parcela,iconImg,altText,variedad,num_arboles,expl
                     {children}
                 </div>
             </div>
-        </div>
 
     )
 }
