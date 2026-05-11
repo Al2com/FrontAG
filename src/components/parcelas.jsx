@@ -1,5 +1,5 @@
 import {useEffect,useState} from 'react';
-import CardInfo from './InfoPanel/InfoPanel.jsx';
+import InfoPanel from './InfoPanel/InfoPanel.jsx'
 import BtnCrear from './buttons/BtnCrear.jsx';
 import BarraBusqueda from './BarraBusqueda/BarraBusqueda.jsx';
 import SelectComp from './BarraBusqueda/SelectComp.jsx';
@@ -7,6 +7,7 @@ import parcelasService from '../services/parcelas.js';
 import ParcelaCard from './InfoPanel/ParcelaCard.jsx';
 import BtnSubmit from './buttons/BtnSubmit.jsx';
 import './Style/cards.css'
+
 
 
 const Parcela = () => {
@@ -61,10 +62,10 @@ const Parcela = () => {
        </div> 
 
        <div className="primeraSeccion">
-         <CardInfo iconImg="./parcela.svg" altText="menu" texto="Total Parcelas" valor={numParcelas} />
-         <CardInfo iconImg="./dimension.svg" altText="Menu" texto="Total hectáreas" valor={totalHng} />
-         <CardInfo altText="Total Riego Manta" iconImg="./riego.svg" texto="Riego Manta" valor={parcelaMan} />
-         <CardInfo altText="Parcelas Riego Goteo" iconImg="./riegoGoteo.svg" texto="Riego Goteo" valor={parcelaGot} />
+         <InfoPanel iconImg="./parcela.svg" altText="menu" texto="Total Parcelas" valor={numParcelas} />
+         <InfoPanel iconImg="./dimension.svg" altText="Menu" texto="Total hectáreas" valor={totalHng} />
+         <InfoPanel altText="Total Riego Manta" iconImg="./riego.svg" texto="Riego Manta" valor={parcelaMan} />
+         <InfoPanel altText="Parcelas Riego Goteo" iconImg="./riegoGoteo.svg" texto="Riego Goteo" valor={parcelaGot} />
        </div>
 
        <div className="filtro-explo">
@@ -95,7 +96,7 @@ const Parcela = () => {
          </div>
        </div>
 
-       <div className="seccion-explo">
+       {/* <div className="seccion-explo"> */}
          {parcelasFiltradas.map((parcela, index) => (
            <div className='seccion-explo-part' key={index}>
              <ParcelaCard 
@@ -117,7 +118,7 @@ const Parcela = () => {
          ))}
        </div>
 
-     </div>
+    //  </div>
    )
 }
 

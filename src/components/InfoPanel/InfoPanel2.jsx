@@ -1,6 +1,5 @@
 
-
-const Card2 = ({ titulo, iconImg,altText,texto,children }) => {
+const InfoPanel2 = ({ titulo, iconImg,altText,texto,children }) => {
   return (
     <div className="card2">
       <div className="tituloCard2">
@@ -15,4 +14,4 @@ const Card2 = ({ titulo, iconImg,altText,texto,children }) => {
   );
 };
 
-export default Card2
+export default InfoPanel2

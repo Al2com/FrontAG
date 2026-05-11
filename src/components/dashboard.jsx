@@ -1,7 +1,7 @@
 import './Style/cards.css';
 
 import InfoPanel from './InfoPanel/InfoPanel.jsx';
-import Card2 from './InfoPanel/InfoPanel2.jsx';
+import InfoPanel2 from './InfoPanel/InfoPanel2.jsx';
 import Btn1 from './buttons/BtnCrear.jsx';
 import explotacionService from '../services/explotaciones.js';
 import parcelasService from '../services/parcelas.js';
@@ -97,7 +97,7 @@ const Dashboard = () => {
 
       <div className="segundaSeccion">
      
-        <Card2 
+        <InfoPanel2 
         iconImg="./advertencia1.png"
         titulo="Alertas"
         texto="Requieren atención"
@@ -107,10 +107,10 @@ const Dashboard = () => {
         titulo="Stock Bajo"
         texto="productos con stock bajo"/>
 
-        </Card2>
+        </InfoPanel2>
      
 
-        <Card2 
+        <InfoPanel2 
         iconImg="./advertencia1.png"
         titulo="Actividad Reciente"
         texto="Requieren atención"
@@ -121,7 +121,7 @@ const Dashboard = () => {
         titulo="Fumigacion"
         texto="Parcela 12/25 15/08/2025"/>
 
-        </Card2>
+        </InfoPanel2>
           
       </div>
     </div>

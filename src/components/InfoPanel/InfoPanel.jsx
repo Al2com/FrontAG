@@ -1,5 +1,4 @@
 
-
 const InfoPanel = ({ texto, iconImg, altText, valor}) => {
   return (
     <div className="card">
