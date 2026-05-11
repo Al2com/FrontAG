@@ -39,6 +39,17 @@ const Dashboard = () => {
 
   }, [])
 
+  //cabio de color segun estados 
+  
+  const colorEstado = (estado) => {
+    switch (estado) {
+      case 'pendiente': return '#E9A800';
+      case 'realizada': return '#2E7D52';
+      case 'revisada':  return '#4A90D9';
+      default:          return 'var(--c-borde)';
+    }
+  };
+
   return (
     <div>
       <h1>Dashboard</h1>
@@ -53,19 +64,44 @@ const Dashboard = () => {
       </div>
 
       <div className="segundaSeccion">
-        <InfoPanel2 iconImg="./advertencia1.png" titulo="Alertas" texto="Requieren atención" textoBtn="Ver">
-          <Btn1 className="BtnCard" titulo="Stock Bajo" texto="productos con stock bajo"/>
-        </InfoPanel2>
+        <InfoPanel2 iconImg="./advertencia1.png" titulo="Alertas" texto="Requieren atención">
+              {[
+                { nombre: 'Glifosato 36%', stock: 2, unidad: 'L' },
+                { nombre: 'Cobre Oxicloruro', stock: 1, unidad: 'kg' },
+                { nombre: 'Abono NPK 15-15-15', stock: 3, unidad: 'kg' },
+              ].map((producto, index) => (
+                <div key={index} className="actividad-item" style={{ borderLeftColor: '#E9A800' }}>
+                  <div className="actividad-item-header">
+                    <strong>{producto.nombre}</strong>
+                    <span className="actividad-estado estado-pendiente">Stock bajo</span>
+                  </div>
+                  <p className="actividad-item-sub">Stock actual: {producto.stock} {producto.unidad}</p>
+                </div>
+              ))}
+      </InfoPanel2>
 
         <InfoPanel2 iconImg="./operaciones.svg" titulo="Actividad Reciente">
-           <h3>Operaciones</h3>
-          {actividadReciente.operaciones.map((op, index) => (
-            <p key={index}><strong>{op.tipo_operacion}</strong> — {op.operario} — {op.estado}</p>
-          ))}
-          <h3>Fumigaciones</h3>
-          {actividadReciente.fumigaciones.map((fum, index) => (
-            <p key={index}><strong>{fum.tipo_operacion}</strong><strong>{fum.metodo_aplicacion}</strong> — {fum.operario} — {fum.estado}</p>
-          ))}
+            <h3>Operaciones</h3>
+            {actividadReciente.operaciones.map((op, index) => (
+              <div key={index} className="actividad-item actividad-operacion"  style={{ borderLeftColor: colorEstado(op.estado) }}>
+                <div className="actividad-item-header">
+                  <strong>{op.tipo_operacion}</strong>
+                  <span className={`actividad-estado estado-${op.estado}`}>{op.estado}</span>
+                </div>
+                <p className="actividad-item-sub">{op.operario}</p>
+              </div>
+            ))}
+
+            <h3>Fumigaciones</h3>
+            {actividadReciente.fumigaciones.map((fum, index) => ( 
+              <div key={index} className="actividad-item actividad-fumigacion" style={{ borderLeftColor: colorEstado(fum.estado) }}>
+                <div className="actividad-item-header">
+                  <strong>{fum.tipo_operacion}</strong>
+                  <span className={`actividad-estado estado-${fum.estado}`}>{fum.estado}</span>
+                </div>
+                <p className="actividad-item-sub">{fum.metodo_aplicacion} — {fum.operario}</p>
+              </div>
+            ))}
         </InfoPanel2>
       </div>
     </div>

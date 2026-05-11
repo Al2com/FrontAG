@@ -132,11 +132,6 @@ const Operaciones = () => {
                             </button>
                         )}
 
-                        {fum.estado === 'revisada' && rol !== 'trabajador' && (
-                            <button onClick={() => marcarRevisada('fumigacion', fum.id)}>
-                                Marcar como revisada
-                            </button>
-                        )}
                     </div>
                 ))
             )}

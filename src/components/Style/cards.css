@@ -44,9 +44,10 @@
 
 .segundaSeccion {
   display: flex;
-  padding: 10px;
+  padding: 1px;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
+  gap: var(--esp-lg);
 }
 
 /* -- Card estadistica (InfoPanel - dashboard y vistas) ------ */
@@ -84,7 +85,7 @@
 /* -- Card secundaria (alertas y actividad - dashboard) ------ */
 .card2 {
   background-color: var(--c-blanco);
-  border: 3px solid var(--c-borde-oscuro);
+  border: 1px solid #8a8a8a;
   border-radius: var(--rad-lg);
   padding: var(--esp-lg);
   width: 710px;
@@ -132,6 +133,63 @@
   font-size: 14px;
   color: var(--c-texto);
 }
+/* -- Items de actividad reciente (operaciones y fumigaciones) -- */
+.actividad-item {
+  border: 1px solid var(--c-borde);
+  border-radius: var(--rad-md);
+  padding: 14px 16px;
+  background-color: var(--c-blanco);
+  margin-bottom: var(--esp-sm);
+}
+
+
+.actividad-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.actividad-item-sub {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: var(--c-texto);
+  opacity: 0.75;
+}
+
+/* Franja de color izquierda según tipo */
+.actividad-operacion {
+  border-left: 4px solid var(--c-primario);
+}
+
+.actividad-fumigacion {
+  border-left: 4px solid #4A90D9;
+}
+
+.actividad-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.actividad-item-sub {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--c-texto);
+  opacity: 0.75;
+}
+
+/* Badge de estado */
+.actividad-estado {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 99px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.estado-pendiente  { background-color: #FFF3CD; color: #856404; }
+.estado-completada { background-color: #D1E7DD; color: #0F5132; }
+.estado-en\ proceso { background-color: #CCE5FF; color: #004085; }
 
 /* -- Responsive --------------------------------------------- */
 @media (max-width: 1200px) {
