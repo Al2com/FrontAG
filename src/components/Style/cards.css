@@ -51,7 +51,7 @@
 
 /* -- Card estadistica (InfoPanel - dashboard y vistas) ------ */
 .card {
-  background-color: var(--c-fondo-verde);
+  background-color: var(--c-blanco);
   border: 1px solid #8a8a8a;
   border-radius: var(--rad-lg);
   padding: var(--esp-lg);
@@ -83,6 +83,7 @@
 
 /* -- Card secundaria (alertas y actividad - dashboard) ------ */
 .card2 {
+  background-color: var(--c-blanco);
   border: 3px solid var(--c-borde-oscuro);
   border-radius: var(--rad-lg);
   padding: var(--esp-lg);

@@ -18,5 +18,9 @@ const marcarRevisada = (tipo, id) => {
     return request.then(response => response.data)
 }
 
+const getActividadReciente = () => {
+    const request = axios.get(`${baseUrl}/actividad-reciente`)
+    return request.then(response => response.data)
+}
 
-export default { getLista,marcarRealizada, marcarRevisada };
+export default { getLista,marcarRealizada, marcarRevisada, getActividadReciente };
