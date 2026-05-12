@@ -23,7 +23,7 @@ const postCrear = (formData) => {
 }
 
 // Trae los datos de una explotacion por su ID para cargarlos en el formulario
-const getOne = (id) => {
+const getExplo = (id) => {
   const request = axios.get(`${baseUrl}/${id}`)
   return request.then(response => response.data)
 }
@@ -34,4 +34,4 @@ const putActualizar = (id, formData) => {
   return request.then(response => response.data)
 }
 
-export default { getCount, getResumen, postCrear, getOne, putActualizar }
+export default { getCount, getResumen, postCrear, getExplo, putActualizar }

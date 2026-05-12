@@ -28,7 +28,7 @@ const getLista = () => {
 }
 
 // trae los datos de una parcela por su id para cargarlos en el formulario de edicion
-const getOne = (id) => {
+const getParcela = (id) => {
   return axios.get(`${baseUrl}/${id}`).then(res => res.data)
 }
 
@@ -37,4 +37,4 @@ const putActualizar = (id, formData) => {
   return axios.put(`${baseUrl}/${id}`, formData).then(res => res.data)
 }
 
-export default { getCount, getResumenP, postCrear, getLista, getOne, putActualizar }
+export default { getCount, getResumenP, postCrear, getLista, getParcela, putActualizar }

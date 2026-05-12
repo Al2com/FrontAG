@@ -150,8 +150,8 @@ return(
         </div>
     </div>
 
-    {/* <div className="seccion-explo"> */}
-      {/* 4. Map usando explotacionesFiltradas en lugar de resumen */}
+  
+      {/*  Map usando explotacionesFiltradas en lugar de resumen */}
       {explotacionesFiltradas.map((explotacion,index) => (
         <div className='seccion-explo-part' key={index}>
           <ExplotacionCard 

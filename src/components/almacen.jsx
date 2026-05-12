@@ -2,6 +2,7 @@ import BtnCrear from './buttons/BtnCrear.jsx';
 import productosService from '../services/productos.js'
 import AlmacenCard from '../components/InfoPanel/AlmacenCard.jsx'
 import { useEffect ,useState} from 'react';
+import BtnSubmit from './buttons/BtnSubmit.jsx';
 import './Style/cards.css'
 
 
@@ -35,21 +36,23 @@ const Almacen = () =>{
     </div>
 
     {/* Cards debajo de los botones */}
-    <div className="seccion-explo">
       {productos.map((lista, index) => (
         <div key={index} className="seccion-explo-part">
           <AlmacenCard 
             iconImg='./almacen.svg'
-            nombre={lista.nombre}
-            precio={lista.precio}
             ubicacion={lista.ubicacion}
+            nombre={lista.nombre}
+            materia_activa={lista.materia_activa}
+            precio={lista.precio}
             stock_actual={lista.stock_actual} 
             unidad={lista.unidad}
-          />
+          >
+          <BtnSubmit texto="Editar" to={`/producto/${lista.id}`} />
+          </ AlmacenCard>
         </div>
       ))}
     </div>
-  </div>
+
 
     )
 }

@@ -16,7 +16,7 @@ const EditarExplotacion = () => {
 
   // Al cargar trae los datos de esa explotación
   useEffect(() => {
-    explotacionService.getOne(id)
+    explotacionService.getExplo(id)
       .then(data => setFormData(data))
       .catch(err => console.error('Error al cargar explotación:', err))
   }, [id])
@@ -72,11 +72,9 @@ const EditarExplotacion = () => {
           />
         </div>
 
-        <div>
+        <div className='menu-button'>
           <button type="submit">Guardar cambios</button>
-          <button type="button" onClick={() => navigate('/explotaciones')}>
-            Cancelar
-          </button>
+          <button type="button" onClick={() => navigate('/explotaciones')}>Cancelar</button>
         </div>
 
       </form>

@@ -23,7 +23,7 @@ const EditarParcela = () => {
 
   // al cargar trae los datos de esa parcela
   useEffect(() => {
-    parcelasService.getOne(id)
+    parcelasService.getParcela(id)
       .then(data => setFormData(data))
       .catch(err => console.error('Error al cargar parcela:', err))
   }, [id])
@@ -97,7 +97,7 @@ const EditarParcela = () => {
           <input type="text" name="descripcion" value={formData.descripcion} onChange={handleChange} />
         </div>
 
-        <div>
+         <div className='menu-button'>
           <button type="submit">Guardar cambios</button>
           <button type="button" onClick={() => navigate('/parcelas')}>Cancelar</button>
         </div>
