@@ -132,9 +132,10 @@
 }
 .menu-button {
   display: flex;
-  padding: 60px;
-  
-
+  padding: 0px;
+}
+.menu-button button {
+  margin: 5px;
 }
 
 /* -- Responsive --------------------------------------------- */

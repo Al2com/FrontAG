@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import tareasService from '../services/tareas'
 import BtnCrear from './buttons/BtnCrear.jsx';
+import BtnSubmit from './buttons/BtnSubmit.jsx'
 import  './Style/cards.css';
 import './Style/forms.css'
+import { Navigate } from 'react-router-dom';
 
 
 const Operaciones = () => {
@@ -52,7 +54,7 @@ const Operaciones = () => {
           <h2>Operaciones</h2>
           <p>Registra y gestiona las operaciones de campo</p>
         </div>
-        <div className="menu-buttons" >
+        <div className="menu-button" >
           {rol!=='trabajador' && (
           <BtnCrear
             to="/nueva-operacion"
@@ -73,7 +75,7 @@ const Operaciones = () => {
         </div>
       </div>
 
-      <div className="seccion-explo">
+      {/* <div className="seccion-explo"> */}
             {operaciones.length === 0 ? (
                 <p>No hay operaciones registradas.</p>
             ) : (
@@ -88,24 +90,29 @@ const Operaciones = () => {
                         <p><strong>Descripción:</strong> {op.descripcion}</p>
                         <p ><strong>Estado:</strong> {op.estado}</p>
 
-                         {op.estado === 'pendiente' && (
-                            <button onClick={() => marcarRealizada('operacion', op.id)}>
-                                Marcar como realizada
-                            </button>
-                        )}
+                    <div className="menu-button">
+                            {op.estado === 'pendiente' && (
+                                <button onClick={() => marcarRealizada('operacion', op.id)}>
+                                    Realizada
+                                </button>
+                            )}
 
-                        {op.estado === 'realizada' && rol !== 'trabajador' && (
-                            <button onClick={() => marcarRevisada('operacion', op.id)}>
-                                Marcar como revisada
-                            </button>
-                        )}
+                            {op.estado === 'realizada' && rol !== 'trabajador' && (
+                                <button onClick={() => marcarRevisada('operacion', op.id)}>
+                                    Revisada
+                                </button>
+                            )}
+                            {rol!=='trabajador' && ( <BtnSubmit texto="Editar" to={`/operacion/${op.id}`}/>)}
+                            
+                        </div>
                     </div>
+                    
                 ))
             )}
-        </div>
+        {/* </div> */}
 
         <h2>Fumigaciones</h2>
-        <div className="seccion-explo">
+        {/* <div className="seccion-explo"> */}
             {fumigaciones.length === 0 ? (
                 <p>No hay fumigaciones registradas.</p>
             ) : (
@@ -119,24 +126,26 @@ const Operaciones = () => {
                         <p><strong>Duración:</strong> {fum.duracion_minutos} min</p>
                         <p><strong>Descripción:</strong> {fum.descripcion}</p>
                         <p><strong>Estado:</strong> {fum.estado}</p>
-
-                        {fum.estado === 'pendiente' && (
+                    
+                    <div className="menu-button">
+                        {fum.estado !== 'pendiente' && (
                             <button onClick={() => marcarRealizada('fumigacion', fum.id)}>
-                                Marcar como realizada
+                                Realizada
                             </button>
                         )}
 
                         {fum.estado === 'realizada' && rol !== 'trabajador' && (
                             <button onClick={() => marcarRevisada('fumigacion', fum.id)}>
-                                Marcar como revisada
+                                Revisada
                             </button>
                         )}
-
+                         {rol==='trabajador' && ( <button onClick={() => Navigate(`{/editar-operaciones/${op.id}`)}>Editar</button>)}
                     </div>
+                 </div>
                 ))
             )}
         </div>
-    </div>
+    // </div>
   )
 }
 
