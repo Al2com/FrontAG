@@ -27,6 +27,15 @@ const EditarParcela = () => {
       .then(data => setFormData(data))
       .catch(err => console.error('Error al cargar parcela:', err))
   }, [id])
+//IMPORTANTE
+// Sin array → se ejecuta en cada render → bucle infinito
+// useEffect(() => { ... })
+
+// Array vacío [] → se ejecuta solo una vez al montar el componente
+// useEffect(() => { ... }, [])
+
+// Array con variable → se ejecuta cuando esa variable cambia
+// useEffect(() => { ... }, [id])
 
   // actualiza el estado cuando el usuario escribe
   const handleChange = (e) => {

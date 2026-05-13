@@ -22,4 +22,9 @@ const postCrear = (formData) => {
 
 }
 
-export default { getLista, getLista1, postCrear };
+const getOperacion = (id) => {
+    return axios.get(`${baseUrl}/${id}`)
+    .then(response=> response.data)
+}
+
+export default { getLista, getLista1, postCrear, getOperacion};
