@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-// import usuariosService from '../../services/usuarios'
 import parcelasService from '../../services/parcelas'
 import operacionesService from '../../services/operaciones'
-
 import '../Style/forms.css'
 
 
@@ -242,13 +240,7 @@ const FormOperacion = () => {
 
         {/* Botones */}
         <div className="form-actions full-width">
-          <button
-            type="button"
-            onClick={() => navigate('/operaciones')}
-            className="btn-cancel"
-          >
-            Cancelar
-          </button>
+          <button type="button" onClick={() => navigate('/operaciones')}className="btn-cancel">Atrás</button>
           <button type="submit">Guardar Operación</button>
         </div>
 

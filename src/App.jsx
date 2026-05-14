@@ -20,6 +20,7 @@ import EditarExplotacion from './components/CreateForm/EditarExplotacion.jsx'
 import EditarParcela from './components/CreateForm/EditarParcela.jsx'
 import EditarProducto from './components/CreateForm/EditarProducto.jsx'
 import EditarOperacion from './components/CreateForm/EditarOperacion.jsx'
+import FormComprarProducto from './components/CreateForm/FormComprarProducto.jsx'
 
 
 
@@ -76,6 +77,7 @@ function App() {
               <Route path="/nueva-operacion" element={<FormOperaciones />} />
               <Route path="/nueva-fumigacion" element={<FormFumigacion />} />
               <Route path="/nuevo-producto" element={<FormProducto />} />
+              <Route path="/comprar-producto" element={<FormComprarProducto />} />
               <Route path="/explotacion/:id" element={<EditarExplotacion />} />
               <Route path="/parcela/:id" element={<EditarParcela/>} />
               <Route path="/producto/:id" element={<EditarProducto/>} />

@@ -108,7 +108,7 @@ const EditarParcela = () => {
 
          <div className='menu-button'>
           <button type="submit">Guardar cambios</button>
-          <button type="button" onClick={() => navigate('/parcelas')}>Cancelar</button>
+          <button type="button" onClick={() => navigate('/parcelas')}>Atrás</button>
         </div>
 
       </form>

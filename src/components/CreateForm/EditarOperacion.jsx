@@ -73,9 +73,10 @@ const EditarOperacion = () => {
                 <label>Estado</label>
                 <input type="text" name="estado" value={FormData.estado} onChange={handleChange} />            </div>
             <div />
-            
-            <button type="submit">Guardar Cambios</button>
-            <button type="button" onClick = {() => navigate ('/operaciones')}> Cancelar</button>
+              <div className="menu-button">
+                <button type="submit">Guardar Cambios</button>
+                <button type="button" onClick = {() => navigate ('/operaciones')}>Atrás</button>
+          </div>
 
         </form>
 </div>

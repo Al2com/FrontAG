@@ -7,6 +7,7 @@ import parcelasService from '../services/parcelas.js';
 import ParcelaCard from './InfoPanel/ParcelaCard.jsx';
 import BtnSubmit from './buttons/BtnSubmit.jsx';
 import './Style/cards.css'
+import axios from '../services/axios.js' 
 
 
 

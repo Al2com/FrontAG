@@ -5,6 +5,7 @@ import BtnSubmit from './buttons/BtnSubmit.jsx'
 import  './Style/cards.css';
 import './Style/forms.css'
 import { Navigate } from 'react-router-dom';
+import axios from '../services/axios.js' 
 
 
 const Operaciones = () => {
@@ -75,7 +76,6 @@ const Operaciones = () => {
         </div>
       </div>
 
-      {/* <div className="seccion-explo"> */}
             {operaciones.length === 0 ? (
                 <p>No hay operaciones registradas.</p>
             ) : (
@@ -139,7 +139,7 @@ const Operaciones = () => {
                                 Revisada
                             </button>
                         )}
-                         {rol==='trabajador' && ( <button onClick={() => Navigate(`{/editar-operaciones/${op.id}`)}>Editar</button>)}
+                         {rol!=='trabajador' && ( <button onClick={() => Navigate(`{/editar-operaciones/${op.id}`)}>Editar</button>)}
                     </div>
                  </div>
                 ))

@@ -81,7 +81,7 @@ const EditarProducto = () => {
                 </div>
                 <div className='menu-button'>
                     <button type="submit">Guardar cambios</button>
-                    <button type="button" onClick={() => navigate('/almacen')}>Cancelar</button>
+                    <button type="button" onClick={() => navigate('/almacen')}>Atrás</button>
                 </div>
             </form>
         </div>
