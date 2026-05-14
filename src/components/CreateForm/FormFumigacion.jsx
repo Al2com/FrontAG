@@ -25,15 +25,14 @@ const FormFumigacion = () => {
 
   const [errors, setErrors] = useState({
     parcela_id: "",
-    operario_id: "",
+    operario: "",
     metodo_aplicacion: "",
     hora_inicio: "",
     duracion_minutos: "",
-    producto_id: "",
-    dosis_introducida: "",
     mochilas: "",
     turbos: "",
-    descripcion: ""
+    descripcion: "",
+    productos: ""
   });
 
   useEffect(() => {
@@ -102,12 +101,9 @@ const FormFumigacion = () => {
     setProductosAñadidos([...productosAñadidos, { producto_id: '', dosis_introducida: '' }])
   }
 
-  // ✅ Eliminar fila
   const eliminarFila = (index) => {
     setProductosAñadidos(productosAñadidos.filter((_, i) => i !== index));
   }
-
-  const productoSeleccionado = productos.find(item => item.id === Number(formData.producto_id))
 
   const enviarFormulario = (e) => {
     e.preventDefault();
@@ -130,9 +126,8 @@ const FormFumigacion = () => {
       ? validarCampos('turbos', formData.turbos)
       : true;
 
-    // ✅ Validar productos
     if (productosAñadidos.length === 0) {
-      alert('Debes añadir al menos un producto químico');
+      setErrors(prev => ({ ...prev, productos: 'Debes añadir al menos un producto' }));
       return;
     }
 
@@ -141,9 +136,11 @@ const FormFumigacion = () => {
     );
 
     if (!productosOk) {
-      alert('Todos los productos deben tener producto y dosis seleccionados');
+      setErrors(prev => ({ ...prev, productos: 'Todos los productos deben tener producto y dosis' }));
       return;
     }
+
+    setErrors(prev => ({ ...prev, productos: '' }));
 
     if (parcelaOk && metodoOk && fechaOk && descripcionOk &&
       operarioOk && duracionOk && mochilasOk && turbosOk) {
@@ -154,24 +151,29 @@ const FormFumigacion = () => {
       };
 
       fumigacionService.postCrearFumigacion(datos)
-        .then((response) => {
-          console.log('respuesta:', response);
+        .then(() => {
           navigate('/operaciones');
         })
         .catch(err => {
-          console.error('Error del servidor:', err.response);
-          console.error('Status:', err.response?.status);
-          console.error('Data:', err.response?.data);
+          if (err.response?.status === 422) {
+            const erroresLaravel = err.response.data.errors;
+            // Recorremos cada error que manda Laravel y lo metemos en el estado errors
+            // para que aparezca en rojo debajo del input correspondiente
+            const nuevosErrores = {};
+            for (const campo in erroresLaravel) {
+              nuevosErrores[campo] = erroresLaravel[campo][0];
+            }
+            setErrors(prev => ({ ...prev, ...nuevosErrores }));
+          } else {
+            alert('Error del servidor. Inténtalo de nuevo.');
+          }
         });
-
-    } else {
-      console.log('formulario inválido', { parcelaOk, metodoOk, fechaOk, descripcionOk });
     }
   };
 
   return (
     <div className="form-container">
-      <h1>Nueva Fumigación (selecciona método aplicación)</h1>
+      <h1>Nueva Fumigación</h1>
 
       <form onSubmit={enviarFormulario} className="form-grid">
 
@@ -184,6 +186,7 @@ const FormFumigacion = () => {
             name="parcela_id"
             value={formData.parcela_id}
             onChange={handleChange}
+            className={errors.parcela_id ? 'input-error' : ''}
           >
             <option value="">Selecciona una parcela</option>
             {parcelas.map(parcela => (
@@ -266,7 +269,6 @@ const FormFumigacion = () => {
               const prodSeleccionado = productos.find(p => p.id === Number(item.producto_id))
               return (
                 <div key={index} className="form-grupo">
-
                   <select
                     name="producto_id"
                     value={item.producto_id}
@@ -291,15 +293,14 @@ const FormFumigacion = () => {
                     onChange={(e) => handleChangeProducto(e, index)}
                   />
 
-                  {/* ✅ Botón eliminar */}
                   <button type="button" onClick={() => eliminarFila(index)}>
                     Eliminar
                   </button>
-
                 </div>
               )
             })}
 
+            {errors.productos && <span className="mensaje-error">{errors.productos}</span>}
             <button type="button" onClick={añadirFila}>+ Añadir producto</button>
           </div>
 
@@ -358,11 +359,7 @@ const FormFumigacion = () => {
 
         {/* Botones */}
         <div className="form-actions full-width">
-          <button
-            type="button"
-            onClick={() => navigate('/operaciones')}
-            className="btn-cancel"
-          >
+          <button type="button" onClick={() => navigate('/operaciones')} className="btn-cancel">
             Cancelar
           </button>
           <button type="submit">Guardar Operación</button>

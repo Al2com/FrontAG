@@ -166,7 +166,7 @@ const FormComprarProducto = () => {
                 </div>
 
                 <div>
-                    <label>Precio (€) *</label>
+                    <label>Precio por unidad litro/Kilo (€) *</label>
                     <input
                         type="number"
                         step="0.01"
@@ -181,7 +181,7 @@ const FormComprarProducto = () => {
 
                 <div className="menu-button">
                     <button type="submit">Registrar Compra</button>
-                    <button type="button" onClick={() => navigate('/almacen')}>Cancelar</button>
+                    <button type="button" onClick={() => navigate('/almacen')}>Atrás</button>
                 </div>
 
             </form>

@@ -4,16 +4,13 @@ import parcelasService from '../../services/parcelas'
 import operacionesService from '../../services/operaciones'
 import '../Style/forms.css'
 
-
-
 const FormOperacion = () => {
- 
 
   const [parcelas, setParcelas] = useState([])
 
   const [formData, setFormData] = useState({
     parcela_id: '',
-    usuario : "",
+    usuario: "",
     operario: '',
     tipo_operacion: 'riego',
     hora_inicio: '',
@@ -23,103 +20,89 @@ const FormOperacion = () => {
 
   const [errors, setErrors] = useState({
     parcela_id: '',
-    usuario : "",
+    usuario: "",
     operario: '',
     tipo_operacion: '',
     hora_inicio: '',
     duracion_minutos: '',
-    descripcion: '' 
-});
+    descripcion: ''
+  });
 
   useEffect(() => {
     parcelasService.getLista()
       .then(data => setParcelas(data))
       .catch(err => console.error('Error cargando parcelas:', err))
-
-    // usuariosService.getUsuarios()
-    //   .then(data => setUsuarios(data.usuarios))
-    //   .catch(err => console.error('Error cargando usuarios:', err))
   }, [])
 
-    const navigate = useNavigate()
+  const navigate = useNavigate()
 
-//regex validar
-    const regexDuracion = /^[0-9]{1,4}$/;
-    const regexDescripcion = /^.{10,}$/;
-
+  const regexDuracion = /^[0-9]{1,4}$/;
+  const regexDescripcion = /^.{10,}$/;
 
   const validarCampos = (name, value) => {
-      let mensaje = '';
-      let comprobar = true;
+    let mensaje = '';
+    let comprobar = true;
 
-      
-
-      if (name === 'duracion_minutos' && !regexDuracion.test(value)) {
-        mensaje = 'Debe ser un número (máx. 4 cifras)';
-        comprobar = false;
-      }
-
-      if (name === 'descripcion' && !regexDescripcion.test(value)) {
-        mensaje = 'Mínimo 10 caracteres';
-        comprobar = false;
-      }
-
-     if ((/*name === 'usuario_id' || */ name === 'parcela_id' || name === 'tipo_operacion' || name === 'operario') && value === "") {
-        mensaje = 'Debes seleccionar una opción';
-        comprobar = false;
-     }
-
-      if (name === 'hora_inicio' && value === "") {
-        mensaje = 'La fecha y hora son obligatorias';
-        comprobar = false;
-      }
-
-       setErrors(prevErrors => ({ ...prevErrors, [name]: mensaje })); 
-    
-       return comprobar;
+    if (name === 'duracion_minutos' && !regexDuracion.test(value)) {
+      mensaje = 'Debe ser un número (máx. 4 cifras)';
+      comprobar = false;
     }
 
-      const handleChange = (e) => {
-        const { name, value } = e.target
-        setFormData({ ...formData, [name]: value })
-        validarCampos(name, value);
+    if (name === 'descripcion' && !regexDescripcion.test(value)) {
+      mensaje = 'Mínimo 10 caracteres';
+      comprobar = false;
+    }
+
+    if ((name === 'parcela_id' || name === 'tipo_operacion' || name === 'operario') && value === "") {
+      mensaje = 'Debes seleccionar una opción';
+      comprobar = false;
+    }
+
+    if (name === 'hora_inicio' && value === "") {
+      mensaje = 'La fecha y hora son obligatorias';
+      comprobar = false;
+    }
+
+    setErrors(prevErrors => ({ ...prevErrors, [name]: mensaje }));
+    return comprobar;
+  }
+
+  const handleChange = (e) => {
+    const { name, value } = e.target
+    setFormData({ ...formData, [name]: value })
+    validarCampos(name, value);
   }
 
   const enviarFormulario = (e) => {
     e.preventDefault();
 
-    // const usuarioOk = validarCampos('usuario_id', formData.usuario_id);
-    const operarioOk = validarCampos('operario', formData.operario);
     const parcelaOk = validarCampos('parcela_id', formData.parcela_id);
-    const fechaOk = validarCampos('hora_inicio', formData.hora_inicio); 
+    const operarioOk = validarCampos('operario', formData.operario);
+    const tipoOk = validarCampos('tipo_operacion', formData.tipo_operacion);
+    const fechaOk = validarCampos('hora_inicio', formData.hora_inicio);
     const duracionOk = validarCampos('duracion_minutos', formData.duracion_minutos);
-    const tipoOk = validarCampos('tipo_operacion', formData.tipo_operacion); 
     const descripcionOk = validarCampos('descripcion', formData.descripcion);
 
+    if (parcelaOk && operarioOk && tipoOk && fechaOk && duracionOk && descripcionOk) {
 
-   
-   if (duracionOk && descripcionOk  && /* usuarioOk  && */ operarioOk && parcelaOk && tipoOk && fechaOk &&
-        formData.duracion_minutos !== "" && formData.descripcion !== "" &&
-        formData.parcela_id !== "" && /*formData.usuario_id !== "" && */ 
-        formData.hora_inicio !== "" && formData.tipo_operacion !== "") {
-      
-      
       operacionesService.postCrear(formData)
-    
-        .then((response) => {  
-          console.log('respuesta:', response);
+        .then(() => {
           navigate('/operaciones');
         })
-        // .catch(err => console.error('Error del servidor:', err));
         .catch(err => {
-           console.error('Error del servidor:', err.response?.data);
-});
-
-    } else {
-     
-      console.log('formulario inválido', { operarioOk, duracionOk, descripcionOk, fechaOk, tipoOk, formData });
+          if (err.response?.status === 422) {
+            const erroresLaravel = err.response.data.errors;
+            const nuevosErrores = {};
+            for (const campo in erroresLaravel) {
+              nuevosErrores[campo] = erroresLaravel[campo][0];
+            }
+            setErrors(prev => ({ ...prev, ...nuevosErrores }));
+          } else {
+            alert('Error del servidor. Inténtalo de nuevo.');
+          }
+        });
     }
-};
+  };
 
   return (
     <div className="form-container">
@@ -135,9 +118,8 @@ const FormOperacion = () => {
             name="parcela_id"
             value={formData.parcela_id}
             onChange={handleChange}
-            
+            className={errors.parcela_id ? 'input-error' : ''}
           >
-        
             <option value="">Selecciona una parcela</option>
             {parcelas.map(parcela => (
               <option key={parcela.id} value={parcela.id}>
@@ -158,17 +140,11 @@ const FormOperacion = () => {
             onChange={handleChange}
             className={errors.operario ? 'input-error' : ''}
           >
-             <option value="">Selecciona un usuario</option>
-             <option value="Luis Pérez">Luis Perez</option>
-             <option value="Pepe Martinez">Pepe Matinez</option>
-            {/* <option value="">Selecciona un usuario</option>
-            {usuarios.map(usuario => (
-              <option key={usuario.id} value={usuario.id}>
-                {usuario.name}
-              </option>
-            ))} */}
+            <option value="">Selecciona un usuario</option>
+            <option value="Luis Pérez">Luis Perez</option>
+            <option value="Pepe Martinez">Pepe Martinez</option>
           </select>
-           {errors.operario && <span className="mensaje-error">{errors.operario}</span>}
+          {errors.operario && <span className="mensaje-error">{errors.operario}</span>}
         </div>
 
         {/* Tipo de Operación */}
@@ -186,7 +162,6 @@ const FormOperacion = () => {
             <option value="abonado">Abonado</option>
             <option value="mantenimiento">Mantenimiento</option>
             <option value="tractor">Tractor</option>
-            
           </select>
           {errors.tipo_operacion && <span className="mensaje-error">{errors.tipo_operacion}</span>}
         </div>
@@ -203,7 +178,6 @@ const FormOperacion = () => {
             className={errors.hora_inicio ? 'input-error' : ''}
           />
           {errors.hora_inicio && <span className="mensaje-error">{errors.hora_inicio}</span>}
-
         </div>
 
         {/* Duración */}
@@ -217,7 +191,7 @@ const FormOperacion = () => {
             onChange={handleChange}
             placeholder="Ej: 120"
             min="1"
-            className={errors.duracion_minutos ? 'input-error' : ''} // si no cumple regex pone la clase y sale el mensaje de bajo
+            className={errors.duracion_minutos ? 'input-error' : ''}
           />
           {errors.duracion_minutos && <span className="mensaje-error">{errors.duracion_minutos}</span>}
         </div>
@@ -232,15 +206,14 @@ const FormOperacion = () => {
             onChange={handleChange}
             rows="4"
             placeholder="Detalles de la operación..."
-            required
-            className={errors.descripcion ? 'input-error' : ''} 
+            className={errors.descripcion ? 'input-error' : ''}
           />
           {errors.descripcion && <span className="mensaje-error">{errors.descripcion}</span>}
         </div>
 
         {/* Botones */}
         <div className="form-actions full-width">
-          <button type="button" onClick={() => navigate('/operaciones')}className="btn-cancel">Atrás</button>
+          <button type="button" onClick={() => navigate('/operaciones')} className="btn-cancel">Atrás</button>
           <button type="submit">Guardar Operación</button>
         </div>
 

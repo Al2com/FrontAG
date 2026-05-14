@@ -49,6 +49,7 @@ const Almacen = () =>{
           >
           <BtnSubmit texto="Editar" to={`/producto/${lista.id}`} />
 
+
           </ AlmacenCard>
         </div>
       ))}
