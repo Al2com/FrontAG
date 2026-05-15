@@ -2,13 +2,16 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import parcelaService from '../../services/parcelas';
 import explotacionesService from "../../services/explotaciones";
-import propietariosService from "../../services/propietarios"
-import Modal from '../Modal/Modal';
-import '../Style/modal.css'
+import propietariosService from "../../services/propietarios";
+import '../Style/forms.css'
+
 
 const FormParcela = () => {
 
   const navigate = useNavigate();
+
+  const [explotaciones, setExplotaciones] = useState([]);
+  const [propietarios, setPropietario] = useState([]);
 
   const regexPoligono = /^\d{1,12}$/;
   const regexParcela = /^\d{1,4}$/;
@@ -17,149 +20,137 @@ const FormParcela = () => {
   const regexNumArboles = /^([1-9]\d{0,2}|[12]\d{3}|3000)$/;
   const regexDescripcion = /^(\S+\s*){1,50}$/;
 
-  //datos select
-  const [explotaciones,setExplotaciones] = useState([]);
-  const [propietarios, setPropietario] = useState([]);
-
-  // Estado para que se muestre el modal
-  const[modalError, setModalError] = useState({visible:false, mensaje:""})
-
   useEffect(() => {
     explotacionesService.getCount()
-      .then(data => {
-        console.log(data.nom)
-        setExplotaciones(data.nom);
-      })
-  },[])
+      .then(data => setExplotaciones(data.nom))
+      .catch(() => setErrors(prev => ({ ...prev, explotacion_id: 'Error al cargar las explotaciones' })))
 
-  useEffect(() => {
     propietariosService.getPropietarios()
-     .then(data => {
-      setPropietario(data.propietarios)
-})
+      .then(data => setPropietario(data.propietarios))
+      .catch(() => setErrors(prev => ({ ...prev, propietarios_id: 'Error al cargar los propietarios' })))
   }, []);
 
-  
+  const [formData, setFormData] = useState({
+    explotacion_id: "",
+    propietarios_id: "",
+    nombre: "",
+    rol: "manta",
+    poligono: "",
+    parcela: "",
+    variedad: "",
+    dimension_hanegadas: "",
+    num_arboles: "",
+    fecha_plantacion: "",
+    descripcion: ""
+  });
 
-  const [formData,setFormData] = useState ({
-    explotacion_id :"",
-    propietarios : "",
-    nombre :"",
-    rol:"manta",
-    poligono:"",
-    parcela:"",
-    variedad:"",
-    dimension_hanegadas:"",
-    num_arboles:"",
-    fecha_plantacion:"",
-    descripcion:""
-
-  })
-//maneja los errores cuando no hacen regex ok
   const [errors, setErrors] = useState({
-    poligono:"",
-    parcela:"",
-    variedad:"",
-    dimension_hanegadas:"",
-    num_arboles:"",
-    fecha_plantacion:"",
-    descripcion:""
+    explotacion_id: "",
+    propietarios_id: "",
+    poligono: "",
+    parcela: "",
+    variedad: "",
+    dimension_hanegadas: "",
+    num_arboles: "",
+    fecha_plantacion: "",
+    descripcion: ""
+  });
 
+  const validarCampos = (name, value) => {
+    let mensaje = '';
+    let comprobar = true;
 
-});
+    if ((name === 'explotacion_id' || name === 'propietarios_id') && value === "") {
+      mensaje = 'Debes seleccionar una opción';
+      comprobar = false;
+    }
 
+    if (name === 'poligono' && !regexPoligono.test(value)) {
+      mensaje = 'Número de 2 cifras';
+      comprobar = false;
+    }
 
-  const actualizaEstado = (e) =>{
+    if (name === 'parcela' && !regexParcela.test(value)) {
+      mensaje = 'Número de 2 cifras';
+      comprobar = false;
+    }
 
-    const {name, value} = e.target
-    setFormData({...formData , [name] : value})
-    validarCampos(name, value);
+    if (name === 'variedad' && !regexVariedad.test(value)) {
+      mensaje = 'Palabra de 8 letras máximo';
+      comprobar = false;
+    }
 
+    if (name === 'dimension_hanegadas' && !regexDimension.test(value)) {
+      mensaje = 'Número decimal ejemplo 2.34';
+      comprobar = false;
+    }
+
+    if (name === 'num_arboles' && !regexNumArboles.test(value)) {
+      mensaje = 'Número entero max 3000';
+      comprobar = false;
+    }
+
+    if (name === 'fecha_plantacion' && value === "") {
+      mensaje = 'La fecha es obligatoria';
+      comprobar = false;
+    }
+
+    if (name === 'descripcion' && !regexDescripcion.test(value)) {
+      mensaje = 'Mínimo 50 caracteres';
+      comprobar = false;
+    }
+
+    setErrors(prevErrors => ({ ...prevErrors, [name]: mensaje }));
+    return comprobar;
   }
 
-
-
+  const actualizaEstado = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+    validarCampos(name, value);
+  }
 
   const enviarFormulario = (e) => {
     e.preventDefault();
 
-     const poligonoOk = validarCampos('poligono', formData.poligono);
-     const parcelaOk= validarCampos('parcela', formData.parcela);
-     const variedadOk= validarCampos('variedad', formData.variedad);
-     const dimensionOk = validarCampos('dimension_hanegadas', formData.dimension_hanegadas);
-     const num_arbolesOk = validarCampos('num_arboles', formData.num_arboles);
-     const fecha_plantacionOk = validarCampos('fecha_plantacion', formData.fecha_plantacion);
-     const descripcionOk =  validarCampos('descripcion', formData.descripcion);
+    const explotacionOk = validarCampos('explotacion_id', formData.explotacion_id);
+    const propietarioOk = validarCampos('propietarios_id', formData.propietarios_id);
+    const poligonoOk = validarCampos('poligono', formData.poligono);
+    const parcelaOk = validarCampos('parcela', formData.parcela);
+    const variedadOk = validarCampos('variedad', formData.variedad);
+    const dimensionOk = validarCampos('dimension_hanegadas', formData.dimension_hanegadas);
+    const numArbolesOk = validarCampos('num_arboles', formData.num_arboles);
+    const fechaOk = validarCampos('fecha_plantacion', formData.fecha_plantacion);
+    const descripcionOk = validarCampos('descripcion', formData.descripcion);
 
-     if(poligonoOk && parcelaOk && variedadOk && dimensionOk && num_arbolesOk && fecha_plantacionOk && descripcionOk &&
-        formData.poligono !=="" && formData.parcela !=="" && formData.dimension_hanegadas !== "" &&
-        formData.user_id !=="" && formData.propietarios_id !==""){
+    if (explotacionOk && propietarioOk && poligonoOk && parcelaOk && variedadOk &&
+      dimensionOk && numArbolesOk && fechaOk && descripcionOk) {
 
-       parcelaService.postCrear(formData)
-        .then((response) => {
-          navigate('/parcelas')
+      parcelaService.postCrear(formData)
+        .then(() => {
+          navigate('/parcelas');
         })
-         .catch(err => {
-              if (err.response?.status === 422) {
-                setModalError({ visible: true, mensaje: 'Error del servidor, inténtalo de nuevo' })
-              } else {
-                  setModalError({ visible: true, mensaje: 'Ya existe una parcela con ese poligono y poarcela' })
-              }
-         })
-     }
-
-     }
-    
-  
-   
-
-  const validarCampos = (name, value) => {
-      let mensaje = '';
-      let comprobar = true;
-
-      if(name === 'poligono' && !regexPoligono.test(value)){
-          mensaje = 'Número de 2 cifras';
-          comprobar = false;
-      }
-      if(name === 'parcela' && !regexParcela.test(value)){
-          mensaje = 'Número de 2 cifras';
-          comprobar = false;
-      }
-      if(name === 'variedad' && !regexVariedad.test(value)){
-          mensaje = 'Palabra de 8 letras máximo';
-          comprobar = false;
-      }
-      if(name === 'dimension_hanegadas' && !regexDimension.test(value)){
-          mensaje = 'Número decimal ejemplo 2.34';
-          comprobar = false;
-      }
-      if(name === 'num_arboles' && !regexNumArboles.test(value)){
-          mensaje = 'Número entero max 3000';
-          comprobar = false;
-      }
-      if(name === 'descripcion' && !regexDescripcion.test(value)){
-          mensaje = 'Mínimo 50 caracteres';
-          comprobar = false;
-      }
-
-      setErrors({...errors, [name]: mensaje});
-      return comprobar;
+        .catch(err => {
+          if (err.response?.status === 422) {
+            const erroresLaravel = err.response.data.errors;
+            const nuevosErrores = {};
+            for (const campo in erroresLaravel) {
+              nuevosErrores[campo] = erroresLaravel[campo][0];
+            }
+            setErrors(prev => ({ ...prev, ...nuevosErrores }));
+          } else {
+            alert('Error del servidor. Inténtalo de nuevo.');
+          }
+        });
+    }
   }
 
-
-    //Función para cerrarlo
-  const cerrarModal = () => setModalError({ visible: false, mensaje: '' })
-
-  return(
-
-     <div className="form-container">
+  return (
+    <div className="form-container">
       <h1>Nueva Parcela</h1>
-        {/* muestra el modal si hay error en el server */}
-        {modalError.visible && <Modal mesajeError={modalError.mensaje} cerrarModal={cerrarModal} />}  
 
-      
-      <form  className="form-grid" onSubmit={enviarFormulario}>
-        
+      <form className="form-grid" onSubmit={enviarFormulario}>
+
         {/* Explotación */}
         <div className="form-grupo">
           <label htmlFor="explotacion_id">Explotación *</label>
@@ -168,36 +159,36 @@ const FormParcela = () => {
             name="explotacion_id"
             value={formData.explotacion_id}
             onChange={actualizaEstado}
-            
+            className={errors.explotacion_id ? 'input-error' : ''}
           >
             <option value="">Selecciona una explotación</option>
-          {explotaciones.map((explotacion) => (
-            <option key={explotacion.id} value={explotacion.id}>
-              {explotacion.nombre}
-            </option>
-          ))}
-
+            {explotaciones.map((explotacion) => (
+              <option key={explotacion.id} value={explotacion.id}>
+                {explotacion.nombre}
+              </option>
+            ))}
           </select>
+          {errors.explotacion_id && <span className="mensaje-error">{errors.explotacion_id}</span>}
         </div>
 
         {/* Propietario */}
         <div className="form-grupo">
-          <label htmlFor="propietario_id">Propietario *</label>
+          <label htmlFor="propietarios_id">Propietario *</label>
           <select
-         
+            id="propietarios_id"
             name="propietarios_id"
             value={formData.propietarios_id}
             onChange={actualizaEstado}
-            
+            className={errors.propietarios_id ? 'input-error' : ''}
           >
             <option value="">Selecciona un propietario</option>
-             {propietarios.map((propietario) => (
+            {propietarios.map((propietario) => (
               <option key={propietario.id} value={propietario.id}>
                 {propietario.nombre}
               </option>
             ))}
-            
           </select>
+          {errors.propietarios_id && <span className="mensaje-error">{errors.propietarios_id}</span>}
         </div>
 
         {/* Tipo de Riego */}
@@ -208,40 +199,42 @@ const FormParcela = () => {
             name="riego"
             value={formData.riego}
             onChange={actualizaEstado}
-            required
           >
             <option value="manta">Manta</option>
             <option value="goteo">Goteo</option>
           </select>
         </div>
-        <div>
-                {/* Polígono */}
-                <div className="form-grupo">
-                  <label htmlFor="pol_parcela">Polígono*</label>
-                  <input
-                    type="number"
-                    id="poligono"
-                    name="poligono"
-                    value={formData.poligono}
-                    onChange={actualizaEstado}
-                    placeholder="Ej: 12"
-                    required
-                  />
-                </div>
-                  {/*Parcela */}
-                <div className="form-grupo">
-                  <label htmlFor="parcela">Parcela*</label>
-                  <input
-                    type="number"
-                    id="parcela"
-                    name="parcela"
-                    value={formData.parcela}
-                    onChange={actualizaEstado}
-                    placeholder="Ej: 45"
-                    required
-                  />
-                </div>
+
+        {/* Polígono */}
+        <div className="form-grupo">
+          <label htmlFor="poligono">Polígono *</label>
+          <input
+            type="number"
+            id="poligono"
+            name="poligono"
+            value={formData.poligono}
+            onChange={actualizaEstado}
+            placeholder="Ej: 12"
+            className={errors.poligono ? 'input-error' : ''}
+          />
+          {errors.poligono && <span className="mensaje-error">{errors.poligono}</span>}
         </div>
+
+        {/* Parcela */}
+        <div className="form-grupo">
+          <label htmlFor="parcela">Parcela *</label>
+          <input
+            type="number"
+            id="parcela"
+            name="parcela"
+            value={formData.parcela}
+            onChange={actualizaEstado}
+            placeholder="Ej: 45"
+            className={errors.parcela ? 'input-error' : ''}
+          />
+          {errors.parcela && <span className="mensaje-error">{errors.parcela}</span>}
+        </div>
+
         {/* Variedad */}
         <div className="form-grupo">
           <label htmlFor="variedad">Variedad *</label>
@@ -252,13 +245,12 @@ const FormParcela = () => {
             value={formData.variedad}
             onChange={actualizaEstado}
             placeholder="Ej: Rojo Brillante"
-            required
             className={errors.variedad ? 'input-error' : ''}
           />
           {errors.variedad && <span className="mensaje-error">{errors.variedad}</span>}
         </div>
 
-        {/* Dimensión en Hanegadas */}
+        {/* Hanegadas */}
         <div className="form-grupo">
           <label htmlFor="dimension_hanegadas">Hanegadas *</label>
           <input
@@ -269,10 +261,9 @@ const FormParcela = () => {
             value={formData.dimension_hanegadas}
             onChange={actualizaEstado}
             placeholder="Ej: 2.5"
-            required
-            className={errors.hanegadas ? 'input-error' : ''}
+            className={errors.dimension_hanegadas ? 'input-error' : ''}
           />
-            {errors.hanegadas && <span className="mensaje-error">{errors.hanegadas}</span>}
+          {errors.dimension_hanegadas && <span className="mensaje-error">{errors.dimension_hanegadas}</span>}
         </div>
 
         {/* Número de Árboles */}
@@ -285,38 +276,37 @@ const FormParcela = () => {
             value={formData.num_arboles}
             onChange={actualizaEstado}
             placeholder="Ej: 250"
-            required
-            className={errors.hanegadas ? 'input-error' : ''}
+            className={errors.num_arboles ? 'input-error' : ''}
           />
-            {errors.num_arboles && <span className="mensaje-error">{errors.num_arboles}</span>}
-
+          {errors.num_arboles && <span className="mensaje-error">{errors.num_arboles}</span>}
         </div>
 
         {/* Fecha de Plantación */}
         <div className="form-grupo">
-          <label htmlFor="fecha_plantacion">Fecha de Plantación</label>
+          <label htmlFor="fecha_plantacion">Fecha de Plantación *</label>
           <input
             type="date"
             id="fecha_plantacion"
             name="fecha_plantacion"
             value={formData.fecha_plantacion}
             onChange={actualizaEstado}
-            required
+            className={errors.fecha_plantacion ? 'input-error' : ''}
           />
-            {errors.fecha_plantacion && <span className="mensaje-error">{errors.fecha_plantacion}</span>}
+          {errors.fecha_plantacion && <span className="mensaje-error">{errors.fecha_plantacion}</span>}
         </div>
 
-        <div className="form-grupo full-width">
-        <label>Nombre de la parcela</label>
-            <input
-              type="text"
-              name="nombre"
-              maxLength={25}
-              value={formData.nombre}
-              onChange={actualizaEstado}
-              placeholder="Nombre de la parcela"
-            />
-      </div>
+        {/* Nombre parcela */}
+        <div className="form-grupo">
+          <label>Nombre de la parcela</label>
+          <input
+            type="text"
+            name="nombre"
+            maxLength={25}
+            value={formData.nombre}
+            onChange={actualizaEstado}
+            placeholder="Nombre de la parcela"
+          />
+        </div>
 
         {/* Descripción */}
         <div className="form-grupo full-width">
@@ -324,21 +314,23 @@ const FormParcela = () => {
           <textarea
             name="descripcion"
             rows="4"
-            placeholder="Descripción de la Explotación"
+            placeholder="Descripción de la parcela"
             value={formData.descripcion}
             onChange={actualizaEstado}
-            className={errors.descripcion ? 'input-error' : ''} 
+            className={errors.descripcion ? 'input-error' : ''}
           />
           {errors.descripcion && <span className="mensaje-error">{errors.descripcion}</span>}
         </div>
 
         <div className="form-actions full-width">
           <button type="submit">Guardar</button>
+          <button type="button" onClick={() => navigate('/parcelas')} className="btn-cancel">Atrás</button>
+         
         </div>
+
       </form>
     </div>
   )
 }
 
-
-  export default FormParcela;
+export default FormParcela;

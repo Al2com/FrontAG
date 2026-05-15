@@ -6,6 +6,7 @@ import SelectComp from './BarraBusqueda/SelectComp.jsx';
 import parcelasService from '../services/parcelas.js';
 import ParcelaCard from './InfoPanel/ParcelaCard.jsx';
 import BtnSubmit from './buttons/BtnSubmit.jsx';
+import BtnEliminar from './buttons/btnEliminar.jsx';
 import './Style/cards.css'
 import axios from '../services/axios.js' 
 
@@ -21,6 +22,9 @@ const Parcela = () => {
    const [busqueda, setBusqueda] = useState('');       
    const [filtroRiego, setFiltroRiego] = useState('todos');  
    const [filtroDimension, setFiltroDimension] = useState('todos');  
+   const [errorCarga, setErrorCarga] = useState('')
+
+
   
    useEffect(() => {
      parcelasService.getCount()
@@ -47,9 +51,20 @@ const Parcela = () => {
        return 0
      })
 
+       const eliminarParcela = (id) => {
+    if (window.confirm('¿Estás seguro de eliminar esta parcela?')) {
+      parcelasService.borrarParcela(id)
+        .then(() => {
+          setParResumen(parResumen.filter(p => p.id !== id))
+        })
+        .catch(() => setErrorCarga('Error al eliminar la parcela'))
+    }
+  }
+
    return (
      <div>
        <h1>Parcelas</h1>
+       {errorCarga && <span className="mensaje-error">{errorCarga}</span>}
        <div className='menuExplo'>
          <p>Gestiona las parcelas de tus explotaciones</p> 
     
@@ -97,29 +112,29 @@ const Parcela = () => {
          </div>
        </div>
 
-       {/* <div className="seccion-explo"> */}
-         {parcelasFiltradas.map((parcela, index) => (
-           <div className='seccion-explo-part' key={index}>
-             <ParcelaCard 
-               poligono={parcela.poligono}
-               parcela={parcela.parcela}
-               iconImg="./parcela.svg"
-               altText="pick"
-               explotacion={parcela.explotacion.nombre}
-               dimension_hanegadas={parcela.dimension_hanegadas}
-               rol={parcela.rol}
-               variedad={parcela.variedad}
-               num_arboles={parcela.num_arboles}
-               fecha_plantacion={parcela.fecha_plantacion}
-               nombre={parcela.nombre}
-             >
-               <BtnSubmit texto="Editar" to={`/parcela/${parcela.id}`} />
-             </ParcelaCard>
-           </div>
-         ))}
+       {parcelasFiltradas.map((parcela, index) => (
+          <div className='seccion-explo-part' key={index}>
+            <ParcelaCard
+              poligono={parcela.poligono}
+              parcela={parcela.parcela}
+              iconImg="./parcela.svg"
+              altText="pick"
+              explotacion={parcela.explotacion.nombre}
+              dimension_hanegadas={parcela.dimension_hanegadas}
+              rol={parcela.rol}
+              variedad={parcela.variedad}
+              num_arboles={parcela.num_arboles}
+              fecha_plantacion={parcela.fecha_plantacion}
+              nombre={parcela.nombre}
+            >
+              <div className='card-botones'>
+                <BtnSubmit texto="Editar" to={`/parcela/${parcela.id}`} />
+                <BtnEliminar texto="Eliminar" onClick={() => eliminarParcela(parcela.id)} />
+              </div>
+            </ParcelaCard>
+          </div>
+        ))}
        </div>
-
-    //  </div>
    )
 }
 

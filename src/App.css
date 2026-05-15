@@ -75,7 +75,7 @@ h1, h2 { color: var(--c-primario); }
 
 /* -- BOTONES GLOBALES --------------------------------------- */
 button {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 10px;
   padding: 12px 24px;
@@ -87,7 +87,7 @@ button {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  margin-left: auto;
+  margin-left: 0;
 }
 
 button img {

@@ -359,10 +359,9 @@ const FormFumigacion = () => {
 
         {/* Botones */}
         <div className="form-actions full-width">
-          <button type="button" onClick={() => navigate('/operaciones')} className="btn-cancel">
-            Cancelar
-          </button>
-          <button type="submit">Guardar Operación</button>
+          <button type="submit">Guardar</button>
+          <button type="button" onClick={() => navigate('/operaciones')} className="btn-cancel">Atrás</button>
+
         </div>
 
       </form>

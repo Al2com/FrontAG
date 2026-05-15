@@ -13,6 +13,8 @@ const ExplotacionCard = ({nombre,iconImg,altText,ubicacion,TotalHngExplo,numParc
                     <p>Parcelas: {numParcelas}</p>
                     {/* Psamos al boton hijo para  */}
                     {children}
+
+
                 </div>
             </div>
   

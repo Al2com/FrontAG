@@ -1,162 +1,115 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import explotacionService from '../../services/explotaciones';
 import usuariosService from '../../services/usuarios';
 import propietariosService from '../../services/propietarios';
-import Modal from '../Modal/Modal';
-import '../Style/modal.css'
 import '../Style/forms.css'
-import '../Style/modal.css'
-
 
 const FormExplotacion = () => {
-
 
   const [usuarios, setUsers] = useState([]);
   const [propietarios, setPropietario] = useState([]);
 
-  // Estado para que se muestre el modal
-  const[modalError, setModalError] = useState({visible:false, mensaje:""})
+  useEffect(() => {
+    usuariosService.getUsuarios()
+      .then(data => setUsers(data.usuarios))
+      .catch(() => setErrorUsuarios('Error al cargar los usuarios'))
 
+    propietariosService.getPropietarios()
+      .then(data => setPropietario(data.propietarios))
+      .catch(() => setErrorPropietarios('Error al cargar los propietarios'))
+  }, []);
 
+  const [formData, setFormData] = useState({
+    nombre: '',
+    user_id: '',
+    ubicacion: '',
+    descripcion: '',
+    propietario_id: '',
+  });
 
-useEffect(() => {
-      usuariosService.getUsuarios()
-        .then(data => {
-          setUsers(data.usuarios)
-         
-        })
+  const [errors, setErrors] = useState({
+    nombre: '',
+    user_id: '',
+    ubicacion: '',
+    descripcion: '',
+    propietario_id: '',
+  });
 
+  const navigate = useNavigate();
 
-      propietariosService.getPropietarios()
-        .then(data => {
-          setPropietario(data.propietarios)
-
-        })
-
-     }, []);
- 
-
-  //ORIGINARIO 
-  //  const [nombre, setNombre] = useState('');
-  // const [usuario, setUsuario] = useState('');
-  // const [ubicacion, setUbicacion] = useState('');
-  // const [descripcion, setDescripcion] = useState('');
-  // const [propietario, setPropietario] = useState('');
-  // const [dni, setDni] = useState('');
-
-
-  // con un solo use useState
-const [formData, setFormData] = useState({
-  nombre: '',
-  user_id: '',
-  ubicacion: '',
-  descripcion: '',
-  propietario_id: '',
-
-
-});
-
- //con un solo UseState
-
-const [errors, setErrors] = useState({
-  nombre: '',
-  user_id: '',
-  ubicacion: '',
-  descripcion: '',
-  propietario_id: '',
-
-
-});
-
-
- 
-const navigate = useNavigate();
-
-//validar con regex, usuario y propietario vienen con el select
-
-  const regexNombre= /^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]{3,25}$/;
+  const regexNombre = /^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]{3,25}$/;
   const regexUbicacion = /^.{3,}$/;
-  const regexDescripcion = /^.{10,}$/; 
+  const regexDescripcion = /^.{10,}$/;
 
-   
- 
+  const validarCampos = (name, value) => {
+    let mensaje = '';
+    let comprobar = true;
 
-   const handleChange = (e) => {
-    const { name, value } = e.target
-    setFormData({...formData,[name]: value});
+    if (name === 'nombre' && !regexNombre.test(value)) {
+      mensaje = 'Más de 3 letras, o menos de 25';
+      comprobar = false;
+    }
+
+    if (name === 'ubicacion' && !regexUbicacion.test(value)) {
+      mensaje = 'Solo letras, mínimo 3 caracteres';
+      comprobar = false;
+    }
+
+    if (name === 'descripcion' && !regexDescripcion.test(value)) {
+      mensaje = 'Mínimo 10 caracteres';
+      comprobar = false;
+    }
+
+    if ((name === 'user_id' || name === 'propietario_id') && value === "") {
+      mensaje = 'Debes seleccionar una opción';
+      comprobar = false;
+    }
+
+    setErrors(prevErrors => ({ ...prevErrors, [name]: mensaje }));
+    return comprobar;
+  }
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
     validarCampos(name, value);
   }
 
+  const enviarFormulario = (e) => {
+    e.preventDefault();
 
-const validarCampos=(name,value) =>{
+    const nombreOk = validarCampos('nombre', formData.nombre);
+    const ubicacionOk = validarCampos('ubicacion', formData.ubicacion);
+    const descripcionOk = validarCampos('descripcion', formData.descripcion);
+    const usuarioOk = validarCampos('user_id', formData.user_id);
+    const propietarioOk = validarCampos('propietario_id', formData.propietario_id);
 
-    let mensaje = '';
-    let comprobar=true;
+    if (nombreOk && ubicacionOk && descripcionOk && usuarioOk && propietarioOk) {
 
-  if(name==='nombre' && !regexNombre.test(value)){
-      mensaje = 'Más de 3 letras , o menos de 25';
-      comprobar=false;
-  }
-
-  if(name==='ubicacion' && !regexUbicacion.test(value)){
-      mensaje = 'Solo letras, mínimo 3 caracteres';
-      comprobar=false;
-  }
-
- if(name==='descripcion' && !regexDescripcion.test(value)){
-  mensaje = 'Mínimo 10 caracteres'; 
-  comprobar=false;
-}
-
-
-  setErrors({ ...errors, [name]: mensaje });
-
-return comprobar;
-
-}
-
-
-
-const enviarFormulario = (e) => {
-  e.preventDefault();
-
-  const nombreOk = validarCampos('nombre', formData.nombre);
-  const ubicacionOk = validarCampos('ubicacion', formData.ubicacion);
-  const descripcionOk = validarCampos('descripcion', formData.descripcion);
-
-  if(nombreOk && ubicacionOk && descripcionOk &&
-     formData.nombre !=="" && formData.ubicacion !=="" && 
-     formData.user_id !=="" && formData.propietario_id !==""){
-    
-    explotacionService.postCrear(formData)
-      .then((response) => {  
-        console.log('respuesta:', response)
-        navigate('/explotaciones')
-      })
-      .catch(err => {
+      explotacionService.postCrear(formData)
+        .then(() => {
+          navigate('/explotaciones');
+        })
+        .catch(err => {
           if (err.response?.status === 422) {
-            setModalError({ visible: true, mensaje: 'Error del servidor, inténtalo de nuevo' })
+            const erroresLaravel = err.response.data.errors;
+            const nuevosErrores = {};
+            for (const campo in erroresLaravel) {
+              nuevosErrores[campo] = erroresLaravel[campo][0];
+            }
+            setErrors(prev => ({ ...prev, ...nuevosErrores }));
           } else {
-              setModalError({ visible: true, mensaje: 'Ya existe una explotación con ese nombre' })
+            alert('Error del servidor. Inténtalo de nuevo.');
           }
-    })
-
-  } else {
-    console.log('formulario inválido', {nombreOk, ubicacionOk, descripcionOk, formData})
-  }
-};
-
-//Función para cerrarlo
-  const cerrarModal = () => setModalError({ visible: false, mensaje: '' })
+        });
+    }
+  };
 
   return (
     <div className="form-container">
       <h1>Nueva Explotación</h1>
-
-              {modalError.visible && <Modal mesajeError={modalError.mensaje} cerrarModal={cerrarModal} />}  
 
       <form className="form-grid" onSubmit={enviarFormulario}>
 
@@ -167,7 +120,7 @@ const enviarFormulario = (e) => {
             placeholder="Ej: Finca Casa del Pi"
             value={formData.nombre}
             onChange={handleChange}
-            className={errors.nombre ? 'input-error' : ''} // si no cumple regex pone la clase y sale el mensaje de bajo
+            className={errors.nombre ? 'input-error' : ''}
           />
           {errors.nombre && <span className="mensaje-error">{errors.nombre}</span>}
         </div>
@@ -179,47 +132,46 @@ const enviarFormulario = (e) => {
             placeholder="Termino municipal"
             value={formData.ubicacion}
             onChange={handleChange}
-            className={errors.ubicacion ? 'input-error' : ''} 
+            className={errors.ubicacion ? 'input-error' : ''}
           />
           {errors.ubicacion && <span className="mensaje-error">{errors.ubicacion}</span>}
         </div>
 
-
-      {/* Usuario hace otra peticion a la Api para traer los usuarios al igual que lo propietario */}
         <div className="form-grupo">
           <label>Usuario</label>
           <select
             name="user_id"
             value={formData.user_id}
-            onChange={handleChange}>
-
+            onChange={handleChange}
+            className={errors.user_id ? 'input-error' : ''}
+          >
             <option value="">Selecciona un usuario</option>
-                {usuarios.map(usuario => (
-                  <option key={usuario.id} value={usuario.id}>
-                    {usuario.name}
+            {usuarios.map(usuario => (
+              <option key={usuario.id} value={usuario.id}>
+                {usuario.name}
               </option>
             ))}
           </select>
+          {errors.user_id && <span className="mensaje-error">{errors.user_id}</span>}
         </div>
-
 
         <div className="form-grupo">
           <label>Propietario</label>
           <select
             name="propietario_id"
             value={formData.propietario_id}
-            onChange={handleChange}>
-
+            onChange={handleChange}
+            className={errors.propietario_id ? 'input-error' : ''}
+          >
             <option value="">Selecciona un propietario</option>
-                {propietarios.map(propietario => (
-                  <option key={propietario.id} value={propietario.id}>
-                    {propietario.nombre}
+            {propietarios.map(propietario => (
+              <option key={propietario.id} value={propietario.id}>
+                {propietario.nombre}
               </option>
             ))}
           </select>
+          {errors.propietario_id && <span className="mensaje-error">{errors.propietario_id}</span>}
         </div>
-
-      
 
         <div className="form-grupo full-width">
           <label>Descripción</label>
@@ -229,15 +181,17 @@ const enviarFormulario = (e) => {
             placeholder="Descripción de la Explotación"
             value={formData.descripcion}
             onChange={handleChange}
-            className={errors.descripcion ? 'input-error' : ''} 
+            className={errors.descripcion ? 'input-error' : ''}
           />
           {errors.descripcion && <span className="mensaje-error">{errors.descripcion}</span>}
         </div>
 
         <div className="form-actions full-width">
           <button type="submit">Guardar</button>
+          <button type="submit" onClick={()=>{navigate('/explotaciones')}} className="btn-cancel">Atrás</button>
+
         </div>
-              
+
       </form>
     </div>
   );

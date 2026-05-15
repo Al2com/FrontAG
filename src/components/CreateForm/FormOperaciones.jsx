@@ -213,8 +213,9 @@ const FormOperacion = () => {
 
         {/* Botones */}
         <div className="form-actions full-width">
+          <button type="submit">Guardar</button>
           <button type="button" onClick={() => navigate('/operaciones')} className="btn-cancel">Atrás</button>
-          <button type="submit">Guardar Operación</button>
+          
         </div>
 
       </form>

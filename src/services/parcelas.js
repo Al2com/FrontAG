@@ -37,4 +37,8 @@ const putActualizar = (id, formData) => {
   return axios.put(`${baseUrl}/${id}`, formData).then(res => res.data)
 }
 
-export default { getCount, getResumenP, postCrear, getLista, getParcela, putActualizar }
+const borrarParcela = (id) => {
+  return axios.delete(`${baseUrl}/${id}`).then(res => res.data)
+}
+
+export default { getCount, getResumenP, postCrear, getLista, getParcela, putActualizar, borrarParcela }

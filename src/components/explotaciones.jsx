@@ -3,11 +3,13 @@ import InfoPanel from './InfoPanel/InfoPanel.jsx';
 import explotacionService from '../services/explotaciones.js';
 import parcelasService from '../services/parcelas.js';
 import BtnCrear from './buttons/BtnCrear.jsx';
+import BtnEliminar from './buttons/btnEliminar.jsx';
 import BarraBusqueda from './BarraBusqueda/BarraBusqueda.jsx';
 import ExplotacionCard from './InfoPanel/ExplotacionCard .jsx';
 import BtnSubmit from './buttons/BtnSubmit.jsx';
 import SelectComp from './BarraBusqueda/SelectComp.jsx'
 import './Style/cards.css'
+
 
 
 
@@ -67,7 +69,16 @@ const Explotaciones = () =>{
       return 0;
     });
 
-
+    //Para eliminar la explotacion
+    const eliminarExplotacion = (id) => {
+  if (window.confirm('¿Estas Seguro de  eliminar la explotación?')) {
+    explotacionService.borrarExplotacion(id)
+      .then(() => {
+        setResumen(resumen.filter(exp => exp.id !== id))
+      })
+      .catch(() => alert('Error al eliminar la explotación'))
+  }
+}
   
 
 
@@ -154,20 +165,23 @@ return(
       {/*  Map usando explotacionesFiltradas en lugar de resumen */}
       {explotacionesFiltradas.map((explotacion,index) => (
         <div className='seccion-explo-part' key={index}>
-          <ExplotacionCard 
+          <ExplotacionCard
             nombre={explotacion.nombre}
-            iconImg="./explotaciones.svg" altText="Ubicacion"  
+            iconImg="./explotaciones.svg" altText="Ubicacion"
             ubicacion={explotacion.ubicacion}
             TotalHngExplo={explotacion.parcelas_sum_dimension_hanegadas}
             numParcelas={explotacion.parcelas_count}
+            
           >
-            <BtnSubmit texto="Editar" to={`/explotacion/${explotacion.id}`} />
+            <div className='card-botones'>
+              <BtnSubmit texto="Editar" to={`/explotacion/${explotacion.id}`} />
+              <BtnEliminar texto="Eliminar" onClick={() => eliminarExplotacion(explotacion.id)} />
+            </div>
           </ExplotacionCard>
         </div>
       ))}
     </div>
 
-      // </div>
 )
 } 
 

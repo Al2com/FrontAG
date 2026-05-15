@@ -33,5 +33,9 @@ const putActualizar = (id, formData) => {
   const request = axios.put(`${baseUrl}/${id}`, formData)
   return request.then(response => response.data)
 }
-
-export default { getCount, getResumen, postCrear, getExplo, putActualizar }
+// Elimina una explotacion por su ID
+const borrarExplotacion = (id) => {
+  const request = axios.delete(`${baseUrl}/${id}`)
+  return request.then(response => response.data)
+}
+export default { getCount, getResumen, postCrear, getExplo, putActualizar, borrarExplotacion }

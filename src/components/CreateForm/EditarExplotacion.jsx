@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import explotacionService from '../../services/explotaciones.js';
+import '../Style/forms.css';
 
 const EditarExplotacion = () => {
-  const { id } = useParams(); //te lo da dentro del componente para poder usarlo, cuando llamas a la
+
+  const { id } = useParams();
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -14,30 +16,21 @@ const EditarExplotacion = () => {
     propietario_id: '',
   });
 
-  const [errors, setErrors] = useState({  nombre: '',
+  const [errors, setErrors] = useState({
+    nombre: '',
     ubicacion: '',
     descripcion: '',
-    user_id: '',
-    propietario_id: '',
-  })
-
-  const [errorCarga, setErrorCarga] = useState('');
+  });
 
   const regexNombre = /^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]{3,50}$/
   const regexUbicacion = /^.{3,}$/
   const regexDescripcion = /^.{10,}$/
 
-  // Al cargar trae los datos de esa explotación
   useEffect(() => {
     explotacionService.getExplo(id)
       .then(data => setFormData(data))
-      .catch(() => setErrorCarga('Error al cargar la explotación'))
+      .catch(err => console.error('Error al cargar explotación:', err))
   }, [id])
-
-  // Actualiza el estado cuando el usuario escribe
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  }
 
   const validarCampos = (name, value) => {
     let mensaje = '';
@@ -62,11 +55,16 @@ const EditarExplotacion = () => {
     return comprobar;
   }
 
-  // Envía los datos al backend
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+    validarCampos(name, value);
+  }
+
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    const nombreOk =    ('nombre', formData.nombre);
+    const nombreOk = validarCampos('nombre', formData.nombre);
     const ubicacionOk = validarCampos('ubicacion', formData.ubicacion);
     const descripcionOk = validarCampos('descripcion', formData.descripcion);
 
@@ -90,44 +88,50 @@ const EditarExplotacion = () => {
         });
     }
   }
-  
 
   return (
-    <div>
+    <div className="form-container">
       <h1>Editar Explotación</h1>
-      <form onSubmit={handleSubmit}>
 
-        <div>
+      <form onSubmit={handleSubmit} className="form-grid">
+
+        <div className="form-grupo">
           <label>Nombre</label>
           <input
             type="text"
             name="nombre"
             value={formData.nombre}
             onChange={handleChange}
+            className={errors.nombre ? 'input-error' : ''}
           />
-        </div>
           {errors.nombre && <span className="mensaje-error">{errors.nombre}</span>}
-        <div>
+        </div>
+
+        <div className="form-grupo">
           <label>Ubicación</label>
           <input
             type="text"
             name="ubicacion"
             value={formData.ubicacion}
             onChange={handleChange}
+            className={errors.ubicacion ? 'input-error' : ''}
           />
-        </div>
           {errors.ubicacion && <span className="mensaje-error">{errors.ubicacion}</span>}
-        <div>
+        </div>
+
+        <div className="form-grupo">
           <label>Descripción</label>
           <input
             type="text"
             name="descripcion"
             value={formData.descripcion}
             onChange={handleChange}
+            className={errors.descripcion ? 'input-error' : ''}
           />
+          {errors.descripcion && <span className="mensaje-error">{errors.descripcion}</span>}
         </div>
-         {errors.descripcion && <span className="mensaje-error">{errors.descripcion}</span>}
-        <div className='menu-button'>
+
+        <div className="form-actions full-width">
           <button type="submit">Guardar cambios</button>
           <button type="button" onClick={() => navigate('/explotaciones')}>Atrás</button>
         </div>

@@ -84,7 +84,7 @@ const MenuNav = () => {
 
           {rol !== 'trabajador' && ( 
         <MenuBar 
-          to="/almacen"
+          to="/rentabilidad"
           iconImg="./iconAlmacen.svg"
           altText="Rentabilidad"
           texto="Rentabilidad"
