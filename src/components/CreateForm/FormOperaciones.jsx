@@ -15,6 +15,7 @@ const FormOperacion = () => {
     tipo_operacion: 'riego',
     hora_inicio: '',
     duracion_minutos: '',
+    precio: '', 
     descripcion: ''
   })
 
@@ -25,6 +26,7 @@ const FormOperacion = () => {
     tipo_operacion: '',
     hora_inicio: '',
     duracion_minutos: '',
+    precio: '', 
     descripcion: ''
   });
 
@@ -38,6 +40,7 @@ const FormOperacion = () => {
 
   const regexDuracion = /^[0-9]{1,4}$/;
   const regexDescripcion = /^.{10,}$/;
+  const regexPrecio = /^\d+(\.\d{1,2})?$/;
 
   const validarCampos = (name, value) => {
     let mensaje = '';
@@ -63,6 +66,11 @@ const FormOperacion = () => {
       comprobar = false;
     }
 
+    if (name === 'precio' && !regexPrecio.test(value)) {
+      mensaje = 'Introduce un precio válido (ej: 12.50)';
+      comprobar = false;
+}
+
     setErrors(prevErrors => ({ ...prevErrors, [name]: mensaje }));
     return comprobar;
   }
@@ -81,9 +89,10 @@ const FormOperacion = () => {
     const tipoOk = validarCampos('tipo_operacion', formData.tipo_operacion);
     const fechaOk = validarCampos('hora_inicio', formData.hora_inicio);
     const duracionOk = validarCampos('duracion_minutos', formData.duracion_minutos);
+    const precioOk = validarCampos('precio', formData.precio);
     const descripcionOk = validarCampos('descripcion', formData.descripcion);
 
-    if (parcelaOk && operarioOk && tipoOk && fechaOk && duracionOk && descripcionOk) {
+    if (parcelaOk && operarioOk && tipoOk && fechaOk && duracionOk && descripcionOk && precioOk) {
 
       operacionesService.postCrear(formData)
         .then(() => {
@@ -194,6 +203,23 @@ const FormOperacion = () => {
             className={errors.duracion_minutos ? 'input-error' : ''}
           />
           {errors.duracion_minutos && <span className="mensaje-error">{errors.duracion_minutos}</span>}
+        </div>
+        
+        {/* Precio */}
+        <div className="form-grupo">
+          <label htmlFor="precio">Precio (€) *</label>
+          <input
+            type="number"
+            id="precio"
+            name="precio"
+            value={formData.precio}
+            onChange={handleChange}
+            placeholder="Ej: 45.00"
+            min="0"
+            step="0.01"
+            className={errors.precio ? 'input-error' : ''}
+          />
+          {errors.precio && <span className="mensaje-error">{errors.precio}</span>}
         </div>
 
         {/* Descripción */}

@@ -57,6 +57,7 @@ const EditarOperacion = () => {
                 <label>Operario</label>
                 <input type="text" name="operario" value={FormData.operario} onChange={handleChange} />            </div>
             <div />
+            
             <div>
                 <label>Hora de inicio</label>
                 <input type="text" name="Hora_inicio" value={FormData.hora_inicio} onChange={handleChange} />            </div>
