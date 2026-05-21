@@ -16,24 +16,24 @@ const getResumen = () => {
   return request.then(response => response.data)
 }
 
-// Crea una nueva explotacion
+// Crea una nueva explo
 const postCrear = (formData) => {
   const request = axios.post(baseUrl2, formData);
   return request.then(response => response.data);
 }
 
-// Trae los datos de una explotacion por su ID para cargarlos en el formulario
+// Trae datos de una explotacion por id ara cargarlos en el formulario
 const getExplo = (id) => {
   const request = axios.get(`${baseUrl}/${id}`)
   return request.then(response => response.data)
 }
 
-// Actualiza los datos de una explotacion por su ID
+// Actualiza los datos de una explotacion por id
 const putActualizar = (id, formData) => {
   const request = axios.put(`${baseUrl}/${id}`, formData)
   return request.then(response => response.data)
 }
-// Elimina una explotacion por su ID
+// Elimina una explotacion por id
 const borrarExplotacion = (id) => {
   const request = axios.delete(`${baseUrl}/${id}`)
   return request.then(response => response.data)

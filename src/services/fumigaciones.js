@@ -13,8 +13,20 @@ const postCrearFumigacion = (formData) =>{
 const getLista = () => {
     return axios.get(baseUrl1).then(res => res.data)
 }
+//saca la fumigacion 
+const getFumigacion = (id) => {
+    return axios.get(`${baseUrl1}/${id}`).then(res => res.data)
+}
+
+//modifica la fumigacion
+const putActualizarFumigacion = (id,formData) => {
+    const request = axios.put(`${baseUrl2}/${id}`, formData)
+        return request.then(response => response.data)
+}
 
 
-export default {postCrearFumigacion, getLista}
+
+
+export default {postCrearFumigacion, getLista, getFumigacion, putActualizarFumigacion}
 
 
