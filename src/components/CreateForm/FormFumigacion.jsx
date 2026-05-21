@@ -14,6 +14,7 @@ const FormFumigacion = () => {
     parcela_id: "",
     operario: "",
     metodo_aplicacion: "",
+    precio:"",
     hora_inicio: "",
     duracion_minutos: "",
     mochilas: "",
@@ -27,6 +28,7 @@ const FormFumigacion = () => {
     parcela_id: "",
     operario: "",
     metodo_aplicacion: "",
+    precio:"",
     hora_inicio: "",
     duracion_minutos: "",
     mochilas: "",
@@ -50,6 +52,7 @@ const FormFumigacion = () => {
   const regexDuracion = /^[0-9]{1,4}$/;
   const regexDescripcion = /^.{10,}$/;
   const regexCantidad = /^[0-9]{1,3}$/;
+  const regexPrecio = /^\d+(\.\d{1,2})?$/;
 
   const validarCampos = (name, value) => {
     let mensaje = '';
@@ -77,6 +80,11 @@ const FormFumigacion = () => {
 
     if (name === 'hora_inicio' && value === "") {
       mensaje = 'La fecha y hora son obligatorias';
+      comprobar = false;
+    }
+
+    if (name === 'precio' && !regexPrecio.test(value)) {
+      mensaje = 'Introduce un precio válido (ej: 12.50)';
       comprobar = false;
     }
 
@@ -112,7 +120,8 @@ const FormFumigacion = () => {
     const metodoOk = validarCampos('metodo_aplicacion', formData.metodo_aplicacion);
     const fechaOk = validarCampos('hora_inicio', formData.hora_inicio);
     const descripcionOk = validarCampos('descripcion', formData.descripcion);
-
+    const precioOk = validarCampos('precio', formData.precio);
+//campos no obligatoris por eso tiene el ternario
     const operarioOk = formData.metodo_aplicacion === 'mochila'
       ? validarCampos('operario', formData.operario)
       : true;
@@ -143,7 +152,7 @@ const FormFumigacion = () => {
     setErrors(prev => ({ ...prev, productos: '' }));
 
     if (parcelaOk && metodoOk && fechaOk && descripcionOk &&
-      operarioOk && duracionOk && mochilasOk && turbosOk) {
+      operarioOk && duracionOk && mochilasOk && turbosOk && precioOk) {
 
       const datos = {
         ...formData,
@@ -212,6 +221,23 @@ const FormFumigacion = () => {
               <option value="tractor">Tractor</option>
             </select>
             {errors.metodo_aplicacion && <span className="mensaje-error">{errors.metodo_aplicacion}</span>}
+          </div>
+
+          {/* Precio */}
+          <div className="form-grupo">
+            <label htmlFor="precio">Precio por hora fumigación (€) *</label>
+            <input
+              type="number"
+              id="precio"
+              name="precio"
+              value={formData.precio}
+              onChange={handleChange}
+              placeholder="Ej: 45.00"
+              min="0"
+              step="0.01"
+              className={errors.precio ? 'input-error' : ''}
+            />
+            {errors.precio && <span className="mensaje-error">{errors.precio}</span>}
           </div>
 
           {/* Operario */}
