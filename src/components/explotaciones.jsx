@@ -130,36 +130,31 @@ return(
       />
     </div>
 
-    <div className="filtro-explo">
-        <div className="filtro-search">
-          {/* 3. BarraBusqueda conectada al estado busqueda */}
-          <BarraBusqueda 
-            iconImg="./search.svg"
-            altText="fotoLupa"
+   <div className="filtro-explo">
+        <div className="barra-search">
+          <img src="./search.svg" alt="fotoLupa" />
+          <input
             onChange={(e) => setBusqueda(e.target.value)}
+            placeholder="buscar"
           />
         </div>
 
-        <div className="filtro-select">
-          <SelectComp 
-            onChange={(e) => setFiltroTamaño(e.target.value)}
-            value1="maximo"
-            value2="minimo"
-            nombre1="Mayor tamaño"
-            nombre2="Menor tamaño"
-          />
+        <div className="barra-select-lg">
+          <select onChange={(e) => setFiltroTamaño(e.target.value)}>
+            <option value="">Tamaño ▾</option>
+            <option value="maximo">Mayor tamaño</option>
+            <option value="minimo">Menor tamaño</option>
+          </select>
         </div>
 
-        <div className="filtro-select">
-          <SelectComp 
-            onChange={(e) => setFiltroParcelas(e.target.value)}
-            value1="masParcelas"
-            value2="menosParcelas"
-            nombre1="Mas parcelas"
-            nombre2="Menos parcelas"
-          />
+        <div className="barra-select-lg">
+          <select onChange={(e) => setFiltroParcelas(e.target.value)}>
+            <option value="">Parcelas ▾</option>
+            <option value="masParcelas">Más parcelas</option>
+            <option value="menosParcelas">Menos parcelas</option>
+          </select>
         </div>
-    </div>
+      </div>
 
   
       {/*  Map usando explotacionesFiltradas en lugar de resumen */}

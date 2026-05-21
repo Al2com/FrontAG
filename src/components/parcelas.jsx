@@ -85,32 +85,30 @@ const Parcela = () => {
        </div>
 
        <div className="filtro-explo">
-         <div className="filtro-search">
-           <BarraBusqueda 
-             iconImg="./search.svg"
-             altText="fotoLupa"
-             onChange={(e) => setBusqueda(e.target.value)}
-           />
-         </div>
-         <div className="filtro-select">
-           <SelectComp
-             onChange={(e) => setFiltroRiego(e.target.value)}
-             value1="goteo"
-             value2="manta"
-             nombre1="Goteo"
-             nombre2="Manta"
-           />
-         </div>
-         <div className="filtro-select">
-           <SelectComp
-             onChange={(e) => setFiltroDimension(e.target.value)}
-             value1="maximo"
-             value2="minimo"
-             nombre1="Mayor dimensión"
-             nombre2="Menor dimensión"
-           />
-         </div>
-       </div>
+        <div className="barra-search">
+          <img src="./search.svg" alt="fotoLupa" />
+          <input
+            onChange={(e) => setBusqueda(e.target.value)}
+            placeholder="buscar"
+          />
+        </div>
+
+        <div className="barra-select">
+          <select onChange={(e) => setFiltroRiego(e.target.value)}>
+            <option value="">Riego ▾</option>
+            <option value="goteo">Goteo</option>
+            <option value="manta">Manta</option>
+          </select>
+        </div>
+
+        <div className="barra-select-lg">
+          <select onChange={(e) => setFiltroDimension(e.target.value)}>
+            <option value="">Dimensión ▾</option>
+            <option value="maximo">Mayor dimensión</option>
+            <option value="minimo">Menor dimensión</option>
+          </select>
+        </div>
+      </div>
 
        {parcelasFiltradas.map((parcela, index) => (
           <div className='seccion-explo-part' key={index}>
