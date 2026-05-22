@@ -22,7 +22,7 @@ const getActividadReciente = () => {
     return request.then(response => response.data)
 }
 
-// Elimina una operacion por su ID
+// Elimina una operacion por su id
 const borrarOperacion = (id) => {
     const request = axios.delete(`http://localhost/api/operaciones/${id}`)
     return request.then(response => response.data)

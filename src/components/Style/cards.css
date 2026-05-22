@@ -245,6 +245,172 @@
   display: flex;
   gap: 6px;
 }
+.rentabilidad-contenedor {
+  padding: var(--esp-md);
+}
+
+.rentabilidad-titulo-seccion {
+  padding: 10px var(--esp-lg);
+  color: var(--c-primario);
+}
+
+/* tarjeta principal */
+.rentabilidad-card {
+  border: 1px solid var(--c-borde);
+  border-radius: var(--rad-md);
+  padding: var(--esp-md);
+  background-color: var(--c-blanco);
+  box-shadow: var(--som-md);
+  margin: 0 var(--esp-lg) var(--esp-md) var(--esp-lg);
+}
+
+/* cabecera clickable */
+.rentabilidad-cabecera {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+}
+
+.rentabilidad-cabecera-izq {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--c-primario);
+}
+
+.rentabilidad-cabecera-izq h4 {
+  margin: 0;
+  font-size: 15px;
+}
+
+.rentabilidad-cabecera-der {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.rentabilidad-coste {
+  font-weight: 600;
+  color: var(--c-primario);
+  font-size: 15px;
+}
+
+/* flecha que rota al abrir */
+.rentabilidad-flecha {
+  transition: transform 0.2s;
+  color: var(--c-texto);
+}
+
+.rentabilidad-flecha.abierta {
+  transform: rotate(180deg);
+}
+
+/* explotacion y variedad debajo de la cabecera */
+.rentabilidad-resumen {
+  display: flex;
+  gap: 16px;
+  font-size: 13px;
+  color: var(--c-texto);
+  margin-top: 4px;
+  opacity: 0.7;
+}
+
+/* contenido desplegable */
+.rentabilidad-desplegable {
+  margin-top: 12px;
+  border-top: 1px solid var(--c-borde);
+  padding-top: 12px;
+}
+
+/* grupo operaciones o fumigaciones */
+.rentabilidad-grupo {
+  margin-bottom: 16px;
+}
+
+.rentabilidad-grupo-titulo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  color: var(--c-primario);
+  margin-bottom: 8px;
+}
+
+/* cada linea de operacion o fumigacion */
+.rentabilidad-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--c-borde);
+}
+
+.rentabilidad-cabecera-izq img {
+  width: 20px;
+  height: 20px;
+}
+
+.rentabilidad-cabecera-der img {
+  width: 16px;
+  height: 16px;
+}
+
+.rentabilidad-item-nombre {
+  font-size: 13px;
+  margin: 0;
+}
+
+.rentabilidad-item-detalle {
+  font-size: 12px;
+  color: var(--c-texto);
+  opacity: 0.6;
+  margin: 2px 0 0 0;
+}
+
+.rentabilidad-item-precio {
+  font-weight: 600;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.rentabilidad-subtotal {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--c-texto);
+  margin-top: 8px;
+  opacity: 0.8;
+}
+
+.rentabilidad-total {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--c-primario);
+  border-top: 2px solid var(--c-primario);
+  padding-top: 10px;
+  margin-top: 8px;
+}
+
+.rentabilidad-vacio {
+  font-size: 13px;
+  color: var(--c-texto);
+  opacity: 0.5;
+  font-style: italic;
+}
+
+/* fila parcela dentro de explotacion desplegada */
+.rentabilidad-fila-parcela {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--c-borde);
+  color: var(--c-texto);
+}
+
 
 /*Responsive */
 @media (max-width: 1200px) {
@@ -283,4 +449,42 @@
   width: 20px;
   height: 20px;
   filter: brightness(0) invert(1);
+}
+@media (max-width: 768px) {
+  .rentabilidad-card {
+    margin: 0 var(--esp-sm) var(--esp-sm) var(--esp-sm);
+  }
+
+  .rentabilidad-cabecera-izq h4 {
+    font-size: 13px;
+  }
+
+  .rentabilidad-coste {
+    font-size: 13px;
+  }
+
+  .rentabilidad-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .rentabilidad-item-precio {
+    align-self: flex-end;
+  }
+
+  .rentabilidad-total {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .rentabilidad-contenedor {
+    padding: var(--esp-sm);
+  }
+
+  .rentabilidad-resumen {
+    flex-direction: column;
+    gap: 2px;
+  }
 }

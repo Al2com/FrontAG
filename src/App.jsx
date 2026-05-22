@@ -21,7 +21,7 @@ import EditarParcela from './components/CreateForm/EditarParcela.jsx'
 import EditarProducto from './components/CreateForm/EditarProducto.jsx'
 import EditarOperacion from './components/CreateForm/EditarOperacion.jsx'
 import FormComprarProducto from './components/CreateForm/FormComprarProducto.jsx'
-import Rentabilidad from './components/rentabilidad.jsx'
+import Gastos from './components/gastos.jsx'
 
 function App() {
 
@@ -81,7 +81,7 @@ function App() {
               <Route path="/parcela/:id" element={<EditarParcela/>} />
               <Route path="/producto/:id" element={<EditarProducto/>} />
               <Route path="/operacion/:id" element={<EditarOperacion/>} />
-              <Route path="/rentabilidad" element={<Rentabilidad/>} />
+              <Route path="/gastos" element={<Gastos/>} />
 
 
                 </Routes>

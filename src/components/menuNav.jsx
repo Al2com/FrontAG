@@ -84,12 +84,12 @@ const MenuNav = () => {
 
           {rol !== 'trabajador' && ( 
         <MenuBar 
-          to="/rentabilidad"
+          to="/gastos"
           iconImg="./iconAlmacen.svg"
-          altText="Rentabilidad"
-          texto="Rentabilidad"
-          isSeleccionado={botonActivo === 'Rentabilidad'} 
-          onClick={() => setBotonActivo('Rentabilidad')}
+          altText="Gastos"
+          texto="Gastos"
+          isSeleccionado={botonActivo === 'Gastos'} 
+          onClick={() => setBotonActivo('Gastos')}
         />
          )}
       </div>

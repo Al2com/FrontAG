@@ -289,7 +289,7 @@ const FormFumigacion = () => {
             </div>
           )}
 
-          {/* Productos */}
+          {/* Productos , recebe los productos de laravel, seleciona el producto y la dosis y lo manda por medio del servicio a laravel para descontarlo en el controlador*/} 
           <div className="form-dosisProduct">
             {productosAñadidos.map((item, index) => {
               const prodSeleccionado = productos.find(p => p.id === Number(item.producto_id))
