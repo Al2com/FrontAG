@@ -85,7 +85,7 @@ const MenuNav = () => {
           {rol !== 'trabajador' && ( 
         <MenuBar 
           to="/gastos"
-          iconImg="./iconAlmacen.svg"
+          iconImg="./expenses.svg"
           altText="Gastos"
           texto="Gastos"
           isSeleccionado={botonActivo === 'Gastos'} 
