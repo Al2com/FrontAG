@@ -113,21 +113,21 @@ const Operaciones = () => {
           <p>Registra y gestiona las operaciones de campo</p>
         </div>
       <div className="menu-button">
-  {rol !== 'trabajador' && (
-    <BtnCrear to="/nueva-operacion" titulo="Nueva Operación" iconIng="./plusNegro.png" />
-  )}
-  {rol !== 'trabajador' && (
-    <BtnCrear to="/nueva-fumigacion" titulo="Nueva Fumigación" iconIng="./plusNegro.png" />
-  )}
-  <div className="separador-btn"></div>
-  <button
-    className={`btn-vista ${mostrarTabla ? 'activo' : ''}`}
-    onClick={() => setMostrarTabla(!mostrarTabla)}
-  >
-    <img src={mostrarTabla ? './iconTable.png' : './cuadrado.png'} alt="vista" />
-    {mostrarTabla ? 'Tarjetas' : 'Tabla'}
-  </button>
-</div>
+          {rol !== 'trabajador' && (
+            <BtnCrear to="/nueva-operacion" titulo="Nueva Operación" iconIng="./plusNegro.png" />
+          )}
+          {rol !== 'trabajador' && (
+            <BtnCrear to="/nueva-fumigacion" titulo="Nueva Fumigación" iconIng="./plusNegro.png" />
+          )}
+          <div className="separador-btn"></div>
+          <button
+            className={`btn-vista ${mostrarTabla ? 'activo' : ''}`}
+            onClick={() => setMostrarTabla(!mostrarTabla)}
+          >
+            <img src={mostrarTabla ? './iconTable.png' : './cuadrado.png'} alt="vista" />
+            {mostrarTabla ? 'Tarjetas' : 'Tabla'}
+          </button>
+        </div>
       </div>
 
       {errorCarga && <span className="mensaje-error">{errorCarga}</span>}

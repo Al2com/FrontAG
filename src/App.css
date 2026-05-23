@@ -1,10 +1,6 @@
-/* ============================================================
-   App.css — Reset + Layout principal + Botones globales
-   Las variables están en components/Style/variables.css
-   Importar en: App.jsx (después de variables.css)
-   ============================================================ */
 
-/* -- RESET --------------------------------------------------- */
+
+/*RESET  */
 * {
   margin: 0;
   padding: 0;
@@ -21,7 +17,7 @@ a { text-decoration: none; }
 
 h1, h2 { color: var(--c-primario); }
 
-/* -- LAYOUT PRINCIPAL --------------------------------------- */
+/*LAYOUT PRINCIPAL*/
 .app-container {
   display: grid;
   grid-template-columns: 260px 1fr;
@@ -45,6 +41,7 @@ h1, h2 { color: var(--c-primario); }
   position: sticky;
   top: 0;
   z-index: 100;
+    justify-content: space-between;
 }
 
 .user-avatar {
@@ -73,7 +70,7 @@ h1, h2 { color: var(--c-primario); }
   margin: 0 auto;
 }
 
-/* -- BOTONES GLOBALES --------------------------------------- */
+/* BOTONES GLOBALES  */
 button {
   display: inline-flex;
   align-items: center;
@@ -102,7 +99,11 @@ button:hover {
   box-shadow: 0 4px 12px rgba(82, 183, 136, 0.3);
 }
 
-.btn-logout { background-color: var(--c-peligro); }
+.btn-logout { 
+  display: flex;
+  background-color: var(--c-peligro);
+  
+ }
 
 .btn-logout:hover {
   background-color: var(--c-peligro-hover);
@@ -121,6 +122,16 @@ button:hover {
   background-color: #e0e0e0;
   transform: none;
   box-shadow: none;
+}
+.header-user {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-sm);
+}
+
+.header-user-info {
+  display: flex;
+  flex-direction: column;
 }
 
 /* -- MEDIA QUERIES ------------------------------------------ */
@@ -146,5 +157,8 @@ button:hover {
   .top-header {
     padding: 12px 16px;
     gap: var(--esp-xs);
+   
+  
+    
   }
 }

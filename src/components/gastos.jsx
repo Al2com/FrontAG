@@ -71,7 +71,7 @@ const Gastos = () => {
     <div className="rentabilidad-contenedor">
       <div className="menuExplo">
         <div>
-          <h2>Rentabilidad</h2>
+          <h2>Gastos</h2>
           <p>Gastos por parcela y explotación</p>
         </div>
         <div className="barra-select">

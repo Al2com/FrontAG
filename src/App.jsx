@@ -56,12 +56,16 @@ function App() {
         : <div className="app-container">
             <MenuNav />
             <div className="main-content">
-            <header className="top-header">
+           <header className="top-header">
+            <div className="header-user">
               <img className="user-avatar" src="/usuario.png" alt="Usuario"/>
-              <span className="user-name">{user.name}</span>
-              <span className="user-rol">{user.rol}</span>
-              <button className="btn-logout" onClick={logout}>Cerrar sesión</button>
-            </header>
+              <div className="header-user-info">
+                <span className="user-name">{user.name}</span>
+                <span className="user-rol">{user.rol}</span>
+              </div>
+            </div>
+            <button className="btn-logout" onClick={logout}>Cerrar sesión</button>
+          </header>
               <main className="content">
                 <Routes>
               <Route path="/" element={<Dashboard />} />
