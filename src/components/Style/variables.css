@@ -1,7 +1,6 @@
 /* ============================================================
-   variables.css — Variables globales del proyecto
-   IMPORTAR PRIMERO en App.jsx antes que cualquier otro CSS
-   import './components/Style/variables.css'
+   Aqui tenemos todas las variables de color , de manera que el color que necesitemos importaremos la variable una cosa parecida
+   a la que hece SAS
    ============================================================ */
 
 :root {

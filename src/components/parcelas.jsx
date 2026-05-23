@@ -1,101 +1,111 @@
-import {useEffect,useState} from 'react';
-import InfoPanel from './InfoPanel/InfoPanel.jsx'
+import { useEffect, useState } from 'react';
+import InfoPanel from './InfoPanel/InfoPanel.jsx';
 import BtnCrear from './buttons/BtnCrear.jsx';
-import BarraBusqueda from './BarraBusqueda/BarraBusqueda.jsx';
-import SelectComp from './BarraBusqueda/SelectComp.jsx';
 import parcelasService from '../services/parcelas.js';
 import ParcelaCard from './InfoPanel/ParcelaCard.jsx';
 import BtnSubmit from './buttons/BtnSubmit.jsx';
 import BtnEliminar from './buttons/btnEliminar.jsx';
-import './Style/cards.css'
-import axios from '../services/axios.js' 
-
-
+import './Style/cards.css';
+import './Style/forms.css';
+import './Style/search.css';
 
 const Parcela = () => {
- 
-   const [numParcelas, setNumParcelas] = useState(0);
-   const [totalHng, setTotalHng] = useState(0);
-   const [parcelaGot, setParGot] = useState(0);
-   const [parcelaMan, setParMan] = useState(0);
-   const [parResumen, setParResumen] = useState([]);
-   const [busqueda, setBusqueda] = useState('');       
-   const [filtroRiego, setFiltroRiego] = useState('todos');  
-   const [filtroDimension, setFiltroDimension] = useState('todos');  
-   const [errorCarga, setErrorCarga] = useState('')
 
+  // numeros de los paneles de arriba
+  const [numParcelas, setNumParcelas] = useState(0);
+  const [totalHng, setTotalHng] = useState(0);
+  const [parcelaGot, setParGot] = useState(0);
+  const [parcelaMan, setParMan] = useState(0);
 
-  
-   useEffect(() => {
-     parcelasService.getCount()
-       .then(data => {
-         setNumParcelas(data.total)
-         setTotalHng(data.totalHng)
-         setParGot(data.parcelasgoteo)
-         setParMan(data.parcelasmanta)
-       })
+  // lista principal de parcelas
+  const [parResumen, setParResumen] = useState([]);
+  const [errorCarga, setErrorCarga] = useState('');
 
-     parcelasService.getResumenP()
-       .then(data => setParResumen(data))
-       .catch(err => console.error('Error al obtener resumen:', err))
-   }, [])
+  // valores de los filtros
+  const [busqueda, setBusqueda] = useState('');
+  const [filtroRiego, setFiltroRiego] = useState('todos');
+  const [filtroDimension, setFiltroDimension] = useState('todos');
 
-   const rol = sessionStorage.getItem('rol')
+  // controla si se ve tabla o tarjetas
+  const [mostrarTabla, setMostrarTabla] = useState(false);
 
-   const parcelasFiltradas = parResumen
-     .filter(p => p.variedad.toLowerCase().includes(busqueda.toLowerCase()))
-     .filter(p => filtroRiego === 'todos' || p.rol === filtroRiego)
-     .sort((a, b) => {
-       if (filtroDimension === 'maximo') return b.dimension_hanegadas - a.dimension_hanegadas
-       if (filtroDimension === 'minimo') return a.dimension_hanegadas - b.dimension_hanegadas
-       return 0
-     })
+  const rol = sessionStorage.getItem('rol');
 
-       const eliminarParcela = (id) => {
-    if (window.confirm('¿Estás seguro de eliminar esta parcela?')) {
+  // al entrar pido los datos al back
+  useEffect(() => {
+    parcelasService.getCount()
+      .then(data => {
+        setNumParcelas(data.total);
+        setTotalHng(data.totalHng);
+        setParGot(data.parcelasgoteo);
+        setParMan(data.parcelasmanta);
+      })
+      .catch(() => setErrorCarga('Error al cargar los contadores'))
+
+    parcelasService.getResumenP()
+      .then(data => setParResumen(data))
+      .catch(err => console.error('Error al obtener resumen:', err))
+  }, [])
+
+  // filtro por variedad y ordeno segun los selects
+  const parcelasFiltradas = parResumen
+    .filter(p => p.variedad.toLowerCase().includes(busqueda.toLowerCase()))
+    .filter(p => filtroRiego === 'todos' || p.rol === filtroRiego)
+    .sort((a, b) => {
+      if (filtroDimension === 'maximo') return b.dimension_hanegadas - a.dimension_hanegadas;
+      if (filtroDimension === 'minimo') return a.dimension_hanegadas - b.dimension_hanegadas;
+      return 0;
+    });
+
+  // pido confirmacion antes de borrar y actualizo la lista sin recargar
+  const eliminarParcela = (id) => {
+    if (window.confirm('Estas seguro de eliminar esta parcela?')) {
       parcelasService.borrarParcela(id)
-        .then(() => {
-          setParResumen(parResumen.filter(p => p.id !== id))
-        })
+        .then(() => setParResumen(parResumen.filter(p => p.id !== id)))
         .catch(() => setErrorCarga('Error al eliminar la parcela'))
     }
-  }
+  };
 
-   return (
-     <div>
-       <h1>Parcelas</h1>
-       {errorCarga && <span className="mensaje-error">{errorCarga}</span>}
-       <div className='menuExplo'>
-         <p>Gestiona las parcelas de tus explotaciones</p> 
-    
-           <BtnCrear 
-             to="/nueva-parcela"
-             titulo="Crear Parcela"
-             iconIng="./plusNegro.png"
-             className="btn-nueva-explotacion"
-           />
-   
-       </div> 
+  return (
+    <div>
+      <div className="menuExplo">
+        <div>
+          <h2>Parcelas</h2>
+          <p>Gestiona las parcelas de tus explotaciones</p>
+        </div>
+        <div className="menu-button">
+          {rol !== 'trabajador' && (
+            <BtnCrear to="/nueva-parcela" titulo="Crear Parcela" iconIng="./plusNegro.png" />
+          )}
+          <div className="separador-btn"></div>
+          <button
+            className={`btn-vista ${mostrarTabla ? 'activo' : ''}`}
+            onClick={() => setMostrarTabla(!mostrarTabla)}
+          >
+            <img src={mostrarTabla ? './iconTable.png' : './cuadrado.png'} alt="vista" />
+            {mostrarTabla ? 'Tarjetas' : 'Tabla'}
+          </button>
+        </div>
+      </div>
 
-       <div className="primeraSeccion">
-         <InfoPanel iconImg="./parcela.svg" altText="menu" texto="Total Parcelas" valor={numParcelas} />
-         <InfoPanel iconImg="./dimension.svg" altText="Menu" texto="Total hectáreas" valor={totalHng} />
-         <InfoPanel altText="Total Riego Manta" iconImg="./riego.svg" texto="Riego Manta" valor={parcelaMan} />
-         <InfoPanel altText="Parcelas Riego Goteo" iconImg="./riegoGoteo.svg" texto="Riego Goteo" valor={parcelaGot} />
-       </div>
+      {errorCarga && <span className="mensaje-error">{errorCarga}</span>}
 
-       <div className="filtro-explo">
+      <div className="primeraSeccion">
+        <InfoPanel iconImg="./parcela.svg" altText="Parcelas" texto="Total Parcelas" valor={numParcelas} />
+        <InfoPanel iconImg="./dimension.svg" altText="Hanegadas" texto="Total hanegadas" valor={totalHng} />
+        <InfoPanel iconImg="./riego.svg" altText="Riego manta" texto="Riego Manta" valor={parcelaMan} />
+        <InfoPanel iconImg="./riegoGoteo.svg" altText="Riego goteo" texto="Riego Goteo" valor={parcelaGot} />
+      </div>
+
+      <div className="filtro-explo">
         <div className="barra-search">
-          <img src="./search.svg" alt="fotoLupa" />
-          <input
-            onChange={(e) => setBusqueda(e.target.value)}
-            placeholder="buscar"
-          />
+          <img src="./search.svg" alt="buscar" />
+          <input onChange={(e) => setBusqueda(e.target.value)} placeholder="Buscar" />
         </div>
 
         <div className="barra-select">
           <select onChange={(e) => setFiltroRiego(e.target.value)}>
-            <option value="">Riego ▾</option>
+            <option value="todos">Riego ▾</option>
             <option value="goteo">Goteo</option>
             <option value="manta">Manta</option>
           </select>
@@ -103,15 +113,54 @@ const Parcela = () => {
 
         <div className="barra-select-lg">
           <select onChange={(e) => setFiltroDimension(e.target.value)}>
-            <option value="">Dimensión ▾</option>
-            <option value="maximo">Mayor dimensión</option>
-            <option value="minimo">Menor dimensión</option>
+            <option value="todos">Dimension ▾</option>
+            <option value="maximo">Mayor dimension</option>
+            <option value="minimo">Menor dimension</option>
           </select>
         </div>
       </div>
 
-       {parcelasFiltradas.map((parcela, index) => (
-          <div className='seccion-explo-part' key={index}>
+      {mostrarTabla ? (
+        <table className="tabla-operaciones">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Poligono</th>
+              <th>Parcela</th>
+              <th>Explotacion</th>
+              <th>Variedad</th>
+              <th>Hanegadas</th>
+              <th>Riego</th>
+              <th>Arboles</th>
+              {rol !== 'trabajador' && <th>Acciones</th>}
+            </tr>
+          </thead>
+          <tbody>
+            {parcelasFiltradas.map(parcela => (
+              <tr key={parcela.id}>
+                <td>{parcela.nombre}</td>
+                <td>{parcela.poligono}</td>
+                <td>{parcela.parcela}</td>
+                <td>{parcela.explotacion.nombre}</td>
+                <td>{parcela.variedad}</td>
+                <td>{parcela.dimension_hanegadas}</td>
+                <td>{parcela.rol}</td>
+                <td>{parcela.num_arboles}</td>
+                {rol !== 'trabajador' && (
+                  <td>
+                    <div className="tabla-botones">
+                      <BtnSubmit texto="Editar" to={`/parcela/${parcela.id}`} />
+                      <BtnEliminar texto="Eliminar" onClick={() => eliminarParcela(parcela.id)} />
+                    </div>
+                  </td>
+                )}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : (
+        parcelasFiltradas.map((parcela, index) => (
+          <div className="seccion-explo-part" key={index}>
             <ParcelaCard
               poligono={parcela.poligono}
               parcela={parcela.parcela}
@@ -125,15 +174,20 @@ const Parcela = () => {
               fecha_plantacion={parcela.fecha_plantacion}
               nombre={parcela.nombre}
             >
-              <div className='card-botones'>
-                <BtnSubmit texto="Editar" to={`/parcela/${parcela.id}`} />
-                <BtnEliminar texto="Eliminar" onClick={() => eliminarParcela(parcela.id)} />
+              <div className="card-botones">
+                {rol !== 'trabajador' && (
+                  <BtnSubmit texto="Editar" to={`/parcela/${parcela.id}`} />
+                )}
+                {rol !== 'trabajador' && (
+                  <BtnEliminar texto="Eliminar" onClick={() => eliminarParcela(parcela.id)} />
+                )}
               </div>
             </ParcelaCard>
           </div>
-        ))}
-       </div>
-   )
-}
+        ))
+      )}
+    </div>
+  );
+};
 
-export default Parcela
+export default Parcela;
