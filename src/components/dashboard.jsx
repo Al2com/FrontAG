@@ -1,4 +1,5 @@
 import './Style/cards.css';
+import './Style/variables.css'
 import InfoPanel from './InfoPanel/InfoPanel.jsx';
 import InfoPanel2 from './InfoPanel/InfoPanel2.jsx';
 import Btn1 from './buttons/BtnCrear.jsx';
@@ -8,6 +9,7 @@ import operacionesService from '../services/operaciones.js';
 import fumigacionesService from '../services/fumigaciones.js';
 import tareasService from '../services/tareas.js';
 import { useEffect, useState } from 'react';
+import almacenService from '../services/almacen.js';
 
 const Dashboard = () => {
   const [numExplo, setNumExplo] = useState(0);
@@ -15,6 +17,7 @@ const Dashboard = () => {
   const [totalOperaciones, setTotalOperaciones] = useState(0);
   const [totalFumigaciones, setTotalFumigaciones] = useState(0);
   const [actividadReciente, setActividadReciente] = useState({ operaciones: [], fumigaciones: [] });
+  const [productosStockBajo, setProductosStockBajo] = useState([])
 
   useEffect(() => {
     explotacionService.getCount()
@@ -36,15 +39,23 @@ const Dashboard = () => {
     tareasService.getActividadReciente()
       .then(data => setActividadReciente(data))
       .catch(err => console.error('Error actividad reciente:', err));
-
+      
+    almacenService.getStockBajo()
+    .then(datos => setProductosStockBajo(datos))
+    .catch(err => console.error('Error stock:', err))
   }, [])
+ 
 
   const colorEstado = (estado) => {
     switch (estado) {
-      case 'pendiente': return '#E9A800';
-      case 'realizada': return '#2E7D52';
-      case 'revisada':  return '#4A90D9';
-      default:          return 'var(--c-borde)';
+      case 'pendiente':
+         return "var(--estado-pendiente)";
+      case 'realizada':
+         return "var(--estado-realizado)";
+      case 'revisada': 
+       return  "var(--estado-revisado)";
+      default:
+         return 'var(--c-borde)';
     }
   };
 
@@ -62,21 +73,22 @@ const Dashboard = () => {
       </div>
 
       <div className="segundaSeccion">
-        <InfoPanel2 iconImg="./advertencia1.png" titulo="Alertas" texto="Requieren atención">
-          {[
-            { nombre: 'Glifosato 36%', stock: 2, unidad: 'L' },
-            { nombre: 'Cobre Oxicloruro', stock: 1, unidad: 'kg' },
-            { nombre: 'Abono NPK 15-15-15', stock: 3, unidad: 'kg' },
-          ].map((producto, index) => (
-            <div key={index} className="actividad-item" style={{ borderLeft: '4px solid #E9A800' }}>
-              <div className="actividad-item-header">
-                <strong>{producto.nombre}</strong>
-                <span className="actividad-estado estado-pendiente">Stock bajo</span>
+      <InfoPanel2 iconImg="./advertencia1.png" titulo="Alertas" texto="Requieren atención">
+        {productosStockBajo.length === 0
+          ? <p>Todos los productos tienen stock suficiente</p>
+          : productosStockBajo.map(producto => (
+              <div key={producto.id} className="actividad-item" style={{ borderLeft: '4px solid #E9A800' }}>
+                <div className="actividad-item-header">
+                  <strong>{producto.nombre}</strong>
+                  <span className="actividad-estado estado-pendiente">Stock bajo</span>
+                </div>
+                <p className="actividad-item-sub">
+                  Actual: {producto.stock_actual} {producto.unidad} — Mínimo: {producto.stock_minimo} {producto.unidad}
+                </p>
               </div>
-              <p className="actividad-item-sub">Stock actual: {producto.stock} {producto.unidad}</p>
-            </div>
-          ))}
-        </InfoPanel2>
+            ))
+        }
+      </InfoPanel2>
 
         <InfoPanel2 iconImg="./operaciones.svg" titulo="Actividad Reciente">
           <h3>Operaciones</h3>

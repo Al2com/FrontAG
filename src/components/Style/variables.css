@@ -6,19 +6,22 @@
 
 :root {
   /* Colores */
-  --c-primario:        #1B4332;
-  --c-primario-medio:    #40916C;
-  --c-primario-claro:  #52B788;
-  --c-fondo:             #F8F9FA;
-  --c-fondo-verde:       #f4fdf2;
-  --c-blanco:          #ffffff;
-  --c-borde:         #ddd;
-  --c-borde-oscuro:    #bdc0c4;
-  --c-texto:           #333;
-  --c-texto-apagado:     #666;
-  --c-texto-etiqueta:     #555;
-  --c-peligro:         #dc3545;
-  --c-peligro-hover:   #b02a37;
+  --c-primario:#1B4332;
+  --c-primario-medio:#40916C;
+  --c-primario-claro:#52B788;
+  --c-fondo: #F8F9FA;
+  --c-fondo-verde:#f4fdf2;
+  --c-blanco:#ffffff;
+  --c-borde: #ddd;
+  --c-borde-oscuro:#bdc0c4;
+  --c-texto:#333;
+  --c-texto-apagado:#666;
+  --c-texto-etiqueta:#555;
+  --c-peligro:#dc3545;
+  --c-peligro-hover: #b02a37;
+  --estado-pendiente: #E9A800;
+  --estado-realizado: #2E7D52;
+  --estado-revisado :#4A90D9;
 
   /* Espaciado */
   --esp-xs:  8px;
