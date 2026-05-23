@@ -450,6 +450,40 @@
   height: 20px;
   filter: brightness(0) invert(1);
 }
+.contenedor-btn-vista {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 var(--esp-lg) 10px var(--esp-lg);
+}
+
+.btn-vista {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border: 1px solid var(--c-primario);
+  border-radius: var(--rad-sm);
+  background: white;
+  color: var(--c-primario);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-vista:hover {
+  background: var(--c-fondo-verde);
+}
+
+.btn-vista.activo {
+  background: var(--c-primario);
+  color: white;
+}
+
+
+.btn-vista.activo img {
+  filter: brightness(0) invert(1);
+}
 @media (max-width: 768px) {
   .rentabilidad-card {
     margin: 0 var(--esp-sm) var(--esp-sm) var(--esp-sm);

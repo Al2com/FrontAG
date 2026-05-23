@@ -76,7 +76,7 @@ const Operaciones = () => {
       .catch(() => setErrorCarga('Error al marcar como realizada'))
   }
 
-  // marco como revisada, solo el admin puede hacer esto
+  // marco como revisada, solo el admin lo puede hacer esto
   const marcarRevisada = (tipo, id) => {
     tareasService.marcarRevisada(tipo, id)
       .then(() => tareasService.getLista()
@@ -87,7 +87,7 @@ const Operaciones = () => {
       .catch(() => setErrorCarga('Error al marcar como revisada'))
   }
 
-  // elimino operacion si confirma el usuario
+  //  si confirma el usuario elimino operacion
   const eliminarOperacion = (id) => {
     if (window.confirm('¿Estás seguro de eliminar esta operación?')) {
       tareasService.borrarOperacion(id)
@@ -96,7 +96,7 @@ const Operaciones = () => {
     }
   }
 
-  // elimino fumigacion si confirma el usuario
+  //  si confirma el usuario elimino fumigacion
   const eliminarFumigacion = (id) => {
     if (window.confirm('¿Estás seguro de eliminar esta fumigación?')) {
       tareasService.borrarFumigacion(id)
@@ -119,6 +119,14 @@ const Operaciones = () => {
           {rol !== 'trabajador' && (
             <BtnCrear to="/nueva-fumigacion" titulo="Nueva Fumigación" iconIng="./plusNegro.png" />
           )}
+        </div>
+         {/* boton para cambiar entre tabla y tarjetas, afecta a los dos */}
+        <div className="contenedor-btn-vista">
+         <button
+            className={`btn-vista ${mostrarTabla ? 'activo' : ''}`} onClick={() => setMostrarTabla(!mostrarTabla)}>
+             <img src={mostrarTabla ? './iconTable.png' : './cuadrado.png'} alt="vista"/>
+            {mostrarTabla ? 'Tarjetas' : 'Tabla'}
+          </button>
         </div>
       </div>
 
@@ -167,14 +175,7 @@ const Operaciones = () => {
           </select>
         </div>
 
-        {/* boton para cambiar entre tabla y tarjetas, afecta a los dos */}
-        <button
-          className={`btn-vista ${mostrarTabla ? 'activo' : ''}`}
-          onClick={() => setMostrarTabla(!mostrarTabla)}
-        >
-          <img src="./iconTable.png" alt="vista" />
-          {mostrarTabla ? 'Tarjetas' : 'Tabla'}
-        </button>
+       
       </div>
 
       <h2 style={{ padding: '10px' }}>Operaciones</h2>
