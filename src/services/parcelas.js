@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from './axios.js';
 
 const baseUrl = 'http://localhost/api/parcelas';
 const baseUrl1 = 'http://localhost/api/parcelas/resumen';

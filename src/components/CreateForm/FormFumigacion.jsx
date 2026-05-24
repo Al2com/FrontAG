@@ -8,13 +8,18 @@ import fumigacionService from '../../services/fumigaciones'
 
 const FormFumigacion = () => {
 
+  const navigate = useNavigate()
+
   const [parcelas, setParcelas] = useState([]);
   const [productos, setProductos] = useState([]);
+  const [productosAñadidos, setProductosAñadidos] = useState([])
+
+  // ahora parcela_ids es un array porq puede haber varias parcelas
   const [formData, setFormData] = useState({
-    parcela_id: "",
+    parcela_ids: [],
     operario: "",
     metodo_aplicacion: "",
-    precio:"",
+    precio: "",
     hora_inicio: "",
     duracion_minutos: "",
     mochilas: "",
@@ -22,13 +27,11 @@ const FormFumigacion = () => {
     descripcion: ""
   });
 
-  const [productosAñadidos, setProductosAñadidos] = useState([])
-
   const [errors, setErrors] = useState({
-    parcela_id: "",
+    parcela_ids: "",
     operario: "",
     metodo_aplicacion: "",
-    precio:"",
+    precio: "",
     hora_inicio: "",
     duracion_minutos: "",
     mochilas: "",
@@ -37,6 +40,7 @@ const FormFumigacion = () => {
     productos: ""
   });
 
+  // cargo parcelas y productos al montar
   useEffect(() => {
     parcelasService.getLista()
       .then(data => setParcelas(data))
@@ -47,12 +51,23 @@ const FormFumigacion = () => {
       .catch(err => console.error('Error cargando productos:', err))
   }, [])
 
-  const navigate = useNavigate()
-
   const regexDuracion = /^[0-9]{1,4}$/;
   const regexDescripcion = /^.{10,}$/;
   const regexCantidad = /^[0-9]{1,3}$/;
   const regexPrecio = /^\d+(\.\d{1,2})?$/;
+
+  // si la parcela ya esta la quito, sino la añado
+  const toggleParcela = (id) => {
+    const idNum = Number(id)
+    const yaEsta = formData.parcela_ids.includes(idNum)
+    const nuevas = yaEsta
+      ? formData.parcela_ids.filter(p => p !== idNum)
+      : [...formData.parcela_ids, idNum]
+
+    setFormData({ ...formData, parcela_ids: nuevas })
+    // limpio el error si ya hay alguna seleccionada
+    setErrors(prev => ({ ...prev, parcela_ids: nuevas.length === 0 ? 'Selecciona al menos una parcela' : '' }))
+  }
 
   const validarCampos = (name, value) => {
     let mensaje = '';
@@ -62,33 +77,29 @@ const FormFumigacion = () => {
       mensaje = 'Debe ser un número (máx. 4 cifras)';
       comprobar = false;
     }
-
     if (name === 'descripcion' && !regexDescripcion.test(value)) {
       mensaje = 'Mínimo 10 caracteres';
       comprobar = false;
     }
-
+    // mochilas y turbos mismo regex
     if ((name === 'mochilas' || name === 'turbos') && !regexCantidad.test(value)) {
       mensaje = 'Debe ser un número (máx. 3 cifras)';
       comprobar = false;
     }
-
-    if ((name === 'parcela_id' || name === 'metodo_aplicacion' || name === 'operario') && value === "") {
+    if ((name === 'metodo_aplicacion' || name === 'operario') && value === "") {
       mensaje = 'Debes seleccionar una opción';
       comprobar = false;
     }
-
     if (name === 'hora_inicio' && value === "") {
       mensaje = 'La fecha y hora son obligatorias';
       comprobar = false;
     }
-
     if (name === 'precio' && !regexPrecio.test(value)) {
-      mensaje = 'Introduce un precio válido (ej: 12.50)';
+      mensaje = 'Introduce un precio valido (ej: 12.50)';
       comprobar = false;
     }
 
-    setErrors(prevErrors => ({ ...prevErrors, [name]: mensaje }));
+    setErrors(prev => ({ ...prev, [name]: mensaje }));
     return comprobar;
   }
 
@@ -98,11 +109,12 @@ const FormFumigacion = () => {
     validarCampos(name, value);
   }
 
+  // actualizo el producto concreto de la fila que toco
   const handleChangeProducto = (e, index) => {
     const { name, value } = e.target
-    const mezclaSelecionada = productosAñadidos.map((item, i) =>
-      i === index ? { ...item, [name]: value } : item)
-    setProductosAñadidos(mezclaSelecionada);
+    setProductosAñadidos(productosAñadidos.map((item, i) =>
+      i === index ? { ...item, [name]: value } : item
+    ))
   }
 
   const añadirFila = () => {
@@ -116,30 +128,29 @@ const FormFumigacion = () => {
   const enviarFormulario = (e) => {
     e.preventDefault();
 
-    const parcelaOk = validarCampos('parcela_id', formData.parcela_id);
-    const metodoOk = validarCampos('metodo_aplicacion', formData.metodo_aplicacion);
-    const fechaOk = validarCampos('hora_inicio', formData.hora_inicio);
+    // primero compruebo que haya minimo 1 parcela seleccionada
+    if (formData.parcela_ids.length === 0) {
+      setErrors(prev => ({ ...prev, parcela_ids: 'Selecciona al menos una parcela' }));
+      return;
+    }
+
+    const metodoOk     = validarCampos('metodo_aplicacion', formData.metodo_aplicacion);
+    const fechaOk      = validarCampos('hora_inicio', formData.hora_inicio);
     const descripcionOk = validarCampos('descripcion', formData.descripcion);
-    const precioOk = validarCampos('precio', formData.precio);
-//campos no obligatoris por eso tiene el ternario
-    const operarioOk = formData.metodo_aplicacion === 'mochila'
-      ? validarCampos('operario', formData.operario)
-      : true;
-    const duracionOk = formData.metodo_aplicacion === 'mochila'
-      ? validarCampos('duracion_minutos', formData.duracion_minutos)
-      : true;
-    const mochilasOk = formData.metodo_aplicacion === 'mochila'
-      ? validarCampos('mochilas', formData.mochilas)
-      : true;
-    const turbosOk = formData.metodo_aplicacion === 'tractor'
-      ? validarCampos('turbos', formData.turbos)
-      : true;
+    const precioOk     = validarCampos('precio', formData.precio);
+
+    // estos solo se validan si el metodo es mochila o tractor
+    const operarioOk  = formData.metodo_aplicacion === 'mochila' ? validarCampos('operario', formData.operario) : true;
+    const duracionOk  = formData.metodo_aplicacion === 'mochila' ? validarCampos('duracion_minutos', formData.duracion_minutos) : true;
+    const mochilasOk  = formData.metodo_aplicacion === 'mochila' ? validarCampos('mochilas', formData.mochilas) : true;
+    const turbosOk    = formData.metodo_aplicacion === 'tractor'  ? validarCampos('turbos', formData.turbos) : true;
 
     if (productosAñadidos.length === 0) {
       setErrors(prev => ({ ...prev, productos: 'Debes añadir al menos un producto' }));
       return;
     }
 
+    // compruebo que todos los productos tengan producto y dosis rellenados
     const productosOk = productosAñadidos.every(
       item => item.producto_id !== '' && item.dosis_introducida !== ''
     );
@@ -151,26 +162,15 @@ const FormFumigacion = () => {
 
     setErrors(prev => ({ ...prev, productos: '' }));
 
-    if (parcelaOk && metodoOk && fechaOk && descripcionOk &&
-      operarioOk && duracionOk && mochilasOk && turbosOk && precioOk) {
-
-      const datos = {
-        ...formData,
-        productos: productosAñadidos
-      };
-
-      fumigacionService.postCrearFumigacion(datos)
-        .then(() => {
-          navigate('/operaciones');
-        })
+    if (metodoOk && fechaOk && descripcionOk && operarioOk && duracionOk && mochilasOk && turbosOk && precioOk) {
+      fumigacionService.postCrearFumigacion({ ...formData, productos: productosAñadidos })
+        .then(() => navigate('/operaciones'))
         .catch(err => {
           if (err.response?.status === 422) {
-            const erroresLaravel = err.response.data.errors;
-            // Recorremos cada error que manda Laravel y lo metemos en el estado errors
-            // para que aparezca en rojo debajo del input correspondiente
+            // pinto los errores de laravel debajo de cada campo
             const nuevosErrores = {};
-            for (const campo in erroresLaravel) {
-              nuevosErrores[campo] = erroresLaravel[campo][0];
+            for (const campo in err.response.data.errors) {
+              nuevosErrores[campo] = err.response.data.errors[campo][0];
             }
             setErrors(prev => ({ ...prev, ...nuevosErrores }));
           } else {
@@ -185,28 +185,25 @@ const FormFumigacion = () => {
       <h1>Nueva Fumigación</h1>
 
       <form onSubmit={enviarFormulario} className="form-grid">
-
         <div className="form-grupo">
 
-          {/* Parcela */}
-          <label htmlFor="parcela_id">Parcela *</label>
-          <select
-            id="parcela_id"
-            name="parcela_id"
-            value={formData.parcela_id}
-            onChange={handleChange}
-            className={errors.parcela_id ? 'input-error' : ''}
-          >
-            <option value="">Selecciona una parcela</option>
+          {/* seleccion de parcelas con checkboxes, puede ser mas de una */}
+          <label>Parcelas *</label>
+          <div className="parcelas-checkboxes">
             {parcelas.map(parcela => (
-              <option key={parcela.id} value={parcela.id}>
+              <label key={parcela.id} className="parcela-checkbox">
+                <input
+                  type="checkbox"
+                  checked={formData.parcela_ids.includes(parcela.id)}
+                  onChange={() => toggleParcela(parcela.id)}
+                />
                 {parcela.poligono} - {parcela.parcela} ({parcela.variedad})
-              </option>
+              </label>
             ))}
-          </select>
-          {errors.parcela_id && <span className="mensaje-error">{errors.parcela_id}</span>}
+          </div>
+          {errors.parcela_ids && <span className="mensaje-error">{errors.parcela_ids}</span>}
 
-          {/* Método */}
+          {/* metodo de aplicacion */}
           <div className="form-grupo">
             <label htmlFor="metodo_aplicacion">Método aplicación *</label>
             <select
@@ -223,9 +220,8 @@ const FormFumigacion = () => {
             {errors.metodo_aplicacion && <span className="mensaje-error">{errors.metodo_aplicacion}</span>}
           </div>
 
-          {/* Precio */}
           <div className="form-grupo">
-            <label htmlFor="precio">Precio por hora fumigación (€) *</label>
+            <label htmlFor="precio">Precio por Tanque (€) *</label>
             <input
               type="number"
               id="precio"
@@ -240,7 +236,7 @@ const FormFumigacion = () => {
             {errors.precio && <span className="mensaje-error">{errors.precio}</span>}
           </div>
 
-          {/* Operario */}
+          {/* operario solo sale si es mochila */}
           {formData.metodo_aplicacion === 'mochila' && (
             <div className="form-grupo">
               <label htmlFor="operario">Operario *</label>
@@ -259,7 +255,6 @@ const FormFumigacion = () => {
             </div>
           )}
 
-          {/* Hora de Inicio */}
           <div className="form-grupo">
             <label htmlFor="hora_inicio">Fecha y Hora de Inicio *</label>
             <input
@@ -273,7 +268,7 @@ const FormFumigacion = () => {
             {errors.hora_inicio && <span className="mensaje-error">{errors.hora_inicio}</span>}
           </div>
 
-          {/* Duración */}
+          {/* duracion solo si es mochila */}
           {formData.metodo_aplicacion === 'mochila' && (
             <div className="form-grupo">
               <label htmlFor="duracion_minutos">Duración en minutos *</label>
@@ -289,7 +284,7 @@ const FormFumigacion = () => {
             </div>
           )}
 
-          {/* Productos , recebe los productos de laravel, seleciona el producto y la dosis y lo manda por medio del servicio a laravel para descontarlo en el controlador*/} 
+          {/* productos que se usan en la fumigacion, se pueden añadir varios */}
           <div className="form-dosisProduct">
             {productosAñadidos.map((item, index) => {
               const prodSeleccionado = productos.find(p => p.id === Number(item.producto_id))
@@ -308,6 +303,7 @@ const FormFumigacion = () => {
                     ))}
                   </select>
 
+                  {/* muestro la dosis recomendada pa que el usuario sepa cuanto poner */}
                   {prodSeleccionado && (
                     <p>Dosis recomendada: {prodSeleccionado.dosis_recomendada} {prodSeleccionado.unidad}</p>
                   )}
@@ -319,9 +315,7 @@ const FormFumigacion = () => {
                     onChange={(e) => handleChangeProducto(e, index)}
                   />
 
-                  <button type="button" onClick={() => eliminarFila(index)}>
-                    Eliminar
-                  </button>
+                  <button type="button" onClick={() => eliminarFila(index)}>Eliminar</button>
                 </div>
               )
             })}
@@ -330,7 +324,7 @@ const FormFumigacion = () => {
             <button type="button" onClick={añadirFila}>+ Añadir producto</button>
           </div>
 
-          {/* Mochilas */}
+          {/* mochilas solo si el metodo es mochila, obvio */}
           {formData.metodo_aplicacion === 'mochila' && (
             <div className="form-grupo">
               <label htmlFor="mochilas">Cantidad de mochilas *</label>
@@ -348,7 +342,7 @@ const FormFumigacion = () => {
             </div>
           )}
 
-          {/* Turbos */}
+          {/* turbos si es tractor, cada turbo son 1500 litros */}
           {formData.metodo_aplicacion === 'tractor' && (
             <div className="form-grupo">
               <label htmlFor="turbos">Cantidad de Turbos (tanques tractor) *</label>
@@ -366,7 +360,6 @@ const FormFumigacion = () => {
             </div>
           )}
 
-          {/* Descripción */}
           <div className="form-grupo full-width">
             <label htmlFor="descripcion">Descripción *</label>
             <textarea
@@ -383,11 +376,9 @@ const FormFumigacion = () => {
 
         </div>
 
-        {/* Botones */}
         <div className="form-actions full-width">
           <button type="submit">Guardar</button>
           <button type="button" onClick={() => navigate('/operaciones')} className="btn-cancel">Atrás</button>
-
         </div>
 
       </form>

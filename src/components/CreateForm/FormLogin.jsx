@@ -69,7 +69,7 @@ const enviarFormulario = (e) => {
     authService.postLogin(credencials)
      .then((response) => {
             sessionStorage.clear() // limpia cualquier sesión anterior
-            window.location.href = '/dashboard' // siempre empieza en dashboard
+          
             //aqui se trae del back con el response y se guardan usuario token y rol en sesionStorage
             sessionStorage.setItem('token', response.token)
             // convierte a string porque es un objeto y sesionstorage no guarda objetos
@@ -77,6 +77,7 @@ const enviarFormulario = (e) => {
             sessionStorage.setItem('rol', response.rol)
             //se actualiza el usuario que se pasa por prop
             setUser(response.usuario)
+              window.location.href = '/dashboard' // siempre empieza en dashboard
             
         
         })

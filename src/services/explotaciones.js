@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from './axios.js';
 
 const baseUrl = 'http://localhost/api/explotaciones';
 const baseUrl1 = 'http://localhost/api/explotaciones/resumen';

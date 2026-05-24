@@ -12,7 +12,7 @@ const MenuNav = () => {
   return (
     <nav className="navbar">
       <div className="navbar-logo">
-        <img src="/AgroControl.webp" alt="AgroGestión" className="logo-img" />
+        <img src="./LogoAgroControl.webp" alt="AgroGestión" className="logo-img" />
         <div className="logo-text">
           <h4>AgroGestión</h4>
           <span>Gestión de tierras</span>

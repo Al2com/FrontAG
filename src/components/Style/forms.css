@@ -136,6 +136,27 @@
   margin-top: 100px;
 }
 
+.parcelas-checkboxes {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.parcela-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.parcela-checkbox input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
 /* -- Responsive --------------------------------------------- */
 @media (max-width: 768px) {
   .form-grid { grid-template-columns: 1fr; }
