@@ -178,44 +178,52 @@ const Operaciones = () => {
        
       </div>
 
-      <h2 style={{ padding: '10px' }}>Operaciones</h2>
+      <h2>Operaciones</h2>
 
       {mostrarTabla ? (
         <table className="tabla-operaciones">
-          <thead>
-            <tr>
-              <th>Tipo</th>
-              <th>Parcela</th>
-              <th>Operario</th>
-              <th>Fecha</th>
-              <th>Duración</th>
-              <th>Precio</th>
-              <th>Estado</th>
-              {rol !== 'trabajador' && <th>Acciones</th>}
+        <thead>
+          <tr>
+            <th>Tipo</th>
+            <th>Parcela</th>
+            <th>Operario</th>
+            <th>Fecha</th>
+            <th>Duración</th>
+            <th>Precio</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {operacionesFiltradas.map(operacion => (
+            <tr key={operacion.id}>
+              <td>{operacion.tipo_operacion}</td>
+              <td>{operacion.parcela?.poligono} - {operacion.parcela?.parcela}</td>
+              <td>{operacion.operario}</td>
+              <td>{operacion.hora_inicio}</td>
+              <td>{operacion.duracion_minutos} min</td>
+              <td>{operacion.precio} €</td>
+              <td>{operacion.estado}</td>
+              <td>
+                <div className="tabla-botones">
+                  {operacion.estado === 'pendiente' && (
+                    <button onClick={() => marcarRealizada('operacion', operacion.id)}>Realizada</button>
+                  )}
+                  {operacion.estado === 'realizada' && rol !== 'trabajador' && (
+                    <button onClick={() => marcarRevisada('operacion', operacion.id)}>Revisada</button>
+                  )}
+                  {rol !== 'trabajador' && (
+                    <BtnSubmit texto="Editar" to={`/operacion/${operacion.id}`} />
+                  )}
+                  {rol !== 'trabajador' && (
+                    <BtnEliminar texto="Eliminar" onClick={() => eliminarOperacion(operacion.id)} />
+                  )}
+                </div>
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {operacionesFiltradas.map(operacion => (
-              <tr key={operacion.id}>
-                <td>{operacion.tipo_operacion}</td>
-                <td>{operacion.parcela?.poligono} - {operacion.parcela?.parcela}</td>
-                <td>{operacion.operario}</td>
-                <td>{operacion.hora_inicio}</td>
-                <td>{operacion.duracion_minutos} min</td>
-                <td>{operacion.precio} €</td>
-                <td>{operacion.estado}</td>
-                {rol !== 'trabajador' && (
-                  <td>
-                    <div className="tabla-botones">
-                      <BtnSubmit texto="Editar" to={`/operacion/${operacion.id}`} />
-                      <BtnEliminar texto="Eliminar" onClick={() => eliminarOperacion(operacion.id)} />
-                    </div>
-                  </td>
-                )}
-              </tr>
-            ))}
-          </tbody>
-        </table>
+          ))}
+        </tbody>
+      </table>
       ) : (
         operacionesFiltradas.map(operacion => (
           <div key={operacion.id} className="explotacionCard">
@@ -278,42 +286,51 @@ const Operaciones = () => {
         </div>
       </div>
 
-      <h2 style={{ padding: '10px' }}>Fumigaciones</h2>
+      <h2>Fumigaciones</h2>
 
       {mostrarTabla ? (
         <table className="tabla-operaciones">
-          <thead>
-            <tr>
-              <th>Método</th>
-              <th>Parcela</th>
-              <th>Operario</th>
-              <th>Fecha</th>
-              <th>Duración</th>
-              <th>Estado</th>
-              {rol !== 'trabajador' && <th>Acciones</th>}
+        <thead>
+          <tr>
+            <th>Método</th>
+            <th>Parcela</th>
+            <th>Operario</th>
+            <th>Fecha</th>
+            <th>Duración</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {fumigacionesFiltradas.map(fumigacion => (
+            <tr key={fumigacion.id}>
+              <td>{fumigacion.metodo_aplicacion}</td>
+              <td>{fumigacion.parcela?.poligono} - {fumigacion.parcela?.parcela}</td>
+              <td>{fumigacion.operario}</td>
+              <td>{fumigacion.hora_inicio}</td>
+              <td>{fumigacion.duracion_minutos} min</td>
+              <td>{fumigacion.estado}</td>
+              <td>
+                <div className="tabla-botones">
+                  {fumigacion.estado === 'pendiente' && (
+                    <button onClick={() => marcarRealizada('fumigacion', fumigacion.id)}>Realizada</button>
+                  )}
+                  {fumigacion.estado === 'realizada' && rol !== 'trabajador' && (
+                    <button onClick={() => marcarRevisada('fumigacion', fumigacion.id)}>Revisada</button>
+                  )}
+                  {rol !== 'trabajador' && (
+                    <BtnSubmit texto="Editar" to={`/editar-fumigacion/${fumigacion.id}`} />
+                  )}
+                  {rol !== 'trabajador' && (
+                    <BtnEliminar texto="Eliminar" onClick={() => eliminarFumigacion(fumigacion.id)} />
+                  )}
+                </div>
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {fumigacionesFiltradas.map(fumigacion => (
-              <tr key={fumigacion.id}>
-                <td>{fumigacion.metodo_aplicacion}</td>
-                <td>{fumigacion.parcela?.poligono} - {fumigacion.parcela?.parcela}</td>
-                <td>{fumigacion.operario}</td>
-                <td>{fumigacion.hora_inicio}</td>
-                <td>{fumigacion.duracion_minutos} min</td>
-                <td>{fumigacion.estado}</td>
-                {rol !== 'trabajador' && (
-                  <td>
-                    <div className="tabla-botones">
-                      <BtnSubmit texto="Editar" to={`/editar-fumigacion/${fumigacion.id}`} />
-                      <BtnEliminar texto="Eliminar" onClick={() => eliminarFumigacion(fumigacion.id)} />
-                    </div>
-                  </td>
-                )}
-              </tr>
-            ))}
-          </tbody>
-        </table>
+          ))}
+        </tbody>
+      </table>
+       
       ) : (
         fumigacionesFiltradas.map(fumigacion => (
           <div key={fumigacion.id} className="explotacionCard">

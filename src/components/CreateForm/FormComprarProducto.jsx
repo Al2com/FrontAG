@@ -3,14 +3,17 @@ import { useNavigate } from "react-router-dom";
 import productosService from "../../services/productos";
 import proveedoresService from "../../services/proveedores";
 import comprasService from "../../services/compras";
+import Modal from "../Modal/Modal"
 
-import '../Style/forms.css'
+import "../Style/forms.css"
+
 
 const FormComprarProducto = () => {
     const navigate = useNavigate();
 
     const [productos, setProductos] = useState([]);
     const [proveedores, setProveedores] = useState([]);
+    const [mensajeModal, setMensajeModal] = useState("");
 
     const [formData, setFormData] = useState({
         producto_id: "",
@@ -28,14 +31,15 @@ const FormComprarProducto = () => {
         precio: "",
     });
 
+    // Cargamos productos y proveedores al montar el componente
     useEffect(() => {
         productosService.getProductos()
             .then(data => setProductos(data))
-            .catch(err => console.error('Error cargando productos:', err));
+            .catch(() => setMensajeModal("Error al cargar los productos. Inténtalo de nuevo."));
 
         proveedoresService.getProveedores()
             .then(data => setProveedores(data))
-            .catch(err => console.error('Error cargando proveedores:', err));
+            .catch(() => setMensajeModal("Error al cargar los proveedores. Inténtalo de nuevo."));
     }, []);
 
     const regexDecimal = /^[0-9]{1,5}(\.[0-9]{1,2})?$/;
@@ -69,6 +73,7 @@ const FormComprarProducto = () => {
             comprobar = false;
         }
 
+        // prevErrors garantiza que cogemos el estado más reciente antes de actualizarlo
         setErrors(prevErrors => ({ ...prevErrors, [name]: mensaje }));
         return comprobar;
     };
@@ -82,6 +87,7 @@ const FormComprarProducto = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
 
+        // Validamos todos los campos antes de enviar
         const productoOk = validarCampos("producto_id", formData.producto_id);
         const proveedorOk = validarCampos("proveedor_id", formData.proveedor_id);
         const fechaOk = validarCampos("fecha_compra", formData.fecha_compra);
@@ -94,16 +100,25 @@ const FormComprarProducto = () => {
                     alert("Compra registrada correctamente");
                     navigate("/almacen");
                 })
-                .catch(err => console.error("Error al registrar compra:", err));
+                .catch(() => setMensajeModal("Error al registrar la compra. Inténtalo de nuevo."));
         }
     };
 
     return (
-        <div>
+        <div className="form-container">
             <h1>Registrar Compra</h1>
-            <form onSubmit={handleSubmit}>
 
-                <div>
+            {/* Modal de error, se muestra solo si hay mensaje */}
+            {mensajeModal && (
+                <Modal
+                    mesajeError={mensajeModal}
+                    cerrarModal={() => setMensajeModal("")}
+                />
+            )}
+
+            <form className="form-grid" onSubmit={handleSubmit}>
+
+                <div className="form-grupo">
                     <label>Producto *</label>
                     <select
                         name="producto_id"
@@ -121,7 +136,7 @@ const FormComprarProducto = () => {
                     {errors.producto_id && <span className="mensaje-error">{errors.producto_id}</span>}
                 </div>
 
-                <div>
+                <div className="form-grupo">
                     <label>Proveedor *</label>
                     <select
                         name="proveedor_id"
@@ -139,7 +154,7 @@ const FormComprarProducto = () => {
                     {errors.proveedor_id && <span className="mensaje-error">{errors.proveedor_id}</span>}
                 </div>
 
-                <div>
+                <div className="form-grupo">
                     <label>Fecha de compra *</label>
                     <input
                         type="datetime-local"
@@ -151,7 +166,7 @@ const FormComprarProducto = () => {
                     {errors.fecha_compra && <span className="mensaje-error">{errors.fecha_compra}</span>}
                 </div>
 
-                <div>
+                <div className="form-grupo">
                     <label>Cantidad *</label>
                     <input
                         type="number"
@@ -165,7 +180,7 @@ const FormComprarProducto = () => {
                     {errors.cantidad_compra && <span className="mensaje-error">{errors.cantidad_compra}</span>}
                 </div>
 
-                <div>
+                <div className="form-grupo">
                     <label>Precio por unidad litro/Kilo (€) *</label>
                     <input
                         type="number"
@@ -179,7 +194,7 @@ const FormComprarProducto = () => {
                     {errors.precio && <span className="mensaje-error">{errors.precio}</span>}
                 </div>
 
-                <div className="menu-button">
+                <div className="form-actions full-width">
                     <button type="submit">Registrar Compra</button>
                     <button type="button" onClick={() => navigate('/almacen')}>Atrás</button>
                 </div>
