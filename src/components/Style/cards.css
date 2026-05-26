@@ -1,5 +1,3 @@
-
-
 /* LAYOUT GENERAL */
 .menuExplo {
   display: flex;
@@ -102,22 +100,23 @@
 
 /* ACTIVIDAD */
 .actividad-item {
-  border: 1px solid var(--c-borde);
-  border-radius: var(--rad-md);
-  padding: 14px var(--esp-md);
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  border-left: 4px solid var(--c-borde);
   background-color: var(--c-blanco);
-  margin-bottom: var(--esp-sm);
 }
 
 .actividad-item-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 8px;
 }
 
 .actividad-item-sub {
-  margin: 6px 0 0;
-  font-size: 13px;
+  margin: 4px 0 0;
+  font-size: 12px;
   color: var(--c-texto-apagado);
 }
 
@@ -127,12 +126,21 @@
   border-radius: 99px;
   font-weight: 600;
   text-transform: capitalize;
+  color: var(--c-blanco);
 }
 
-.estado-pendiente {
-  background-color: #fff8e1;
-  color: var(--estado-pendiente);
-}
+/* Borde izquierdo según estado */
+.estado-borde--pendiente { border-left-color: var(--estado-pendiente); }
+.estado-borde--realizada { border-left-color: var(--estado-realizado); }
+.estado-borde--revisada  { border-left-color: var(--estado-revisado); }
+
+/* Badge de color según estado */
+.estado-badge--pendiente { background-color: var(--estado-pendiente); }
+.estado-badge--realizada { background-color: var(--estado-realizado); }
+.estado-badge--revisada  { background-color: var(--estado-revisado); }
+
+/* Alerta de stock bajo */
+.actividad-item--alerta { border-left-color: #E9A800; }
 
 /* BOTONES */
 .btn-eliminar {
@@ -146,9 +154,7 @@
   border: 1px solid var(--c-primario);
 }
 
-.btn-vista.activo {
-  background-color: var(--c-primario-medio);
-}
+.btn-vista.activo { background-color: var(--c-primario-medio); }
 
 .btn-vista img,
 .btn-vista.activo img {
@@ -184,6 +190,34 @@
 
 .tabla-operaciones tr:last-child td { border-bottom: none; }
 .tabla-operaciones tr:hover td { background-color: var(--c-fondo-verde); }
+
+/* filas de material quimico indentadas */
+.tabla-fila-material td {
+  color: var(--c-texto-apagado);
+  font-size: 12px;
+  padding-left: 28px;
+  font-style: italic;
+  background-color: var(--c-fondo-verde);
+}
+
+/* separador entre secciones de la tabla */
+.tabla-separador td {
+  padding: 2px 0;
+  border-bottom: 2px solid var(--c-primario);
+}
+
+/* fila total al final */
+.tabla-total td {
+  font-weight: 700;
+  color: var(--c-blanco);
+  background-color: var(--c-primario);
+  padding: 10px 14px;
+}
+
+.detalle-fechas {
+  color: var(--c-texto-apagado);
+  font-size: 12px;
+}
 
 .tabla-botones {
   display: flex;
@@ -238,9 +272,6 @@
   font-size: 15px;
 }
 
-.rentabilidad-flecha { transition: transform 0.2s; }
-.rentabilidad-flecha.abierta { transform: rotate(180deg); }
-
 .rentabilidad-resumen {
   display: flex;
   gap: var(--esp-md);
@@ -255,45 +286,13 @@
   padding-top: var(--esp-sm);
 }
 
-.rentabilidad-grupo { margin-bottom: var(--esp-md); }
-
-.rentabilidad-grupo-titulo {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-weight: 600;
-  color: var(--c-primario);
-  margin-bottom: var(--esp-xs);
-}
-
-.rentabilidad-item {
+.rentabilidad-fila-parcela {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  font-size: 13px;
   padding: 6px 0;
   border-bottom: 1px solid var(--c-borde);
-}
-
-.rentabilidad-item-nombre { font-size: 13px; margin: 0; }
-
-.rentabilidad-item-detalle {
-  font-size: 12px;
-  color: var(--c-texto-apagado);
-  margin: 2px 0 0;
-}
-
-.rentabilidad-item-precio {
-  font-weight: 600;
-  font-size: 13px;
-  white-space: nowrap;
-}
-
-.rentabilidad-subtotal {
-  display: flex;
-  justify-content: space-between;
-  font-size: 13px;
-  color: var(--c-texto-apagado);
-  margin-top: var(--esp-xs);
+  color: var(--c-texto);
 }
 
 .rentabilidad-total {
@@ -313,20 +312,9 @@
   font-style: italic;
 }
 
-.rentabilidad-fila-parcela {
-  display: flex;
-  justify-content: space-between;
-  font-size: 13px;
-  padding: 6px 0;
-  border-bottom: 1px solid var(--c-borde);
-  color: var(--c-texto);
-}
-
 /* RESPONSIVE 1024px */
 @media (max-width: 1024px) {
-  .primeraSeccion {
-    grid-template-columns: repeat(3, 1fr);
-  }
+  .primeraSeccion { grid-template-columns: repeat(3, 1fr); }
 }
 
 /* RESPONSIVE 768px */
@@ -354,9 +342,7 @@
     gap: var(--esp-xs);
   }
 
-  .seccion-explo-part {
-    padding: 0 var(--esp-md) var(--esp-xs);
-  }
+  .seccion-explo-part { padding: 0 var(--esp-md) var(--esp-xs); }
 
   .tabla-operaciones {
     display: block;
@@ -366,86 +352,13 @@
     -webkit-overflow-scrolling: touch;
   }
 
-  .tabla-botones {
-    flex-direction: column;
-    gap: 4px;
-  }
+  .tabla-botones { flex-direction: column; gap: 4px; }
 
-  .rentabilidad-card {
-    margin: 0 var(--esp-sm) var(--esp-sm);
-  }
-
+  .rentabilidad-card { margin: 0 var(--esp-sm) var(--esp-sm); }
   .rentabilidad-cabecera-izq h4 { font-size: 13px; }
   .rentabilidad-coste { font-size: 13px; }
-
-  .rentabilidad-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 4px;
-  }
-
-  .rentabilidad-item-precio { align-self: flex-end; }
   .rentabilidad-total { font-size: 14px; }
 }
-/* ── Actividad Reciente / Alertas ─────────────────────────── */
-
-.actividad-item {
-  padding: 10px 12px;
-  margin-bottom: 8px;
-  border-radius: 6px;
-  border-left: 4px solid var(--c-borde);
-  background-color: var(--color-fondo-card, #f9f9f9);
-}
-
-.actividad-item-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 8px;
-}
-
-.actividad-item-sub {
-  margin: 4px 0 0;
-  font-size: 12px;
-  color: #666;
-}
-
-/* Badge de estado */
-.actividad-estado {
-  font-size: 11px;
-  padding: 2px 8px;
-  border-radius: 99px;
-  font-weight: 600;
-  text-transform: capitalize;
-  color: #fff;
-}
-
-/* Borde izquierdo según estado */
-.estado-borde--pendiente  {
-   border-left-color: var(--estado-pendiente);
-}
-.estado-borde--realizada  {
-  border-left-color: var(--estado-realizado);
-}
-.estado-borde--revisada   { 
-  border-left-color: var(--estado-revisado);
-}
-
-/* Badge de color según estado */
-.estado-badge--pendiente  {
-   background-color: var(--estado-pendiente);
-   }
-.estado-badge--realizada  { 
-  background-color: var(--estado-realizado);
- }
-.estado-badge--revisada   { 
-  background-color: var(--estado-revisado); 
-}
-
-/* Alerta de stock bajo  */
-.actividad-item--alerta   {
-   border-left-color: #E9A800;
-   }
 
 /* RESPONSIVE 480px */
 @media (max-width: 480px) {

@@ -2,124 +2,166 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import parcelasService from '../../services/parcelas'
 import operacionesService from '../../services/operaciones'
+import productosService from '../../services/productos'
+import Modal from '../Modal/Modal'
 import '../Style/forms.css'
 
 const FormOperacion = () => {
 
+  const navigate = useNavigate()
+
   const [parcelas, setParcelas] = useState([])
+  const [productos, setProductos] = useState([])
+  const [mensajeModal, setMensajeModal] = useState('')
 
   const [formData, setFormData] = useState({
     parcela_id: '',
-    usuario: "",
+    usuario: '',
     operario: '',
     tipo_operacion: 'riego',
     hora_inicio: '',
     duracion_minutos: '',
-    precio: '', 
-    descripcion: ''
+    precio: '',
+    descripcion: '',
+    producto_id: '',
+    dosis: ''
   })
 
   const [errors, setErrors] = useState({
     parcela_id: '',
-    usuario: "",
+    usuario: '',
     operario: '',
     tipo_operacion: '',
     hora_inicio: '',
     duracion_minutos: '',
-    precio: '', 
-    descripcion: ''
-  });
+    precio: '',
+    descripcion: '',
+    producto_id: '',
+    dosis: ''
+  })
 
+  // solo mostramos los campos de producto y dosis si el tipo es abonado
+  const esAbonado = formData.tipo_operacion === 'abonado'
+
+  // cargamos parcelas y productos al montar el componente
   useEffect(() => {
     parcelasService.getLista()
       .then(data => setParcelas(data))
-      .catch(err => console.error('Error cargando parcelas:', err))
+      .catch(() => setMensajeModal('Error al cargar las parcelas. Inténtalo de nuevo.'))
   }, [])
 
-  const navigate = useNavigate()
+  useEffect(() => {
+    productosService.getProductos()
+      .then(data => setProductos(data))
+      .catch(() => setMensajeModal('Error al cargar los productos. Inténtalo de nuevo.'))
+  }, [])
 
-  const regexDuracion = /^[0-9]{1,4}$/;
-  const regexDescripcion = /^.{10,}$/;
-  const regexPrecio = /^\d+(\.\d{1,2})?$/;
+  // cuando cambia el producto o la dosis calculamos el precio automaticamente
+  useEffect(() => {
+    if (!esAbonado) return
+
+    const producto = productos.find(p => p.id === parseInt(formData.producto_id))
+    const dosis = parseFloat(formData.dosis)
+
+    if (producto && !isNaN(dosis) && dosis > 0) {
+      const precioCalculado = (producto.precio * dosis).toFixed(2)
+      setFormData(prev => ({ ...prev, precio: precioCalculado }))
+    } else {
+      setFormData(prev => ({ ...prev, precio: '' }))
+    }
+  }, [formData.producto_id, formData.dosis, esAbonado])
+
+  const regexDuracion = /^[0-9]{1,4}$/
+  const regexDescripcion = /^.{10,}$/
+  const regexPrecio = /^\d+(\.\d{1,2})?$/
 
   const validarCampos = (name, value) => {
-    let mensaje = '';
-    let comprobar = true;
+    let mensaje = ''
+    let comprobar = true
 
     if (name === 'duracion_minutos' && !regexDuracion.test(value)) {
-      mensaje = 'Debe ser un número (máx. 4 cifras)';
-      comprobar = false;
+      mensaje = 'Debe ser un número (máx. 4 cifras)'
+      comprobar = false
     }
 
     if (name === 'descripcion' && !regexDescripcion.test(value)) {
-      mensaje = 'Mínimo 10 caracteres';
-      comprobar = false;
+      mensaje = 'Mínimo 10 caracteres'
+      comprobar = false
     }
 
-    if ((name === 'parcela_id' || name === 'tipo_operacion' || name === 'operario') && value === "") {
-      mensaje = 'Debes seleccionar una opción';
-      comprobar = false;
+    if ((name === 'parcela_id' || name === 'tipo_operacion' || name === 'operario') && value === '') {
+      mensaje = 'Debes seleccionar una opción'
+      comprobar = false
     }
 
-    if (name === 'hora_inicio' && value === "") {
-      mensaje = 'La fecha y hora son obligatorias';
-      comprobar = false;
+    if (name === 'hora_inicio' && value === '') {
+      mensaje = 'La fecha y hora son obligatorias'
+      comprobar = false
     }
 
     if (name === 'precio' && !regexPrecio.test(value)) {
-      mensaje = 'Introduce un precio válido (ej: 12.50)';
-      comprobar = false;
-}
+      mensaje = 'Introduce un precio válido (ej: 12.50)'
+      comprobar = false
+    }
 
-    setErrors(prevErrors => ({ ...prevErrors, [name]: mensaje }));
-    return comprobar;
+    // prevErrors garantiza que cogemos el estado más reciente antes de actualizarlo
+    setErrors(prevErrors => ({ ...prevErrors, [name]: mensaje }))
+    return comprobar
   }
 
   const handleChange = (e) => {
     const { name, value } = e.target
     setFormData({ ...formData, [name]: value })
-    validarCampos(name, value);
+    validarCampos(name, value)
   }
 
   const enviarFormulario = (e) => {
-    e.preventDefault();
+    e.preventDefault()
 
-    const parcelaOk = validarCampos('parcela_id', formData.parcela_id);
-    const operarioOk = validarCampos('operario', formData.operario);
-    const tipoOk = validarCampos('tipo_operacion', formData.tipo_operacion);
-    const fechaOk = validarCampos('hora_inicio', formData.hora_inicio);
-    const duracionOk = validarCampos('duracion_minutos', formData.duracion_minutos);
-    const precioOk = validarCampos('precio', formData.precio);
-    const descripcionOk = validarCampos('descripcion', formData.descripcion);
+    // validamos todos los campos antes de enviar
+    const parcelaOk = validarCampos('parcela_id', formData.parcela_id)
+    const operarioOk = validarCampos('operario', formData.operario)
+    const tipoOk = validarCampos('tipo_operacion', formData.tipo_operacion)
+    const fechaOk = validarCampos('hora_inicio', formData.hora_inicio)
+    const duracionOk = validarCampos('duracion_minutos', formData.duracion_minutos)
+    const precioOk = validarCampos('precio', formData.precio)
+    const descripcionOk = validarCampos('descripcion', formData.descripcion)
 
     if (parcelaOk && operarioOk && tipoOk && fechaOk && duracionOk && descripcionOk && precioOk) {
-
       operacionesService.postCrear(formData)
         .then(() => {
-          navigate('/operaciones');
+          navigate('/operaciones')
         })
         .catch(err => {
           if (err.response?.status === 422) {
-            const erroresLaravel = err.response.data.errors;
-            const nuevosErrores = {};
+            // Laravel manda los errores así: { errors: { campo: ["mensaje"] } }
+            const erroresLaravel = err.response.data.errors
+            const nuevosErrores = {}
             for (const campo in erroresLaravel) {
-              nuevosErrores[campo] = erroresLaravel[campo][0];
+              nuevosErrores[campo] = erroresLaravel[campo][0]
             }
-            setErrors(prev => ({ ...prev, ...nuevosErrores }));
+            setErrors(prev => ({ ...prev, ...nuevosErrores }))
           } else {
-            alert('Error del servidor. Inténtalo de nuevo.');
+            setMensajeModal('Error del servidor. Inténtalo de nuevo.')
           }
-        });
+        })
     }
-  };
+  }
 
   return (
     <div className="form-container">
       <h1>Nueva Operación</h1>
 
+      {/* modal de error, se muestra solo si hay mensaje */}
+      {mensajeModal && (
+        <Modal
+          mesajeError={mensajeModal}
+          cerrarModal={() => setMensajeModal('')}
+        />
+      )}
+
       <form onSubmit={enviarFormulario} className="form-grid">
 
-        {/* Parcela */}
         <div className="form-grupo">
           <label htmlFor="parcela_id">Parcela *</label>
           <select
@@ -139,7 +181,6 @@ const FormOperacion = () => {
           {errors.parcela_id && <span className="mensaje-error">{errors.parcela_id}</span>}
         </div>
 
-        {/* Operario */}
         <div className="form-grupo">
           <label htmlFor="operario">Operario *</label>
           <select
@@ -156,7 +197,6 @@ const FormOperacion = () => {
           {errors.operario && <span className="mensaje-error">{errors.operario}</span>}
         </div>
 
-        {/* Tipo de Operación */}
         <div className="form-grupo">
           <label htmlFor="tipo_operacion">Tipo de Operación *</label>
           <select
@@ -175,7 +215,46 @@ const FormOperacion = () => {
           {errors.tipo_operacion && <span className="mensaje-error">{errors.tipo_operacion}</span>}
         </div>
 
-        {/* Hora de Inicio */}
+        {/* campos extra que solo aparecen si es abonado */}
+        {esAbonado && (
+          <>
+            <div className="form-grupo">
+              <label htmlFor="producto_id">Producto *</label>
+              <select
+                id="producto_id"
+                name="producto_id"
+                value={formData.producto_id}
+                onChange={handleChange}
+                className={errors.producto_id ? 'input-error' : ''}
+              >
+                <option value="">Selecciona un producto</option>
+                {productos.map(p => (
+                  <option key={p.id} value={p.id}>
+                    {p.nombre} — {p.precio} €/{p.unidad}
+                  </option>
+                ))}
+              </select>
+              {errors.producto_id && <span className="mensaje-error">{errors.producto_id}</span>}
+            </div>
+
+            <div className="form-grupo">
+              <label htmlFor="dosis">Dosis (kg/L) *</label>
+              <input
+                type="number"
+                id="dosis"
+                name="dosis"
+                value={formData.dosis}
+                onChange={handleChange}
+                placeholder="Ej: 2.5"
+                min="0"
+                step="0.001"
+                className={errors.dosis ? 'input-error' : ''}
+              />
+              {errors.dosis && <span className="mensaje-error">{errors.dosis}</span>}
+            </div>
+          </>
+        )}
+
         <div className="form-grupo">
           <label htmlFor="hora_inicio">Fecha y Hora de Inicio *</label>
           <input
@@ -189,32 +268,30 @@ const FormOperacion = () => {
           {errors.hora_inicio && <span className="mensaje-error">{errors.hora_inicio}</span>}
         </div>
 
-        {/* Duración */}
         <div className="form-grupo">
-          <label htmlFor="duracion_minutos">Duración (minutos) *</label>
+          <label htmlFor="duracion_minutos">Duración (minutos) </label>
           <input
             type="number"
             id="duracion_minutos"
             name="duracion_minutos"
             value={formData.duracion_minutos}
             onChange={handleChange}
-            placeholder="Ej: 120"
+            placeholder="Ejemplo 120"
             min="1"
             className={errors.duracion_minutos ? 'input-error' : ''}
           />
           {errors.duracion_minutos && <span className="mensaje-error">{errors.duracion_minutos}</span>}
         </div>
-        
-        {/* Precio */}
+
         <div className="form-grupo">
-          <label htmlFor="precio">Precio (€) *</label>
+          <label htmlFor="precio">Precio € </label>
           <input
             type="number"
             id="precio"
             name="precio"
             value={formData.precio}
             onChange={handleChange}
-            placeholder="Ej: 45.00"
+            placeholder="Ejemplo 45"
             min="0"
             step="0.01"
             className={errors.precio ? 'input-error' : ''}
@@ -222,7 +299,6 @@ const FormOperacion = () => {
           {errors.precio && <span className="mensaje-error">{errors.precio}</span>}
         </div>
 
-        {/* Descripción */}
         <div className="form-grupo full-width">
           <label htmlFor="descripcion">Descripción *</label>
           <textarea
@@ -237,11 +313,9 @@ const FormOperacion = () => {
           {errors.descripcion && <span className="mensaje-error">{errors.descripcion}</span>}
         </div>
 
-        {/* Botones */}
         <div className="form-actions full-width">
           <button type="submit">Guardar</button>
           <button type="button" onClick={() => navigate('/operaciones')} className="btn-cancel">Atrás</button>
-          
         </div>
 
       </form>

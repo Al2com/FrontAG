@@ -48,13 +48,6 @@ const Gastos = () => {
   const getFumigacionesParcela = (parcelaId) =>
     fumigacionesFiltradas.filter(fum => fum.parcela_id === parcelaId)
 
-  // coste total de una parcela: operaciones + fumigaciones
-  const getCosteParcela = (parcelaId) => {
-    const gastoOps = getOperacionesParcela(parcelaId).reduce((acc, op) => acc + Number(op.precio || 0), 0)
-    const gastoFums = getFumigacionesParcela(parcelaId).reduce((acc, fum) => acc + Number(fum.precio || 0), 0)
-    return gastoOps + gastoFums
-  }
-
   // tractor = 1500L por turbo, mochila = 12L por mochila
   const calcularLitros = (fum) => {
     const unidades = fum.metodo_aplicacion === 'tractor' ? fum.turbos : fum.mochilas
@@ -62,39 +55,95 @@ const Gastos = () => {
     return unidades * litrosPorUnidad
   }
 
-  // agrupa todos los productos usados en las fumigaciones de una parcela
-  // si el mismo producto aparece en varias fumigaciones lo acumula en uno solo
-  const getProductosParcela = (parcelaId) => {
-    const fumigaciones = getFumigacionesParcela(parcelaId)
-    const mapa = {}
+  // formatea "2025-03-12 08:00:00" a "12/03"
+  const formatearFecha = (fechaStr) => {
+    const fecha = new Date(fechaStr)
+    const dia = String(fecha.getDate()).padStart(2, '0')
+    const mes = String(fecha.getMonth() + 1).padStart(2, '0')
+    return `${dia}/${mes}`
+  }
 
-    fumigaciones.forEach(fum => {
-      const unidades = fum.metodo_aplicacion === 'tractor' ? fum.turbos : fum.mochilas
-
-      if (!fum.productos) return
-
-      fum.productos.forEach(prod => {
-        const cantidadFum = prod.pivot.dosis_introducida * unidades
-        const costeFum = cantidadFum * Number(prod.precio || 0)
-
-        if (mapa[prod.id]) {
-          // si ya existe el producto sumamos cantidad y coste
-          mapa[prod.id].cantidad += cantidadFum
-          mapa[prod.id].coste += costeFum
-        } else {
-          mapa[prod.id] = {
-            id: prod.id,
-            nombre: prod.nombre,
-            unidad: prod.unidad,
-            precioPorUnidad: Number(prod.precio || 0),
-            cantidad: cantidadFum,
-            coste: costeFum,
-          }
-        }
+  // agrupa operaciones por tipo y dentro por operario con sus fechas y horas
+  const agruparOperacionesPorTipo = (parcelaId) => {
+    const agrupado = {}
+    getOperacionesParcela(parcelaId).forEach(op => {
+      if (!agrupado[op.tipo_operacion]) agrupado[op.tipo_operacion] = {}
+      if (!agrupado[op.tipo_operacion][op.operario]) agrupado[op.tipo_operacion][op.operario] = []
+      agrupado[op.tipo_operacion][op.operario].push({
+        fecha: formatearFecha(op.hora_inicio),
+        horas: Number(op.duracion_minutos || 0) / 60,
+        precio: Number(op.precio || 0),
       })
     })
+    return agrupado
+  }
 
+  // agrupa productos de las fumigaciones de una parcela filtrando por metodo
+  const getProductosPorMetodo = (parcelaId, metodo) => {
+    const mapa = {}
+    getFumigacionesParcela(parcelaId)
+      .filter(f => f.metodo_aplicacion === metodo)
+      .forEach(fum => {
+        const unidades = metodo === 'tractor' ? fum.turbos : fum.mochilas
+        if (!fum.productos) return
+        fum.productos.forEach(prod => {
+          const cantidad = prod.pivot.dosis_introducida * unidades
+          const coste = cantidad * Number(prod.precio || 0)
+          if (mapa[prod.id]) {
+            mapa[prod.id].cantidad += cantidad
+            mapa[prod.id].coste += coste
+          } else {
+            mapa[prod.id] = {
+              id: prod.id,
+              nombre: prod.nombre,
+              unidad: prod.unidad,
+              precioPorUnidad: Number(prod.precio || 0),
+              cantidad,
+              coste,
+            }
+          }
+        })
+      })
     return Object.values(mapa)
+  }
+
+  // resumen de una explotacion agrupando todas sus parcelas
+  const getResumenExplotacion = (parcelas) => {
+    let horasOperaciones = 0, costeOperaciones = 0
+    let litrosTractor = 0, costeTractor = 0, materialTractor = 0
+    let litrosMochila = 0, costeMochila = 0, materialMochila = 0
+
+    parcelas.forEach(parcela => {
+      getOperacionesParcela(parcela.id).forEach(op => {
+        horasOperaciones += Number(op.duracion_minutos || 0)
+        costeOperaciones += Number(op.precio || 0)
+      })
+      getFumigacionesParcela(parcela.id).forEach(fum => {
+        const litros = calcularLitros(fum)
+        if (fum.metodo_aplicacion === 'tractor') {
+          litrosTractor += litros
+          costeTractor += Number(fum.precio || 0)
+        } else {
+          litrosMochila += litros
+          costeMochila += Number(fum.precio || 0)
+        }
+      })
+      getProductosPorMetodo(parcela.id, 'tractor').forEach(p => { materialTractor += p.coste })
+      getProductosPorMetodo(parcela.id, 'mochila').forEach(p => { materialMochila += p.coste })
+    })
+
+    return { horasOperaciones, costeOperaciones, litrosTractor, costeTractor, materialTractor, litrosMochila, costeMochila, materialMochila }
+  }
+
+  // coste total de una parcela sumando todo
+  const getCosteParcela = (parcelaId) => {
+    const gastoOps = getOperacionesParcela(parcelaId).reduce((acc, op) => acc + Number(op.precio || 0), 0)
+    const gastoFums = getFumigacionesParcela(parcelaId).reduce((acc, fum) => acc + Number(fum.precio || 0), 0)
+    const gastoMaterial = [
+      ...getProductosPorMetodo(parcelaId, 'tractor'),
+      ...getProductosPorMetodo(parcelaId, 'mochila')
+    ].reduce((acc, p) => acc + p.coste, 0)
+    return gastoOps + gastoFums + gastoMaterial
   }
 
   const toggleParcela = (parcelaId) =>
@@ -103,7 +152,7 @@ const Gastos = () => {
   const toggleExplotacion = (nombre) =>
     setExplotacionAbierta(explotacionAbierta === nombre ? null : nombre)
 
-  // agrupa parcelas por explotacion para el bloque de arriba
+  // agrupa parcelas por explotacion
   const parcelasPorExplotacion = {}
   listaParcelas.forEach(parcela => {
     const nombreExplo = parcela.explotacion?.nombre || 'Sin explotación'
@@ -130,12 +179,13 @@ const Gastos = () => {
 
       {errorCarga && <span className="mensaje-error">{errorCarga}</span>}
 
-      {/* resumen por explotacion, solo muestra el coste total de cada una */}
+      {/* resumen por explotacion */}
       <h3 className="rentabilidad-titulo-seccion">Por Explotación</h3>
 
       {Object.entries(parcelasPorExplotacion).map(([nombreExplo, parcelas]) => {
         const costeExplo = parcelas.reduce((acc, p) => acc + getCosteParcela(p.id), 0)
         const estaAbierta = explotacionAbierta === nombreExplo
+        const resumen = getResumenExplotacion(parcelas)
 
         return (
           <div key={nombreExplo} className="rentabilidad-card">
@@ -152,36 +202,55 @@ const Gastos = () => {
 
             {estaAbierta && (
               <div className="rentabilidad-desplegable">
-                {parcelas.map(parcela => (
-                  <div key={parcela.id} className="rentabilidad-fila-parcela">
-                    <span>{parcela.nombre || `Pol. ${parcela.poligono} - Par. ${parcela.parcela}`}</span>
-                    <span>{getCosteParcela(parcela.id).toFixed(2)} €</span>
+                <div className="rentabilidad-fila-parcela">
+                  <span>Operaciones · {(resumen.horasOperaciones / 60).toFixed(1)} h</span>
+                  <span>{resumen.costeOperaciones.toFixed(2)} €</span>
+                </div>
+                {resumen.litrosTractor > 0 && (
+                  <div className="rentabilidad-fila-parcela">
+                    <span>Fumigaciones tractor · {resumen.litrosTractor.toLocaleString()} L</span>
+                    <span>{resumen.costeTractor.toFixed(2)} €</span>
                   </div>
-                ))}
+                )}
+                {resumen.materialTractor > 0 && (
+                  <div className="rentabilidad-fila-parcela">
+                    <span>Material químico tractor</span>
+                    <span>{resumen.materialTractor.toFixed(2)} €</span>
+                  </div>
+                )}
+                {resumen.litrosMochila > 0 && (
+                  <div className="rentabilidad-fila-parcela">
+                    <span>Fumigaciones mochila hierba · {resumen.litrosMochila.toLocaleString()} L</span>
+                    <span>{resumen.costeMochila.toFixed(2)} €</span>
+                  </div>
+                )}
+                {resumen.materialMochila > 0 && (
+                  <div className="rentabilidad-fila-parcela">
+                    <span>Material químico mochila hierba</span>
+                    <span>{resumen.materialMochila.toFixed(2)} €</span>
+                  </div>
+                )}
               </div>
             )}
           </div>
         )
       })}
 
-      {/* desglose completo por parcela */}
+      {/* desglose completo por parcela en tabla */}
       <h3 className="rentabilidad-titulo-seccion">Por Parcela</h3>
 
       {listaParcelas.map(parcela => {
-        const operacionesParcela = getOperacionesParcela(parcela.id)
         const fumigacionesParcela = getFumigacionesParcela(parcela.id)
-
-        const costeOperaciones = operacionesParcela.reduce((acc, op) => acc + Number(op.precio || 0), 0)
+        const operacionesAgrupadas = agruparOperacionesPorTipo(parcela.id)
+        const costeOperaciones = getOperacionesParcela(parcela.id).reduce((acc, op) => acc + Number(op.precio || 0), 0)
         const costeFumigaciones = fumigacionesParcela.reduce((acc, fum) => acc + Number(fum.precio || 0), 0)
-        const horasOperaciones = operacionesParcela.reduce((acc, op) => acc + Number(op.duracion_minutos || 0), 0)
-        const horasFumigaciones = fumigacionesParcela.reduce((acc, fum) => acc + Number(fum.duracion_minutos || 0), 0)
-        const litrosParcela = fumigacionesParcela.reduce((acc, fum) => acc + calcularLitros(fum), 0)
-
-        // productos agrupados de todas las fumigaciones de esta parcela
-        const productosParcela = getProductosParcela(parcela.id)
-        const costeProductos = productosParcela.reduce((acc, p) => acc + p.coste, 0)
-
-        const costeTotal = costeOperaciones + costeFumigaciones + costeProductos
+        const productosTractor = getProductosPorMetodo(parcela.id, 'tractor')
+        const productosMochila = getProductosPorMetodo(parcela.id, 'mochila')
+        const costeProductosTractor = productosTractor.reduce((acc, p) => acc + p.coste, 0)
+        const costeProductosMochila = productosMochila.reduce((acc, p) => acc + p.coste, 0)
+        const costeTotal = costeOperaciones + costeFumigaciones + costeProductosTractor + costeProductosMochila
+        const fumigacionesTractor = fumigacionesParcela.filter(f => f.metodo_aplicacion === 'tractor')
+        const fumigacionesMochila = fumigacionesParcela.filter(f => f.metodo_aplicacion === 'mochila')
         const estaAbierta = parcelaAbierta === parcela.id
 
         return (
@@ -204,133 +273,121 @@ const Gastos = () => {
 
             {estaAbierta && (
               <div className="rentabilidad-desplegable">
+                <table className="tabla-operaciones">
+                  <thead>
+                    <tr>
+                      <th>Concepto</th>
+                      <th>Detalle</th>
+                      <th>Horas</th>
+                      <th>Litros</th>
+                      <th>Importe</th>
+                    </tr>
+                  </thead>
+                  <tbody>
 
-                {/* operaciones: mano de obra, tractor, etc */}
-                <div className="rentabilidad-grupo">
-                  <p className="rentabilidad-grupo-titulo">
-                    <img src="./operaciones.svg" alt="operaciones" />
-                    Operaciones
-                  </p>
-
-                  {operacionesParcela.length === 0
-                    ? <p className="rentabilidad-vacio">Sin operaciones este año</p>
-                    : operacionesParcela.map(op => (
-                      <div key={op.id} className="rentabilidad-item">
-                        <div>
-                          <p className="rentabilidad-item-nombre">{op.tipo_operacion} — {op.operario}</p>
-                          <p className="rentabilidad-item-detalle">
-                            {(op.duracion_minutos / 60).toFixed(1)} h
-                          </p>
-                        </div>
-                        <span className="rentabilidad-item-precio">{Number(op.precio).toFixed(2)} €</span>
-                      </div>
-                    ))
-                  }
-
-                  <div className="rentabilidad-subtotal">
-                    <span>Subtotal operaciones ({(horasOperaciones / 60).toFixed(1)} h)</span>
-                    <span>{costeOperaciones.toFixed(2)} €</span>
-                  </div>
-                </div>
-
-                {/* fumigaciones: metodo, litros y productos usados en cada una */}
-                <div className="rentabilidad-grupo">
-                  <p className="rentabilidad-grupo-titulo">
-                    <img src="./fumigar1.svg" alt="fumigaciones" />
-                    Fumigaciones
-                  </p>
-
-                  {fumigacionesParcela.length === 0
-                    ? <p className="rentabilidad-vacio">Sin fumigaciones este año</p>
-                    : fumigacionesParcela.map(fum => {
-                        const unidades = fum.metodo_aplicacion === 'tractor' ? fum.turbos : fum.mochilas
-                        const litros = calcularLitros(fum)
-
+                    {/* operaciones agrupadas por tipo, dentro por operario con todas las fechas */}
+                    {Object.entries(operacionesAgrupadas).map(([tipo, porOperario]) => {
+                      const precioTipo = Object.values(porOperario).flat().reduce((acc, e) => acc + e.precio, 0)
+                      return Object.entries(porOperario).map(([operario, entradas], i) => {
+                        const horasOperario = entradas.reduce((acc, e) => acc + e.horas, 0)
+                        const detalle = entradas.map(e => `${e.fecha} ${e.horas.toFixed(1)}h`).join(' · ')
                         return (
-                          <div key={fum.id} className="rentabilidad-item">
-                            <div>
-                              <p className="rentabilidad-item-nombre">
-                                {fum.metodo_aplicacion} — {fum.operario}
-                              </p>
-
-                              {/* litros segun turbos o mochilas */}
-                              <p className="rentabilidad-item-detalle">
-                                {fum.metodo_aplicacion === 'tractor'
-                                  ? `${fum.turbos} turbo${fum.turbos !== 1 ? 's' : ''} · ${litros.toLocaleString()} L`
-                                  : `${fum.mochilas} mochila${fum.mochilas !== 1 ? 's' : ''} · ${litros} L`
-                                }
-                              </p>
-
-                              {/* productos que se usaron en esta fumigacion concreta */}
-                              {fum.productos && fum.productos.length > 0 && (
-                                <div className="rentabilidad-productos">
-                                  {fum.productos.map(prod => {
-                                    const totalProducto = prod.pivot.dosis_introducida * unidades
-                                    return (
-                                      <p key={prod.id} className="rentabilidad-item-detalle">
-                                        {prod.nombre}: {prod.pivot.dosis_introducida} {prod.unidad}/unidad · {totalProducto.toFixed(2)} {prod.unidad} total
-                                      </p>
-                                    )
-                                  })}
-                                </div>
-                              )}
-
-                              {fum.duracion_minutos && (
-                                <p className="rentabilidad-item-detalle">
-                                  {(fum.duracion_minutos / 60).toFixed(1)} h
-                                </p>
-                              )}
-                            </div>
-                            <span className="rentabilidad-item-precio">{Number(fum.precio).toFixed(2)} €</span>
-                          </div>
+                          <tr key={`${tipo}-${operario}`}>
+                            <td style={{ textTransform: 'capitalize', fontWeight: i === 0 ? 600 : 400 }}>
+                              {i === 0 ? tipo : ''} — {operario}
+                            </td>
+                            <td className="detalle-fechas">{detalle}</td>
+                            <td>{horasOperario.toFixed(1)} h</td>
+                            <td>—</td>
+                            {/* precio solo en la primera fila del tipo */}
+                            <td>{i === 0 ? `${precioTipo.toFixed(2)} €` : ''}</td>
+                          </tr>
                         )
                       })
-                  }
+                    })}
 
-                  <div className="rentabilidad-subtotal">
-                    <span>
-                      Subtotal fumigaciones
-                      {horasFumigaciones > 0 && ` · ${(horasFumigaciones / 60).toFixed(1)} h`}
-                      {litrosParcela > 0 && ` · ${litrosParcela.toLocaleString()} L`}
-                    </span>
-                    <span>{costeFumigaciones.toFixed(2)} €</span>
-                  </div>
-                </div>
+                    <tr className="tabla-separador"><td colSpan={5}></td></tr>
 
-                {/* resumen de productos: todos los que se han usado en esta parcela agrupados */}
-                {productosParcela.length > 0 && (
-                  <div className="rentabilidad-grupo">
-                    <p className="rentabilidad-grupo-titulo">
-                      <img src="./productos.svg" alt="productos" />
-                      Material utilizado
-                    </p>
+                    {/* fumigaciones tractor con material indentado debajo */}
+                    {fumigacionesTractor.length === 0
+                      ? (
+                        <tr>
+                          <td colSpan={5} style={{ fontStyle: 'italic', color: 'var(--c-texto-apagado)' }}>
+                            Sin fumigaciones con tractor
+                          </td>
+                        </tr>
+                      )
+                      : fumigacionesTractor.map(fum => (
+                        <>
+                          <tr key={`tractor-${fum.id}`}>
+                            <td>Tractor</td>
+                            <td className="detalle-fechas">{formatearFecha(fum.hora_inicio)} · {fum.turbos} turbo{fum.turbos !== 1 ? 's' : ''}</td>
+                            <td>—</td>
+                            <td>{calcularLitros(fum).toLocaleString()} L</td>
+                            <td>{Number(fum.precio).toFixed(2)} €</td>
+                          </tr>
+                          {fum.productos?.map(prod => {
+                            const cantidad = prod.pivot.dosis_introducida * fum.turbos
+                            const coste = cantidad * Number(prod.precio || 0)
+                            return (
+                              <tr key={`prod-t-${fum.id}-${prod.id}`} className="tabla-fila-material">
+                                <td> {prod.nombre}</td>
+                                <td>{prod.pivot.dosis_introducida} {prod.unidad}/turbo · {cantidad.toFixed(2)} {prod.unidad}</td>
+                                <td>—</td>
+                                <td>—</td>
+                                <td>{coste.toFixed(2)} €</td>
+                              </tr>
+                            )
+                          })}
+                        </>
+                      ))
+                    }
 
-                    {productosParcela.map(prod => (
-                      <div key={prod.id} className="rentabilidad-item">
-                        <div>
-                          <p className="rentabilidad-item-nombre">{prod.nombre}</p>
-                          {/* cantidad total = suma de todas las fumigaciones donde aparece */}
-                          <p className="rentabilidad-item-detalle">
-                            {prod.cantidad.toFixed(2)} {prod.unidad} · {prod.precioPorUnidad.toFixed(2)} €/{prod.unidad}
-                          </p>
-                        </div>
-                        <span className="rentabilidad-item-precio">{prod.coste.toFixed(2)} €</span>
-                      </div>
-                    ))}
+                    <tr className="tabla-separador"><td colSpan={5}></td></tr>
 
-                    <div className="rentabilidad-subtotal">
-                      <span>Subtotal material</span>
-                      <span>{costeProductos.toFixed(2)} €</span>
-                    </div>
-                  </div>
-                )}
+                    {/* fumigaciones mochila hierba con material indentado debajo */}
+                    {fumigacionesMochila.length === 0
+                      ? (
+                        <tr>
+                          <td colSpan={5} style={{ fontStyle: 'italic', color: 'var(--c-texto-apagado)' }}>
+                            Sin fumigaciones con mochila
+                          </td>
+                        </tr>
+                      )
+                      : fumigacionesMochila.map(fum => (
+                        <>
+                          <tr key={`mochila-${fum.id}`}>
+                            <td>Mochila hierba</td>
+                            <td className="detalle-fechas">{formatearFecha(fum.hora_inicio)} · {fum.operario} · {fum.mochilas} mochila{fum.mochilas !== 1 ? 's' : ''}</td>
+                            <td>{(fum.duracion_minutos / 60).toFixed(1)} h</td>
+                            <td>{calcularLitros(fum)} L</td>
+                            <td>{Number(fum.precio).toFixed(2)} €</td>
+                          </tr>
+                          {fum.productos?.map(prod => {
+                            const cantidad = prod.pivot.dosis_introducida * fum.mochilas
+                            const coste = cantidad * Number(prod.precio || 0)
+                            return (
+                              <tr key={`prod-m-${fum.id}-${prod.id}`} className="tabla-fila-material">
+                                <td>{prod.nombre}</td>
+                                <td>{prod.pivot.dosis_introducida} {prod.unidad}/mochila · {cantidad.toFixed(2)} {prod.unidad}</td>
+                                <td>—</td>
+                                <td>—</td>
+                                <td>{coste.toFixed(2)} €</td>
+                              </tr>
+                            )
+                          })}
+                        </>
+                      ))
+                    }
 
-                {/* total final sumando operaciones + fumigaciones + material */}
-                <div className="rentabilidad-total">
-                  <span>TOTAL</span>
-                  <span>{costeTotal.toFixed(2)} €</span>
-                </div>
+                    {/* fila total */}
+                    <tr className="tabla-total">
+                      <td colSpan={4}><strong>TOTAL</strong></td>
+                      <td><strong>{costeTotal.toFixed(2)} €</strong></td>
+                    </tr>
 
+                  </tbody>
+                </table>
               </div>
             )}
           </div>

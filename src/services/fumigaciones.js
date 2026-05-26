@@ -19,9 +19,8 @@ const getFumigacion = (id) => {
 }
 
 //modifica la fumigacion
-const putActualizarFumigacion = (id,formData) => {
-    const request = axios.put(`${baseUrl2}/${id}`, formData)
-        return request.then(response => response.data)
+const putActualizarFumigacion = (id, formData) => {
+    return axios.put(`${baseUrl1}/${id}`, formData).then(res => res.data)
 }
 
 
