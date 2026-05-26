@@ -1,7 +1,8 @@
 import axios from "./axios.js";
 
 
-const baseUrl = 'http://localhost/api/login';
+// const baseUrl = 'http://localhost/api/login';
+const baseUrl = '/login';
 
 // //con el get traemos todos los datos del response del controlador de la API
 // const getLogin = () => {
