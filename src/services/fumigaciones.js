@@ -1,7 +1,7 @@
 import axios from './axios.js';
 
 const baseUrl = ('/fumigaciones/crear');
-const baseUrl1 = ('/api/fumigaciones');
+const baseUrl1 = ('/fumigaciones');
 
 
 const postCrearFumigacion = (formData) =>{
