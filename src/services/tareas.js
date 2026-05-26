@@ -1,6 +1,6 @@
 import axios from './axios.js';
 
-const baseUrl = 'http://localhost/api/tareas';
+const baseUrl = '/tareas';
 
 const getLista = () => {
     const request = axios.get(baseUrl)

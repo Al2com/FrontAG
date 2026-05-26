@@ -1,6 +1,6 @@
 import axios from './axios.js';
 
-const baseUrl = 'http://localhost/api/propietarios';
+const baseUrl = '/api/propietarios';
 
 const getPropietarios = () => {
     const request = axios.get(baseUrl)

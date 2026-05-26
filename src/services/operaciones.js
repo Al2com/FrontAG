@@ -1,7 +1,7 @@
 import axios from './axios.js';
-const baseUrl = 'http://localhost/api/operaciones';
-const baseUrl1 = 'http://localhost/api/fumigaciones';
-const baseUrl2 = 'http://localhost/api/operaciones/crear';
+const baseUrl = '/operaciones';
+const baseUrl1 = '/fumigaciones';
+const baseUrl2 = '/operaciones/crear';
 
 const getLista = () => {
     return axios.get(`${baseUrl}`).then(res => res.data);
