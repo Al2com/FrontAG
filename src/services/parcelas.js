@@ -1,8 +1,8 @@
 import axios from './axios.js';
 
-const baseUrl = '/parcelas';
-const baseUrl1 = '/parcelas/resumen';
-const baseUrl2 = '/parcelas/crear';
+const baseUrl = '/api/parcelas';
+const baseUrl1 = '/api/parcelas/resumen';
+const baseUrl2 = '/api/parcelas/crear';
 
 // cuenta el total de parcelas y sumas de hanegadas,tipo riego
 const getCount = () => {

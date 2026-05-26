@@ -1,9 +1,8 @@
 import axios from "./axios.js";
 
 
-// const baseUrl = 'http://localhost/api/login';// en problema en el despliegue era esta ruta
 
-const baseUrl = '/login';
+const baseUrl = '/api/login'; // aqui hay que poner api en la ruta sino en local no va 
 
 // //con el get traemos todos los datos del response del controlador de la API
 // const getLogin = () => {

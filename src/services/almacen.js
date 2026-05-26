@@ -1,8 +1,8 @@
 import axios from "./axios.js";
 
 
-const baseUrl = '/almacen/crear';
-const baseUrl1 = '/almacen';
+const baseUrl = '/api/almacen/crear';
+const baseUrl1 = '/api/almacen';
 
 
 

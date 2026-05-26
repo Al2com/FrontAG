@@ -1,6 +1,6 @@
 import axios from './axios.js';
 
-const baseUrl = '/usuarios';
+const baseUrl = '/api/usuarios';
 
 const getUsuarios = () => {
     const request = axios.get(baseUrl)

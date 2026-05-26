@@ -1,10 +1,10 @@
 
 
-//hay que pòner la ruta a pelo sino da error el despliegue 
+//hay que pòner la ruta a pelo sino da error el despliegue
 import axios from './axios.js';
-const baseUrl = '/explotaciones';
-const baseUrl1 = '/explotaciones/resumen';
-const baseUrl2 = '/explotaciones/crear';
+const baseUrl = '/api/explotaciones';
+const baseUrl1 = '/api/explotaciones/resumen';
+const baseUrl2 = '/api/explotaciones/crear';
 
 const getCount = () => {
   const request = axios.get(baseUrl)
