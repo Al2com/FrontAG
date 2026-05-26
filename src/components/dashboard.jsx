@@ -60,6 +60,7 @@ const Dashboard = () => {
 
   return (
     <div>
+       <div className="menuExplo">
       <h1>Dashboard</h1>
       <p>Resumen general de la gestión agrícola</p>
 
@@ -69,7 +70,7 @@ const Dashboard = () => {
           <InfoPanel key={panel.texto} {...panel} />
         ))}
       </div>
-
+    </div>
       <div className="segundaSeccion">
 
         {/* alertas de stock bajo */}
