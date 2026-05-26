@@ -1,6 +1,6 @@
 import axios from './axios.js';
 
-const base = '/api/productos';
+const base = '/productos';
 const baseUrl = `${base}/lista`
 
 const getProductos = () => {
