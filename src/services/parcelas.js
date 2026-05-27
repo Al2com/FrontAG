@@ -3,6 +3,7 @@ import axios from './axios.js';
 const baseUrl = '/api/parcelas';
 const baseUrl1 = '/api/parcelas/resumen';
 const baseUrl2 = '/api/parcelas/crear';
+const baseUrl3 = '/api/parcelas/lista'
 
 // cuenta el total de parcelas y sumas de hanegadas,tipo riego
 const getCount = () => {
@@ -24,7 +25,7 @@ const postCrear = (formData) => {
 
 // trae solo id, nombre, poligono y variedad para los selects
 const getLista = () => {
-  return axios.get('http://localhost/api/parcelas/lista').then(res => res.data)
+  return axios.get(`${baseUrl3}`).then(res => res.data)
 }
 
 // trae los datos de una parcela por su id para cargarlos en el formulario de edicion

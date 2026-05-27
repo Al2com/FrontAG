@@ -171,7 +171,7 @@ const FormFumigacion = () => {
           navigate('/operaciones');
          })
         
-        
+    
         .catch(err => {
 
              console.log('Errores Laravel:', err.response.data);
