@@ -60,9 +60,6 @@ const Dashboard = () => {
 
   return (
     <div>
-      
-      <h1>Dashboard</h1>
-      <p>Resumen general de la gestión agrícola</p>
 
       {/* tarjetas resumen */}
       <div className="primeraSeccion">
@@ -70,13 +67,18 @@ const Dashboard = () => {
           <InfoPanel key={panel.texto} {...panel} />
         ))}
       </div>
-  
+
       <div className="segundaSeccion">
 
         {/* alertas de stock bajo */}
         <InfoPanel2 iconImg="./advertencia1.png" titulo="Alertas" texto="Requieren atención">
           {productosStockBajo.length === 0
-            ? <p>Todos los productos tienen stock suficiente</p>
+            ? (
+                <div className="stock-ok">
+                  <img src="./check.svg" alt="" width="16" />
+                  Todos los productos tienen stock suficiente
+                </div>
+              )
             : productosStockBajo.map(producto => (
                 <div key={producto.id} className="actividad-item actividad-item--alerta">
                   <div className="actividad-item-header">

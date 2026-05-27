@@ -79,10 +79,7 @@ const Explotaciones = () => {
   return (
     <div>
       <div className="menuExplo">
-        <div>
-          <h2>Explotaciones</h2>
-          <p>Gestiona tus fincas y propiedades</p>
-        </div>
+     
         <div className="menu-button">
           {rol !== 'trabajador' && (
             <BtnCrear to="/nueva-explotacion" titulo="Crear Explotacion" iconIng="./plusNegro.png" />

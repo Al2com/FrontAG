@@ -15,9 +15,9 @@ const FormParcela = () => {
 
   const regexPoligono = /^\d{1,12}$/;
   const regexParcela = /^\d{1,4}$/;
-  const regexVariedad = /^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]{1,10}$/;
+  const regexVariedad = /^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]{1,15}$/;
   const regexDimension = /^\d{1,4}(\.\d{1,2})?$/;
-  const regexNumArboles = /^([1-9]\d{0,2}|[12]\d{3}|3000)$/;
+  const regexNumArboles = /^([1-9]\d{0,2}|[12]\d{4}|3000)$/;
   const regexDescripcion = /^(\S+\s*){1,50}$/;
 
   useEffect(() => {
@@ -128,6 +128,7 @@ const FormParcela = () => {
 
       parcelaService.postCrear(formData)
         .then(() => {
+          alert('Parcela creada correctamente');
           navigate('/parcelas');
         })
         .catch(err => {

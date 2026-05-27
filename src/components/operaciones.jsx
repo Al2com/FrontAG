@@ -108,10 +108,7 @@ const Operaciones = () => {
   return (
     <div>
       <div className="menuExplo">
-        <div>
-          <h2>Operaciones</h2>
-          <p>Registra y gestiona las operaciones de campo</p>
-        </div>
+
       <div className="menu-button">
           {rol !== 'trabajador' && (
             <BtnCrear to="/nueva-operacion" titulo="Nueva Operación" iconIng="./plusNegro.png" />

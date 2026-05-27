@@ -69,10 +69,7 @@ const Parcela = () => {
   return (
     <div>
       <div className="menuExplo">
-        <div>
-          <h2>Parcelas</h2>
-          <p>Gestiona las parcelas de tus explotaciones</p>
-        </div>
+        
         <div className="menu-button">
           {rol !== 'trabajador' && (
             <BtnCrear to="/nueva-parcela" titulo="Crear Parcela" iconIng="./plusNegro.png" />

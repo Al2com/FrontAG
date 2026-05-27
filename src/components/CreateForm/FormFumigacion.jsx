@@ -165,6 +165,8 @@ const FormFumigacion = () => {
     if (metodoOk && fechaOk && descripcionOk && operarioOk && duracionOk && mochilasOk && turbosOk && precioOk) {
       fumigacionService.postCrearFumigacion({ ...formData, productos: productosAñadidos })
         .then(() => navigate('/operaciones'))
+        alert('Parcela creada correctamente')
+        
         .catch(err => {
           if (err.response?.status === 422) {
             // pinto los errores de laravel debajo de cada campo

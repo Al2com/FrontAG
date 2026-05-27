@@ -31,10 +31,7 @@ const Almacen = () => {
   return (
     <div>
       <div className="menuExplo">
-        <div>
-          <h2>Almacén</h2>
-          <p>Gestión de inventario y productos químicos</p>
-        </div>
+      
         <div className="menu-button">
           {rol !== 'trabajador' && (
             <BtnCrear to="/nuevo-producto" titulo="Añadir Producto" iconIng="./plusNegro.png" />

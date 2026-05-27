@@ -1,9 +1,9 @@
 /* LAYOUT GENERAL */
 .menuExplo {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
-  padding: var(--esp-xl) var(--esp-xl);
+  padding: 1px var(--esp-xl);
 }
 
 .menu-button {
@@ -21,7 +21,15 @@
 .primeraSeccion {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: var(--esp-lg);
+  gap: var(--esp-xl);
+  padding: var(--esp-xl);
+}
+
+/* SEGUNDA SECCIÓN — alertas + actividad reciente */
+.segundaSeccion {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--esp-xl);
   padding: 0 var(--esp-xl) var(--esp-xl);
 }
 
@@ -45,6 +53,14 @@
   padding: var(--esp-xl);
   width: 100%;
   box-sizing: border-box;
+}
+
+.card2 {
+  background-color: var(--c-blanco);
+  border: 1px solid var(--c-borde);
+  border-radius: var(--rad-lg);
+  padding: var(--esp-xl);
+  box-shadow: var(--som-md);
 }
 
 .explotacionCard {
@@ -87,6 +103,7 @@
   display: flex;
   align-items: center;
   gap: var(--esp-xs);
+  margin-bottom: var(--esp-xs);
 }
 
 .tituloCard2 img { width: 20px; }
@@ -100,9 +117,9 @@
 
 /* ACTIVIDAD */
 .actividad-item {
-  padding: 10px 12px;
-  margin-bottom: 8px;
-  border-radius: 6px;
+  padding: 10px 14px;
+  margin-bottom: var(--esp-sm);
+  border-radius: var(--rad-md);
   border-left: 4px solid var(--c-borde);
   background-color: var(--c-blanco);
 }
@@ -127,6 +144,8 @@
   font-weight: 600;
   text-transform: capitalize;
   color: var(--c-blanco);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 /* Borde izquierdo según estado */
@@ -141,6 +160,21 @@
 
 /* Alerta de stock bajo */
 .actividad-item--alerta { border-left-color: #E9A800; }
+
+/* Stock OK — cuando no hay alertas */
+.stock-ok {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-xs);
+  padding: var(--esp-sm) var(--esp-md);
+  margin-top: var(--esp-sm);
+  border-radius: var(--rad-md);
+  background-color: var(--c-fondo-verde);
+  border: 1px solid #b7e4c7;
+  color: var(--c-primario-medio);
+  font-size: 13px;
+  font-weight: 500;
+}
 
 /* BOTONES */
 .btn-eliminar {
@@ -334,7 +368,13 @@
 
   .primeraSeccion {
     grid-template-columns: repeat(2, 1fr);
+    padding: var(--esp-md);
+  }
+
+  .segundaSeccion {
+    grid-template-columns: 1fr;
     padding: 0 var(--esp-md) var(--esp-md);
+    gap: var(--esp-md);
   }
 
   .filtro-explo {
@@ -364,7 +404,7 @@
 @media (max-width: 480px) {
   .primeraSeccion {
     grid-template-columns: 1fr;
-    padding: 0 var(--esp-sm) var(--esp-sm);
+    padding: var(--esp-sm);
   }
 
   .separador-btn { display: none; }

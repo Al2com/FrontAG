@@ -64,7 +64,7 @@ h1, h2 { color: var(--c-primario); }
 }
 
 .content {
-  padding: 30px 40px;
+  padding: 0px 40px 30px 40px; 
   max-width: 1600px;
   width: 100%;
   margin: 0 auto;
