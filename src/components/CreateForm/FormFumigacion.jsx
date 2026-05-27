@@ -163,6 +163,8 @@ const FormFumigacion = () => {
     setErrors(prev => ({ ...prev, productos: '' }));
 
     if (metodoOk && fechaOk && descripcionOk && operarioOk && duracionOk && mochilasOk && turbosOk && precioOk) {
+      console.log('Datos enviados:', { ...formData, productos: productosAñadidos });
+      
       fumigacionService.postCrearFumigacion({ ...formData, productos: productosAñadidos })
         .then(() => {
           alert('Fumigación creada correctamente');
@@ -171,6 +173,8 @@ const FormFumigacion = () => {
         
         
         .catch(err => {
+
+             console.log('Errores Laravel:', err.response.data);
           if (err.response?.status === 422) {
             // pinto los errores de laravel debajo de cada campo
             const nuevosErrores = {};
