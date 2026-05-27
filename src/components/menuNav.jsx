@@ -77,7 +77,7 @@ const MenuNav = () => {
           iconImg="./iconAlmacen.svg"
           altText="Almacen"
           texto="Almacen"
-          isSeleccionado={botonActivo === 'Almacen'} 
+          isSeleccionado={botonActivo === 'Almacén'} 
           onClick={() => setBotonActivo('Almacen')}
         />
          )}
@@ -88,6 +88,16 @@ const MenuNav = () => {
           iconImg="./expenses.svg"
           altText="Gastos"
           texto="Gastos"
+          isSeleccionado={botonActivo === 'Gastos'} 
+          onClick={() => setBotonActivo('Gastos')}
+        />
+         )}
+         {rol !== 'trabajador' && ( 
+        <MenuBar 
+          to="/gastos"
+          iconImg="./analisis.svg"
+          altText="Análisis"
+          texto="Análsiis"
           isSeleccionado={botonActivo === 'Gastos'} 
           onClick={() => setBotonActivo('Gastos')}
         />
