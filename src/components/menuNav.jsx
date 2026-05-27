@@ -97,9 +97,9 @@ const MenuNav = () => {
           to="/gastos"
           iconImg="./analisis.svg"
           altText="Análisis"
-          texto="Análsiis"
-          isSeleccionado={botonActivo === 'Gastos'} 
-          onClick={() => setBotonActivo('Gastos')}
+          texto="Análsis"
+          // isSeleccionado={botonActivo === 'Gastos'} 
+          // onClick={() => setBotonActivo('Gastos')}
         />
          )}
       </div>
