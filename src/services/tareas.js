@@ -1,6 +1,7 @@
 import axios from './axios.js';
-
 const baseUrl = '/api/tareas';
+
+// este servivio se ultiliza para todo lo relacionado con la pagina operaciones que no son formulario 
 
 const getLista = () => {
     const request = axios.get(baseUrl)
@@ -24,13 +25,13 @@ const getActividadReciente = () => {
 
 // Elimina una operacion por su id
 const borrarOperacion = (id) => {
-    const request = axios.delete(`http://localhost/api/operaciones/${id}`)
+    const request = axios.delete(`/api/operaciones/${id}`)
     return request.then(response => response.data)
 }
 
 // Elimina una fumigacion por su ID
 const borrarFumigacion = (id) => {
-    const request = axios.delete(`http://localhost/api/fumigaciones/${id}`)
+    const request = axios.delete(`/api/fumigaciones/${id}`)
     return request.then(response => response.data)
 }
 

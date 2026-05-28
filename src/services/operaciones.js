@@ -2,7 +2,7 @@ import axios from './axios.js';
 const baseUrl = '/api/operaciones';
 const baseUrl1 = '/api/fumigaciones';
 const baseUrl2 = '/api/operaciones/crear';
-
+//este servicio se usa para todo lo relacionado con los formularios
 const getLista = () => {
     return axios.get(`${baseUrl}`).then(res => res.data);
 }
