@@ -13,6 +13,7 @@ const FormOperacion = () => {
   const [parcelas, setParcelas] = useState([])
   const [productos, setProductos] = useState([])
   const [mensajeModal, setMensajeModal] = useState('')
+  const [precioPorHora, setPrecioPorHora] = useState('')
 
   const [formData, setFormData] = useState({
     parcela_id: '',
@@ -43,20 +44,21 @@ const FormOperacion = () => {
   // solo mostramos los campos de producto y dosis si el tipo es abonado
   const esAbonado = formData.tipo_operacion === 'abonado'
 
-  // cargamos parcelas y productos al montar el componente
+  // cargamos las parcelas al montar el componente
   useEffect(() => {
     parcelasService.getLista()
       .then(data => setParcelas(data))
       .catch(() => setMensajeModal('Error al cargar las parcelas. Inténtalo de nuevo.'))
   }, [])
 
+  // cargamos los productos al montar el componente
   useEffect(() => {
     productosService.getProductos()
       .then(data => setProductos(data))
       .catch(() => setMensajeModal('Error al cargar los productos. Inténtalo de nuevo.'))
   }, [])
 
-  // cuando cambia el producto o la dosis calculamos el precio automaticamente
+  // si es abonado calculo el precio automaticamente multiplicando precio del producto por la dosis
   useEffect(() => {
     if (!esAbonado) return
 
@@ -70,6 +72,20 @@ const FormOperacion = () => {
       setFormData(prev => ({ ...prev, precio: '' }))
     }
   }, [formData.producto_id, formData.dosis, esAbonado])
+
+  // cuando cambia la duracion recalculo el precio total multiplicando precio por hora por las horas
+  useEffect(() => {
+    const hora = parseFloat(precioPorHora)
+    const duracion = parseFloat(formData.duracion_minutos)
+
+    if (!isNaN(hora) && !isNaN(duracion) && hora > 0 && duracion > 0) {
+      const horas = duracion / 60
+      const total = (hora * horas).toFixed(2)
+      setFormData(prev => ({ ...prev, precio: total }))
+    } else {
+      setFormData(prev => ({ ...prev, precio: '' }))
+    }
+  }, [formData.duracion_minutos, precioPorHora])
 
   const regexDuracion = /^[0-9]{1,4}$/
   const regexDescripcion = /^.{10,}$/
@@ -215,7 +231,7 @@ const FormOperacion = () => {
           {errors.tipo_operacion && <span className="mensaje-error">{errors.tipo_operacion}</span>}
         </div>
 
-        {/* campos extra que solo aparecen si es abonado */}
+        {/* campos extra que solo aparecen si el tipo de operacion es abonado */}
         {esAbonado && (
           <>
             <div className="form-grupo">
@@ -269,7 +285,7 @@ const FormOperacion = () => {
         </div>
 
         <div className="form-grupo">
-          <label htmlFor="duracion_minutos">Duración (minutos) </label>
+          <label htmlFor="duracion_minutos">Duración (minutos) *</label>
           <input
             type="number"
             id="duracion_minutos"
@@ -283,20 +299,18 @@ const FormOperacion = () => {
           {errors.duracion_minutos && <span className="mensaje-error">{errors.duracion_minutos}</span>}
         </div>
 
+        {/* precio por hora, el total se calcula automaticamente al introducir la duracion */}
         <div className="form-grupo">
-          <label htmlFor="precio">Precio € </label>
+          <label htmlFor="precioPorHora">Precio por hora (€/h) *</label>
           <input
             type="number"
-            id="precio"
-            name="precio"
-            value={formData.precio}
-            onChange={handleChange}
+            id="precioPorHora"
+            value={precioPorHora}
+            onChange={(e) => setPrecioPorHora(e.target.value)}
             placeholder="Ejemplo 45"
             min="0"
             step="0.01"
-            className={errors.precio ? 'input-error' : ''}
           />
-          {errors.precio && <span className="mensaje-error">{errors.precio}</span>}
         </div>
 
         <div className="form-grupo full-width">
