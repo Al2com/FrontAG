@@ -32,7 +32,7 @@ const Dashboard = () => {
       .catch(err => console.error('Error operaciones:', err));
 
     fumigacionesService.getLista()
-      .then(data => setTotalFumigaciones(data.totalFumigaciones))
+      .then(data => setTotalFumigaciones(data.length))
       .catch(err => console.error('Error fumigaciones:', err));
 
     tareasService.getActividadReciente()

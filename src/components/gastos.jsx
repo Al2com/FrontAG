@@ -51,11 +51,12 @@ const Gastos = () => {
   // tractor = 1500L por turbo, mochila = 12L por mochila
   // divido entre num_parcelas para que cada parcela muestre solo los litros que le corresponden
   const calcularLitros = (fum) => {
-    const unidades = fum.metodo_aplicacion === 'tractor' ? fum.turbos : fum.mochilas
-    const litrosPorUnidad = fum.metodo_aplicacion === 'tractor' ? 1500 : 12
-    const numParcelas = fum.num_parcelas || 1
-    return (unidades * litrosPorUnidad) / numParcelas
-  }
+  console.log('turbos:', fum.turbos, 'num_parcelas:', fum.num_parcelas)
+  const unidades = fum.metodo_aplicacion === 'tractor' ? fum.turbos : fum.mochilas
+  const litrosPorUnidad = fum.metodo_aplicacion === 'tractor' ? 1500 : 12
+  const numParcelas = fum.num_parcelas || 1
+  return (unidades * litrosPorUnidad) / numParcelas
+}
 
   // formatea "2025-03-12 08:00:00" a "12/03"
   const formatearFecha = (fechaStr) => {
