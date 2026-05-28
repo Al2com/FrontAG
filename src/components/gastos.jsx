@@ -49,10 +49,12 @@ const Gastos = () => {
     fumigacionesFiltradas.filter(fum => fum.parcela_id === parcelaId)
 
   // tractor = 1500L por turbo, mochila = 12L por mochila
+  // divido entre num_parcelas para que cada parcela muestre solo los litros que le corresponden
   const calcularLitros = (fum) => {
     const unidades = fum.metodo_aplicacion === 'tractor' ? fum.turbos : fum.mochilas
     const litrosPorUnidad = fum.metodo_aplicacion === 'tractor' ? 1500 : 12
-    return unidades * litrosPorUnidad
+    const numParcelas = fum.num_parcelas || 1
+    return (unidades * litrosPorUnidad) / numParcelas
   }
 
   // formatea "2025-03-12 08:00:00" a "12/03"
@@ -79,15 +81,18 @@ const Gastos = () => {
   }
 
   // agrupa productos de las fumigaciones de una parcela filtrando por metodo
+  // divido cantidad y coste entre num_parcelas para que cada parcela tenga solo su parte
   const getProductosPorMetodo = (parcelaId, metodo) => {
     const mapa = {}
     getFumigacionesParcela(parcelaId)
       .filter(f => f.metodo_aplicacion === metodo)
       .forEach(fum => {
         const unidades = metodo === 'tractor' ? fum.turbos : fum.mochilas
+        const numParcelas = fum.num_parcelas || 1
         if (!fum.productos) return
         fum.productos.forEach(prod => {
-          const cantidad = prod.pivot.dosis_introducida * unidades
+          // divido entre num_parcelas para repartir el material proporcionalmente
+          const cantidad = (prod.pivot.dosis_introducida * unidades) / numParcelas
           const coste = cantidad * Number(prod.precio || 0)
           if (mapa[prod.id]) {
             mapa[prod.id].cantidad += cantidad
@@ -135,7 +140,7 @@ const Gastos = () => {
     return { horasOperaciones, costeOperaciones, litrosTractor, costeTractor, materialTractor, litrosMochila, costeMochila, materialMochila }
   }
 
-  // coste total de una parcela sumando todo
+  // coste total de una parcela sumando operaciones, fumigaciones y material
   const getCosteParcela = (parcelaId) => {
     const gastoOps = getOperacionesParcela(parcelaId).reduce((acc, op) => acc + Number(op.precio || 0), 0)
     const gastoFums = getFumigacionesParcela(parcelaId).reduce((acc, fum) => acc + Number(fum.precio || 0), 0)
@@ -285,7 +290,7 @@ const Gastos = () => {
                   </thead>
                   <tbody>
 
-                    {/* operaciones agrupadas por tipo, dentro por operario con todas las fechas */}
+                    {/* operaciones agrupadas por tipo y operario con sus fechas */}
                     {Object.entries(operacionesAgrupadas).map(([tipo, porOperario]) => {
                       const precioTipo = Object.values(porOperario).flat().reduce((acc, e) => acc + e.precio, 0)
                       return Object.entries(porOperario).map(([operario, entradas], i) => {
@@ -299,7 +304,6 @@ const Gastos = () => {
                             <td className="detalle-fechas">{detalle}</td>
                             <td>{horasOperario.toFixed(1)} h</td>
                             <td>—</td>
-                            {/* precio solo en la primera fila del tipo */}
                             <td>{i === 0 ? `${precioTipo.toFixed(2)} €` : ''}</td>
                           </tr>
                         )
@@ -323,15 +327,18 @@ const Gastos = () => {
                             <td>Tractor</td>
                             <td className="detalle-fechas">{formatearFecha(fum.hora_inicio)} · {fum.turbos} turbo{fum.turbos !== 1 ? 's' : ''}</td>
                             <td>—</td>
+                            {/* litros divididos entre num_parcelas para mostrar solo los de esta parcela */}
                             <td>{calcularLitros(fum).toLocaleString()} L</td>
                             <td>{Number(fum.precio).toFixed(2)} €</td>
                           </tr>
                           {fum.productos?.map(prod => {
-                            const cantidad = prod.pivot.dosis_introducida * fum.turbos
+                            // divido entre num_parcelas para mostrar solo el material de esta parcela
+                            const numParcelas = fum.num_parcelas || 1
+                            const cantidad = (prod.pivot.dosis_introducida * fum.turbos) / numParcelas
                             const coste = cantidad * Number(prod.precio || 0)
                             return (
                               <tr key={`prod-t-${fum.id}-${prod.id}`} className="tabla-fila-material">
-                                <td> {prod.nombre}</td>
+                                <td>{prod.nombre}</td>
                                 <td>{prod.pivot.dosis_introducida} {prod.unidad}/turbo · {cantidad.toFixed(2)} {prod.unidad}</td>
                                 <td>—</td>
                                 <td>—</td>
@@ -345,7 +352,7 @@ const Gastos = () => {
 
                     <tr className="tabla-separador"><td colSpan={5}></td></tr>
 
-                    {/* fumigaciones mochila hierba con material indentado debajo */}
+                    {/* fumigaciones mochila con material indentado debajo */}
                     {fumigacionesMochila.length === 0
                       ? (
                         <tr>
@@ -360,11 +367,14 @@ const Gastos = () => {
                             <td>Mochila hierba</td>
                             <td className="detalle-fechas">{formatearFecha(fum.hora_inicio)} · {fum.operario} · {fum.mochilas} mochila{fum.mochilas !== 1 ? 's' : ''}</td>
                             <td>{(fum.duracion_minutos / 60).toFixed(1)} h</td>
+                            {/* litros divididos entre num_parcelas para mostrar solo los de esta parcela */}
                             <td>{calcularLitros(fum)} L</td>
                             <td>{Number(fum.precio).toFixed(2)} €</td>
                           </tr>
                           {fum.productos?.map(prod => {
-                            const cantidad = prod.pivot.dosis_introducida * fum.mochilas
+                            // divido entre num_parcelas para mostrar solo el material de esta parcela
+                            const numParcelas = fum.num_parcelas || 1
+                            const cantidad = (prod.pivot.dosis_introducida * fum.mochilas) / numParcelas
                             const coste = cantidad * Number(prod.precio || 0)
                             return (
                               <tr key={`prod-m-${fum.id}-${prod.id}`} className="tabla-fila-material">
