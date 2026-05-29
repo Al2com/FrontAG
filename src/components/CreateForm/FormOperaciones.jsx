@@ -12,8 +12,12 @@ const FormOperacion = () => {
 
   const [parcelas, setParcelas] = useState([])
   const [productos, setProductos] = useState([])
-  const [mensajeModal, setMensajeModal] = useState('')
   const [precioPorHora, setPrecioPorHora] = useState('')
+
+  // estados del modal de exito o error
+  const [mostrarModal, setMostrarModal] = useState(false)
+  const [mensajeModal, setMensajeModal] = useState('')
+  const [esExito, setEsExito] = useState(false)
 
   const [formData, setFormData] = useState({
     parcela_id: '',
@@ -48,14 +52,22 @@ const FormOperacion = () => {
   useEffect(() => {
     parcelasService.getLista()
       .then(data => setParcelas(data))
-      .catch(() => setMensajeModal('Error al cargar las parcelas. Inténtalo de nuevo.'))
+      .catch(() => {
+        setMensajeModal('Error al cargar las parcelas. Inténtalo de nuevo.')
+        setEsExito(false)
+        setMostrarModal(true)
+      })
   }, [])
 
   // cargamos los productos al montar el componente
   useEffect(() => {
     productosService.getProductos()
       .then(data => setProductos(data))
-      .catch(() => setMensajeModal('Error al cargar los productos. Inténtalo de nuevo.'))
+      .catch(() => {
+        setMensajeModal('Error al cargar los productos. Inténtalo de nuevo.')
+        setEsExito(false)
+        setMostrarModal(true)
+      })
   }, [])
 
   // si es abonado calculo el precio automaticamente multiplicando precio del producto por la dosis
@@ -131,22 +143,33 @@ const FormOperacion = () => {
     validarCampos(name, value)
   }
 
+  // si fue exito navego a operaciones, si fue error solo cierro para corregir el formulario
+  const cerrarModal = () => {
+    setMostrarModal(false)
+    if (esExito) {
+      navigate('/operaciones')
+    }
+  }
+
   const enviarFormulario = (e) => {
     e.preventDefault()
 
     // validamos todos los campos antes de enviar
-    const parcelaOk = validarCampos('parcela_id', formData.parcela_id)
-    const operarioOk = validarCampos('operario', formData.operario)
-    const tipoOk = validarCampos('tipo_operacion', formData.tipo_operacion)
-    const fechaOk = validarCampos('hora_inicio', formData.hora_inicio)
-    const duracionOk = validarCampos('duracion_minutos', formData.duracion_minutos)
-    const precioOk = validarCampos('precio', formData.precio)
+    const parcelaOk     = validarCampos('parcela_id', formData.parcela_id)
+    const operarioOk    = validarCampos('operario', formData.operario)
+    const tipoOk        = validarCampos('tipo_operacion', formData.tipo_operacion)
+    const fechaOk       = validarCampos('hora_inicio', formData.hora_inicio)
+    const duracionOk    = validarCampos('duracion_minutos', formData.duracion_minutos)
+    const precioOk      = validarCampos('precio', formData.precio)
     const descripcionOk = validarCampos('descripcion', formData.descripcion)
 
     if (parcelaOk && operarioOk && tipoOk && fechaOk && duracionOk && descripcionOk && precioOk) {
       operacionesService.postCrear(formData)
         .then(() => {
-          navigate('/operaciones')
+          // operacion creada correctamente, muestro modal de exito
+          setMensajeModal('Operación creada correctamente')
+          setEsExito(true)
+          setMostrarModal(true)
         })
         .catch(err => {
           if (err.response?.status === 422) {
@@ -158,7 +181,10 @@ const FormOperacion = () => {
             }
             setErrors(prev => ({ ...prev, ...nuevosErrores }))
           } else {
+            // error generico de servidor
             setMensajeModal('Error del servidor. Inténtalo de nuevo.')
+            setEsExito(false)
+            setMostrarModal(true)
           }
         })
     }
@@ -168,11 +194,11 @@ const FormOperacion = () => {
     <div className="form-container">
       <h1>Nueva Operación</h1>
 
-      {/* modal de error, se muestra solo si hay mensaje */}
-      {mensajeModal && (
+      {/* modal de exito o error al enviar el formulario */}
+      {mostrarModal && (
         <Modal
           mesajeError={mensajeModal}
-          cerrarModal={() => setMensajeModal('')}
+          cerrarModal={cerrarModal}
         />
       )}
 

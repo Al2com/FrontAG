@@ -25,7 +25,6 @@
   padding: var(--esp-xl);
 }
 
-/* SEGUNDA SECCIÓN — alertas + actividad reciente */
 .segundaSeccion {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -148,20 +147,16 @@
   flex-shrink: 0;
 }
 
-/* Borde izquierdo según estado */
 .estado-borde--pendiente { border-left-color: var(--estado-pendiente); }
 .estado-borde--realizada { border-left-color: var(--estado-realizado); }
 .estado-borde--revisada  { border-left-color: var(--estado-revisado); }
 
-/* Badge de color según estado */
 .estado-badge--pendiente { background-color: var(--estado-pendiente); }
 .estado-badge--realizada { background-color: var(--estado-realizado); }
 .estado-badge--revisada  { background-color: var(--estado-revisado); }
 
-/* Alerta de stock bajo */
 .actividad-item--alerta { border-left-color: #E9A800; }
 
-/* Stock OK — cuando no hay alertas */
 .stock-ok {
   display: flex;
   align-items: center;
@@ -225,7 +220,6 @@
 .tabla-operaciones tr:last-child td { border-bottom: none; }
 .tabla-operaciones tr:hover td { background-color: var(--c-fondo-verde); }
 
-/* filas de material quimico indentadas */
 .tabla-fila-material td {
   color: var(--c-texto-apagado);
   font-size: 12px;
@@ -234,13 +228,11 @@
   background-color: var(--c-fondo-verde);
 }
 
-/* separador entre secciones de la tabla */
 .tabla-separador td {
   padding: 2px 0;
   border-bottom: 2px solid var(--c-primario);
 }
 
-/* fila total al final */
 .tabla-total td {
   font-weight: 700;
   color: var(--c-blanco);
@@ -256,6 +248,59 @@
 .tabla-botones {
   display: flex;
   gap: 6px;
+}
+
+/* MODAL */
+.fondo-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal {
+  background: var(--c-blanco);
+  border: 1px solid var(--c-borde-oscuro);
+  border-radius: var(--rad-lg);
+  padding: var(--esp-xl);
+  box-shadow: var(--som-lg);
+  text-align: center;
+  min-width: 300px;
+}
+
+.modal p {
+  color: var(--c-texto);
+  font-size: 15px;
+  margin-bottom: var(--esp-md);
+}
+
+.modal-botones {
+  display: flex;
+  gap: var(--esp-sm);
+  justify-content: center;
+  margin-top: var(--esp-md);
+}
+
+.btn-confirmar {
+  background-color: var(--c-peligro);
+  color: var(--c-blanco);
+  border: none;
+  padding: 0.5rem 1.5rem;
+  border-radius: var(--rad-md);
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-cancelar {
+  background-color: var(--c-borde);
+  color: var(--c-texto);
+  border: none;
+  padding: 0.5rem 1.5rem;
+  border-radius: var(--rad-md);
+  cursor: pointer;
 }
 
 /* GASTOS */
@@ -344,6 +389,11 @@
   font-size: 13px;
   color: var(--c-texto-apagado);
   font-style: italic;
+}
+.input-readonly {
+  background-color: var(--c-fondo-verde);
+  cursor: not-allowed;
+  opacity: 0.8;
 }
 
 /* RESPONSIVE 1024px */

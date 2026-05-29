@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import parcelasService from '../../services/parcelas'
 import productoService from '../../services/productos'
 import fumigacionService from '../../services/fumigaciones'
+import Modal from '../Modal/Modal.jsx'
 
 const FormFumigacion = () => {
 
@@ -14,7 +15,19 @@ const FormFumigacion = () => {
   const [productos, setProductos] = useState([]);
   const [productosAñadidos, setProductosAñadidos] = useState([])
 
-  // parcela_ids es un array para tractor, para mochila solo puede haber una
+  // estados para el modal de exito o error
+  const [mostrarModal, setMostrarModal] = useState(false)
+  const [mensajeModal, setMensajeModal] = useState('')
+  const [esExito, setEsExito] = useState(false)
+
+  // estados para el modal de confirmacion al eliminar producto de la lista
+  const [mostrarModalEliminar, setMostrarModalEliminar] = useState(false)
+  const [indiceEliminar, setIndiceEliminar] = useState(null)
+
+  // guardo el precio por hora en un estado aparte para no sobreescribirlo al calcular
+  // esto solo se usa en mochila, en tractor el precio es por tanque
+  const [precioPorHora, setPrecioPorHora] = useState('')
+
   const [formData, setFormData] = useState({
     parcela_ids: [],
     operario: "",
@@ -59,29 +72,29 @@ const FormFumigacion = () => {
   // si es tractor calculo el precio total multiplicando precio por tanque por los turbos
   useEffect(() => {
     if (formData.metodo_aplicacion !== 'tractor') return
-
     const precioPorTanque = parseFloat(formData.precio)
     const turbos = parseFloat(formData.turbos)
-
     if (!isNaN(precioPorTanque) && !isNaN(turbos) && precioPorTanque > 0 && turbos > 0) {
       const total = (precioPorTanque * turbos).toFixed(2)
       setFormData(prev => ({ ...prev, precio: total }))
     }
   }, [formData.turbos])
 
-  // si es mochila calculo el precio total multiplicando precio por hora por las horas trabajadas
+  // si es mochila calculo el precio total usando precioPorHora que es un estado separado
+  // asi evito el bug de que formData.precio se sobreescriba con el total y al recalcular multiplique mal
+  // ej: 10€/h * 3h = 30€ correcto, si usara formData.precio cogeria 30 * 3 = 90€ incorrecto
   useEffect(() => {
     if (formData.metodo_aplicacion !== 'mochila') return
-
-    const precioPorHora = parseFloat(formData.precio)
+    const hora = parseFloat(precioPorHora)
     const duracion = parseFloat(formData.duracion_minutos)
-
-    if (!isNaN(precioPorHora) && !isNaN(duracion) && precioPorHora > 0 && duracion > 0) {
+    if (!isNaN(hora) && !isNaN(duracion) && hora > 0 && duracion > 0) {
       const horas = duracion / 60
-      const total = (precioPorHora * horas).toFixed(2)
+      const total = (hora * horas).toFixed(2)
       setFormData(prev => ({ ...prev, precio: total }))
+    } else {
+      setFormData(prev => ({ ...prev, precio: '' }))
     }
-  }, [formData.duracion_minutos])
+  }, [formData.duracion_minutos, precioPorHora])
 
   const regexDuracion = /^[0-9]{1,4}$/;
   const regexDescripcion = /^.{10,}$/;
@@ -95,7 +108,6 @@ const FormFumigacion = () => {
     const nuevas = yaEsta
       ? formData.parcela_ids.filter(p => p !== idNum)
       : [...formData.parcela_ids, idNum]
-
     setFormData({ ...formData, parcela_ids: nuevas })
     setErrors(prev => ({ ...prev, parcela_ids: nuevas.length === 0 ? 'Selecciona al menos una parcela' : '' }))
   }
@@ -159,8 +171,30 @@ const FormFumigacion = () => {
     setProductosAñadidos([...productosAñadidos, { producto_id: '', dosis_introducida: '' }])
   }
 
-  const eliminarFila = (index) => {
-    setProductosAñadidos(productosAñadidos.filter((_, i) => i !== index));
+  // abro el modal de confirmacion guardando el indice del producto a eliminar
+  const pedirConfirmacionEliminar = (index) => {
+    setIndiceEliminar(index)
+    setMostrarModalEliminar(true)
+  }
+
+  // si confirma elimino la fila, si cancela cierro el modal sin hacer nada
+  const confirmarEliminarFila = () => {
+    setProductosAñadidos(productosAñadidos.filter((_, i) => i !== indiceEliminar))
+    setIndiceEliminar(null)
+    setMostrarModalEliminar(false)
+  }
+
+  const cancelarEliminarFila = () => {
+    setIndiceEliminar(null)
+    setMostrarModalEliminar(false)
+  }
+
+  // si fue exito navego a operaciones, si fue error solo cierro para corregir el formulario
+  const cerrarModal = () => {
+    setMostrarModal(false)
+    if (esExito) {
+      navigate('/operaciones')
+    }
   }
 
   const enviarFormulario = (e) => {
@@ -201,15 +235,17 @@ const FormFumigacion = () => {
     setErrors(prev => ({ ...prev, productos: '' }));
 
     if (metodoOk && fechaOk && descripcionOk && operarioOk && duracionOk && mochilasOk && turbosOk && precioOk) {
-      console.log('Datos enviados:', { ...formData, productos: productosAñadidos });
-
+       console.log('precio que se envia:', formData.precio)  // ← añade esto
+  console.log('precioPorHora:', precioPorHora)   
       fumigacionService.postCrearFumigacion({ ...formData, productos: productosAñadidos })
         .then(() => {
-          alert('Fumigación creada correctamente');
-          navigate('/operaciones');
+          // fumigacion creada correctamente, muestro modal de exito
+          setMensajeModal('Fumigación creada correctamente')
+          setEsExito(true)
+          setMostrarModal(true)
         })
         .catch(err => {
-          console.log('Errores Laravel:', err.response.data);
+          console.log('Errores Laravel:', err.response?.data);
           if (err.response?.status === 422) {
             // pinto los errores de laravel debajo de cada campo
             const nuevosErrores = {};
@@ -218,7 +254,10 @@ const FormFumigacion = () => {
             }
             setErrors(prev => ({ ...prev, ...nuevosErrores }));
           } else {
-            alert('Error del servidor. Inténtalo de nuevo.');
+            // error generico de servidor
+            setMensajeModal('Error del servidor. Inténtalo de nuevo.')
+            setEsExito(false)
+            setMostrarModal(true)
           }
         });
     }
@@ -226,6 +265,24 @@ const FormFumigacion = () => {
 
   return (
     <div className="form-container">
+
+      {/* modal de exito o error al enviar el formulario */}
+      {mostrarModal && (
+        <Modal
+          mesajeError={mensajeModal}
+          cerrarModal={cerrarModal}
+        />
+      )}
+
+      {/* modal de confirmacion al eliminar un producto de la lista */}
+      {mostrarModalEliminar && (
+        <Modal
+          mesajeError="¿Estas seguro de que quieres eliminar este producto?"
+          cerrarModal={cancelarEliminarFila}
+          onConfirmar={confirmarEliminarFila}
+        />
+      )}
+
       <h1>Nueva Fumigación</h1>
 
       <form onSubmit={enviarFormulario} className="form-grid">
@@ -289,24 +346,53 @@ const FormFumigacion = () => {
             </div>
           )}
 
-          {/* la etiqueta cambia segun el metodo elegido */}
-          <div className="form-grupo">
-            <label htmlFor="precio">
-              {formData.metodo_aplicacion === 'tractor' ? 'Precio por tanque (€)' : 'Precio por hora (€/h)'} *
-            </label>
-            <input
-              type="number"
-              id="precio"
-              name="precio"
-              value={formData.precio}
-              onChange={handleChange}
-              placeholder="Ej: 45.00"
-              min="0"
-              step="0.01"
-              className={errors.precio ? 'input-error' : ''}
-            />
-            {errors.precio && <span className="mensaje-error">{errors.precio}</span>}
-          </div>
+          {/* en mochila el precio se introduce por hora y se calcula el total automaticamente */}
+          {formData.metodo_aplicacion === 'mochila' && (
+            <div className="form-grupo">
+              <label htmlFor="precioPorHora">Precio por hora (€/h) *</label>
+              <input
+                type="number"
+                id="precioPorHora"
+                value={precioPorHora}
+                onChange={(e) => setPrecioPorHora(e.target.value)}
+                placeholder="Ej: 10.00"
+                min="0"
+                step="0.01"
+              />
+            </div>
+          )}
+
+          {/* en tractor el precio es por tanque, el total se calcula con los turbos */}
+          {formData.metodo_aplicacion === 'tractor' && (
+            <div className="form-grupo">
+              <label htmlFor="precio">Precio por tanque (€) *</label>
+              <input
+                type="number"
+                id="precio"
+                name="precio"
+                value={formData.precio}
+                onChange={handleChange}
+                placeholder="Ej: 45.00"
+                min="0"
+                step="0.01"
+                className={errors.precio ? 'input-error' : ''}
+              />
+              {errors.precio && <span className="mensaje-error">{errors.precio}</span>}
+            </div>
+          )}
+
+          {/* precio total calculado automaticamente, solo lectura para que no lo toque el usuario */}
+          {formData.metodo_aplicacion && (
+            <div className="form-grupo">
+              <label>Precio total (€)</label>
+              <input
+                type="number"
+                value={formData.precio}
+                readOnly
+                className="input-readonly"
+              />
+            </div>
+          )}
 
           {/* operario solo sale si es mochila */}
           {formData.metodo_aplicacion === 'mochila' && (
@@ -386,12 +472,11 @@ const FormFumigacion = () => {
                     value={item.dosis_introducida}
                     onChange={(e) => handleChangeProducto(e, index)}
                   />
-
-                  <button type="button" onClick={() => eliminarFila(index)}>Eliminar</button>
+                  {/* al pulsar eliminar abro el modal de confirmacion en vez de borrar directo */}
+                  <button type="button" onClick={() => pedirConfirmacionEliminar(index)}>Eliminar</button>
                 </div>
               )
             })}
-
             {errors.productos && <span className="mensaje-error">{errors.productos}</span>}
             <button type="button" onClick={añadirFila}>+ Añadir producto</button>
           </div>

@@ -17,13 +17,19 @@ const Gastos = () => {
   useEffect(() => {
     tareasService.getLista()
       .then(datos => {
+          const tractorFum = datos.fumigaciones.find(f => f.metodo_aplicacion === 'tractor')
+        console.log('hanegadas_parcela:', tractorFum?.hanegadas_parcela)
+        console.log('total_hanegadas:', tractorFum?.total_hanegadas)
         setListaOperaciones(datos.operaciones)
         setListaFumigaciones(datos.fumigaciones)
       })
       .catch(() => setErrorCarga('Error al cargar las tareas'))
 
     parcelasService.getResumenP()
-      .then(datos => setListaParcelas(datos))
+      .then(datos => {
+        console.log('parcelas con hanegadas:', datos)
+        setListaParcelas(datos)
+      })
       .catch(() => setErrorCarga('Error al cargar las parcelas'))
   }, [])
 
@@ -48,15 +54,32 @@ const Gastos = () => {
   const getFumigacionesParcela = (parcelaId) =>
     fumigacionesFiltradas.filter(fum => fum.parcela_id === parcelaId)
 
-  // tractor = 1500L por turbo, mochila = 12L por mochila
-  // divido entre num_parcelas para que cada parcela muestre solo los litros que le corresponden
+  // si es tractor reparto los litros por hanegadas de cada parcela proporcionalmente
+  // si es mochila va por parcela directa porque se aplica a una sola parcela
   const calcularLitros = (fum) => {
-  console.log('turbos:', fum.turbos, 'num_parcelas:', fum.num_parcelas)
-  const unidades = fum.metodo_aplicacion === 'tractor' ? fum.turbos : fum.mochilas
-  const litrosPorUnidad = fum.metodo_aplicacion === 'tractor' ? 1500 : 12
-  const numParcelas = fum.num_parcelas || 1
-  return (unidades * litrosPorUnidad) / numParcelas
-}
+    const unidades = fum.metodo_aplicacion === 'tractor' ? fum.turbos : fum.mochilas
+    const litrosPorUnidad = fum.metodo_aplicacion === 'tractor' ? 1500 : 12
+    const litrosTotales = unidades * litrosPorUnidad
+
+    if (fum.metodo_aplicacion === 'tractor' && fum.total_hanegadas > 0) {
+      // reparto proporcional segun las hanegadas de esta parcela respecto al total
+      const proporcion = fum.hanegadas_parcela / fum.total_hanegadas
+      return litrosTotales * proporcion
+    }
+
+    // mochila va directo por parcela
+    const numParcelas = fum.num_parcelas || 1
+    return litrosTotales / numParcelas
+  }
+
+  // calcula la proporcion de hanegadas de una parcela respecto al total del lote
+  // si no hay hanegadas reparte igual entre todas las parcelas
+  const calcularProporcion = (fum) => {
+    if (fum.metodo_aplicacion === 'tractor' && fum.total_hanegadas > 0) {
+      return fum.hanegadas_parcela / fum.total_hanegadas
+    }
+    return 1 / (fum.num_parcelas || 1)
+  }
 
   // formatea "2025-03-12 08:00:00" a "12/03"
   const formatearFecha = (fechaStr) => {
@@ -82,18 +105,22 @@ const Gastos = () => {
   }
 
   // agrupa productos de las fumigaciones de una parcela filtrando por metodo
-  // divido cantidad y coste entre num_parcelas para que cada parcela tenga solo su parte
+  // usa proporcion de hanegadas para tractor y num_parcelas para mochila
+//   La función getProductosPorMetodo agrupa todos los productos químicos usados en las fumigaciones de una parcela.
+// Primero filtra las fumigaciones de esa parcela por metodo (tractor o mochila). Para cada fumigación calcula la proporción de hanegadas que le corresponde a esa parcela respecto al total del lote, y con eso calcula qué cantidad de cada producto le toca y cuánto cuesta.
+// El mapa es un objeto que usa el id del producto como clave. Si el producto ya existe lo acumula sumando cantidad y coste, si no existe lo crea. Así si una parcela tiene varias fumigaciones con el mismo producto los agrupa en una sola línea en vez de mostrarlos por separado.
+// Al final devuelve los valores del mapa como un array para poder recorrerlos en el JSX.
   const getProductosPorMetodo = (parcelaId, metodo) => {
     const mapa = {}
     getFumigacionesParcela(parcelaId)
       .filter(f => f.metodo_aplicacion === metodo)
       .forEach(fum => {
         const unidades = metodo === 'tractor' ? fum.turbos : fum.mochilas
-        const numParcelas = fum.num_parcelas || 1
+        const proporcion = calcularProporcion(fum)
         if (!fum.productos) return
         fum.productos.forEach(prod => {
-          // divido entre num_parcelas para repartir el material proporcionalmente
-          const cantidad = (prod.pivot.dosis_introducida * unidades) / numParcelas
+          // reparto el material proporcionalmente segun hanegadas
+          const cantidad = prod.pivot.dosis_introducida * unidades * proporcion
           const coste = cantidad * Number(prod.precio || 0)
           if (mapa[prod.id]) {
             mapa[prod.id].cantidad += cantidad
@@ -141,7 +168,7 @@ const Gastos = () => {
     return { horasOperaciones, costeOperaciones, litrosTractor, costeTractor, materialTractor, litrosMochila, costeMochila, materialMochila }
   }
 
-  // coste total de una parcela sumando operaciones, fumigaciones y material
+  // coste total de una parcela sumando operaciones fumigaciones y material
   const getCosteParcela = (parcelaId) => {
     const gastoOps = getOperacionesParcela(parcelaId).reduce((acc, op) => acc + Number(op.precio || 0), 0)
     const gastoFums = getFumigacionesParcela(parcelaId).reduce((acc, fum) => acc + Number(fum.precio || 0), 0)
@@ -169,19 +196,20 @@ const Gastos = () => {
   return (
     <div className="rentabilidad-contenedor">
       <div className="menuExplo">
-        <div>
-          <h2>Gastos</h2>
-          <p>Gastos por parcela y explotación</p>
-        </div>
-        <div className="barra-select">
-          <select value={campañaSeleccionada} onChange={(e) => setCampañaSeleccionada(e.target.value)}>
-            <option value="todas">Todas las campañas</option>
-            {obtenerAños().map(año => (
-              <option key={año} value={año}>{año}</option>
-            ))}
-          </select>
+      <div className="menu-button">
+        <div className="filtro-explo">
+          <div className="barra-select">
+            <select value={campañaSeleccionada} onChange={(e) => setCampañaSeleccionada(e.target.value)}>
+              <option value="todas">Campaña ▾</option>
+              {obtenerAños().map(año => (
+                <option key={año} value={año}>{año}</option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
+    </div>
+      
 
       {errorCarga && <span className="mensaje-error">{errorCarga}</span>}
 
@@ -226,13 +254,13 @@ const Gastos = () => {
                 )}
                 {resumen.litrosMochila > 0 && (
                   <div className="rentabilidad-fila-parcela">
-                    <span>Fumigaciones mochila hierba · {resumen.litrosMochila.toLocaleString()} L</span>
+                    <span>Fumigaciones mochila · {resumen.litrosMochila.toLocaleString()} L</span>
                     <span>{resumen.costeMochila.toFixed(2)} €</span>
                   </div>
                 )}
                 {resumen.materialMochila > 0 && (
                   <div className="rentabilidad-fila-parcela">
-                    <span>Material químico mochila hierba</span>
+                    <span>Material químico mochila</span>
                     <span>{resumen.materialMochila.toFixed(2)} €</span>
                   </div>
                 )}
@@ -322,33 +350,39 @@ const Gastos = () => {
                           </td>
                         </tr>
                       )
-                      : fumigacionesTractor.map(fum => (
-                        <>
-                          <tr key={`tractor-${fum.id}`}>
-                            <td>Tractor</td>
-                            <td className="detalle-fechas">{formatearFecha(fum.hora_inicio)} · {fum.turbos} turbo{fum.turbos !== 1 ? 's' : ''}</td>
-                            <td>—</td>
-                            {/* litros divididos entre num_parcelas para mostrar solo los de esta parcela */}
-                            <td>{calcularLitros(fum).toLocaleString()} L</td>
-                            <td>{Number(fum.precio).toFixed(2)} €</td>
-                          </tr>
-                          {fum.productos?.map(prod => {
-                            // divido entre num_parcelas para mostrar solo el material de esta parcela
-                            const numParcelas = fum.num_parcelas || 1
-                            const cantidad = (prod.pivot.dosis_introducida * fum.turbos) / numParcelas
-                            const coste = cantidad * Number(prod.precio || 0)
-                            return (
-                              <tr key={`prod-t-${fum.id}-${prod.id}`} className="tabla-fila-material">
-                                <td>{prod.nombre}</td>
-                                <td>{prod.pivot.dosis_introducida} {prod.unidad}/turbo · {cantidad.toFixed(2)} {prod.unidad}</td>
-                                <td>—</td>
-                                <td>—</td>
-                                <td>{coste.toFixed(2)} €</td>
-                              </tr>
-                            )
-                          })}
-                        </>
-                      ))
+                      : fumigacionesTractor.map(fum => {
+                        // calculo la proporcion de hanegadas para repartir litros y material
+                        const proporcion = calcularProporcion(fum)
+                        return (
+                          <>
+                            <tr key={`tractor-${fum.id}`}>
+                              <td>Tractor</td>
+                              <td className="detalle-fechas">
+                                {formatearFecha(fum.hora_inicio)} · {fum.turbos} turbo{fum.turbos !== 1 ? 's' : ''}
+                                {/* muestro las hanegadas para que se vea el reparto */}
+                                {fum.hanegadas_parcela > 0 && ` · ${fum.hanegadas_parcela} han.`}
+                              </td>
+                              <td>—</td>
+                              <td>{calcularLitros(fum).toFixed(0)} L</td>
+                              <td>{Number(fum.precio).toFixed(2)} €</td>
+                            </tr>
+                            {fum.productos?.map(prod => {
+                              // reparto el material por hanegadas igual que los litros
+                              const cantidad = prod.pivot.dosis_introducida * fum.turbos * proporcion
+                              const coste = cantidad * Number(prod.precio || 0)
+                              return (
+                                <tr key={`prod-t-${fum.id}-${prod.id}`} className="tabla-fila-material">
+                                  <td>{prod.nombre}</td>
+                                  <td>{prod.pivot.dosis_introducida} {prod.unidad}/turbo · {cantidad.toFixed(2)} {prod.unidad}</td>
+                                  <td>—</td>
+                                  <td>—</td>
+                                  <td>{coste.toFixed(2)} €</td>
+                                </tr>
+                              )
+                            })}
+                          </>
+                        )
+                      })
                     }
 
                     <tr className="tabla-separador"><td colSpan={5}></td></tr>
@@ -366,16 +400,16 @@ const Gastos = () => {
                         <>
                           <tr key={`mochila-${fum.id}`}>
                             <td>Mochila hierba</td>
-                            <td className="detalle-fechas">{formatearFecha(fum.hora_inicio)} · {fum.operario} · {fum.mochilas} mochila{fum.mochilas !== 1 ? 's' : ''}</td>
+                            <td className="detalle-fechas">
+                              {formatearFecha(fum.hora_inicio)} · {fum.operario} · {fum.mochilas} mochila{fum.mochilas !== 1 ? 's' : ''}
+                            </td>
                             <td>{(fum.duracion_minutos / 60).toFixed(1)} h</td>
-                            {/* litros divididos entre num_parcelas para mostrar solo los de esta parcela */}
-                            <td>{calcularLitros(fum)} L</td>
+                            <td>{calcularLitros(fum).toFixed(0)} L</td>
                             <td>{Number(fum.precio).toFixed(2)} €</td>
                           </tr>
                           {fum.productos?.map(prod => {
-                            // divido entre num_parcelas para mostrar solo el material de esta parcela
-                            const numParcelas = fum.num_parcelas || 1
-                            const cantidad = (prod.pivot.dosis_introducida * fum.mochilas) / numParcelas
+                            // mochila va directo sin proporcion porque es una sola parcela
+                            const cantidad = prod.pivot.dosis_introducida * fum.mochilas
                             const coste = cantidad * Number(prod.precio || 0)
                             return (
                               <tr key={`prod-m-${fum.id}-${prod.id}`} className="tabla-fila-material">
