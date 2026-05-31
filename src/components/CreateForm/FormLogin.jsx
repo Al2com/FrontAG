@@ -113,7 +113,7 @@ const cerrarModal = () => setModalError({ visible: false, mensaje: '' })
         <form onSubmit={enviarFormulario}>
             <div className="form-login">
                 <div className="header-login">
-                    <img src="./LogoAgroControl.webp" alt="Logo AgroControl" />
+                    <img src="./AgroControl.webp" alt="Logo AgroControl" />
                 </div>
                 <div>
                     <label>Correo Electronico</label>
