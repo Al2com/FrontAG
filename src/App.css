@@ -134,7 +134,7 @@ button:hover {
   flex-direction: column;
 }
 
-/* -- MEDIA QUERIES ------------------------------------------ */
+/* MEDIA QUERIES */
 @media (max-width: 1024px) {
   .app-container { grid-template-columns: 80px 1fr; }
 }
