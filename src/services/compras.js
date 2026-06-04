@@ -1,6 +1,6 @@
 import axios from './axios.js';
 
-const base = '/compras';
+const base = '/api/compras';
 
 const getCompras = () => {
     return axios.get(base).then(response => response.data);
