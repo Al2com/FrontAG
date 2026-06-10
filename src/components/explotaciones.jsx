@@ -6,6 +6,7 @@ import BtnCrear from './buttons/BtnCrear.jsx';
 import BtnEliminar from './buttons/btnEliminar.jsx';
 import ExplotacionCard from './InfoPanel/ExplotacionCard .jsx';
 import BtnSubmit from './buttons/BtnSubmit.jsx';
+import Modal from './Modal/Modal.jsx';
 import './Style/cards.css';
 import './Style/forms.css';
 import './Style/search.css';
@@ -30,6 +31,30 @@ const Explotaciones = () => {
 
   // controla si se ve tabla o tarjetas
   const [mostrarTabla, setMostrarTabla] = useState(false);
+
+  // modal de confirmacion
+  const [modalConfirm, setModalConfirm] = useState({ visible: false, id: null });
+
+  const confirmarEliminar = (id) => {
+    setModalConfirm({ visible: true, id });
+  };
+
+  // pido confirmacion antes de borrar y actualizo la lista sin recargar
+  const eliminarExplotacion = () => {
+    explotacionService.borrarExplotacion(modalConfirm.id)
+      .then(() => {
+        setResumen(resumen.filter(exp => exp.id !== modalConfirm.id));
+        setModalConfirm({ visible: false, id: null });
+      })
+      .catch(() => {
+        setErrorCarga('Error al eliminar la explotacion');
+        setModalConfirm({ visible: false, id: null });
+      });
+  };
+
+  const cancelarEliminar = () => {
+    setModalConfirm({ visible: false, id: null });
+  };
 
   const rol = sessionStorage.getItem('rol');
 
@@ -67,22 +92,21 @@ const Explotaciones = () => {
       return 0;
     });
 
-  // pido confirmacion antes de borrar y actualizo la lista sin recargar
-  const eliminarExplotacion = (id) => {
-    if (window.confirm('Estas seguro de eliminar la explotacion?')) {
-      explotacionService.borrarExplotacion(id)
-        .then(() => setResumen(resumen.filter(exp => exp.id !== id)))
-        .catch(() => setErrorCarga('Error al eliminar la explotacion'))
-    }
-  };
-
   return (
     <div>
+      {/* modal de confirmacion para eliminar */}
+      {modalConfirm.visible && (
+        <Modal
+          mesajeError="¿Estás seguro de eliminar la explotación?"
+          cerrarModal={cancelarEliminar}
+          onConfirmar={eliminarExplotacion}
+        />
+      )}
+
       <div className="menuExplo">
-     
         <div className="menu-button">
           {rol !== 'trabajador' && (
-            <BtnCrear to="/nueva-explotacion" titulo="Crear Explotacion" iconIng="./plusNegro.png" />
+            <BtnCrear to="/nueva-explotacion" titulo="Crear Explotación" iconIng="./plusNegro.png" />
           )}
           <div className="separador-btn"></div>
           <button
@@ -110,7 +134,6 @@ const Explotaciones = () => {
           <img src="./search.svg" alt="buscar" />
           <input onChange={(e) => setBusqueda(e.target.value)} placeholder="Buscar" />
         </div>
-
         <div className="barra-select-lg">
           <select onChange={(e) => setFiltroTamaño(e.target.value)}>
             <option value="todos">Tamano ▾</option>
@@ -118,7 +141,6 @@ const Explotaciones = () => {
             <option value="minimo">Menor tamano</option>
           </select>
         </div>
-
         <div className="barra-select-lg">
           <select onChange={(e) => setFiltroParcelas(e.target.value)}>
             <option value="todos">Parcelas ▾</option>
@@ -150,7 +172,7 @@ const Explotaciones = () => {
                   <td>
                     <div className="tabla-botones">
                       <BtnSubmit texto="Editar" to={`/explotacion/${explotacion.id}`} />
-                      <BtnEliminar texto="Eliminar" onClick={() => eliminarExplotacion(explotacion.id)} />
+                      <BtnEliminar texto="Eliminar" onClick={() => confirmarEliminar(explotacion.id)} />
                     </div>
                   </td>
                 )}
@@ -174,7 +196,7 @@ const Explotaciones = () => {
                   <BtnSubmit texto="Editar" to={`/explotacion/${explotacion.id}`} />
                 )}
                 {rol !== 'trabajador' && (
-                  <BtnEliminar texto="Eliminar" onClick={() => eliminarExplotacion(explotacion.id)} />
+                  <BtnEliminar texto="Eliminar" onClick={() => confirmarEliminar(explotacion.id)} />
                 )}
               </div>
             </ExplotacionCard>

@@ -1,7 +1,3 @@
-/* ============================================================
-   navbar.css — Menú lateral de navegación
-   Importar en: menuNav.jsx, MenuBar.jsx
-   ============================================================ */
 
 .navbar {
   display: flex;
@@ -11,6 +7,10 @@
   position: sticky;
   top: 0;
   box-shadow: 4px 0 12px rgba(0, 0, 0, 0.08);
+}
+.olvidar-contasena{
+ text-align: center;
+
 }
 
 .navbar-logo {
