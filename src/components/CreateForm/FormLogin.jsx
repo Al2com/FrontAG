@@ -2,6 +2,7 @@ import Modal from "../Modal/Modal.jsx"
 import authService from '../../services/auth'
 import '../Style/forms.css'
 import { useState } from "react"
+import { Link } from "react-router-dom"
 
 const FormLogin = ({setUser}) =>{
 
@@ -122,10 +123,13 @@ const cerrarModal = () => setModalError({ visible: false, mensaje: '' })
                 </div>
                 <div>
                     <label>Contraseña</label>
-                    <input name="password" value={credencials.password} onChange={handleChange}/>
+                    <input name="password" type="password" value={credencials.password} onChange={handleChange}/>
                     {errors.password && <p className="error">{errors.password}</p>}
                 </div>
                 <button type="submit">Iniciar Sesión</button>
+                <p className="olvidar-contasena">
+                    <Link to="/olvidar-contrasena">¿Olvidaste tu contraseña?</Link>
+                </p>
             </div>
         </form>
     </div>

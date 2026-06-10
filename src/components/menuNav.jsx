@@ -65,7 +65,7 @@ const MenuNav = () => {
           to="/recoleccion"
           iconImg="./iconRecoleccion.svg"
           altText="Recoleccion"
-          texto="Recoleccion"
+          texto="Recolección"
           isSeleccionado={botonActivo === 'Recoleccion'} 
           onClick={() => setBotonActivo('Recoleccion')}
         />
@@ -76,7 +76,7 @@ const MenuNav = () => {
           to="/almacen"
           iconImg="./iconAlmacen.svg"
           altText="Almacen"
-          texto="Almacen"
+          texto="Almacén"
           isSeleccionado={botonActivo === 'Almacén'} 
           onClick={() => setBotonActivo('Almacen')}
         />
@@ -97,7 +97,7 @@ const MenuNav = () => {
           to=""
           iconImg="./analisis.svg"
           altText="Análisis"
-          texto="Análsis"
+          texto="Análisis"
           // isSeleccionado={botonActivo === 'Gastos'} 
           // onClick={() => setBotonActivo('Gastos')}
         />
