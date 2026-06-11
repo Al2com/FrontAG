@@ -3,8 +3,8 @@ import { useNavigate } from "react-router-dom";
 import parcelaService from '../../services/parcelas';
 import explotacionesService from "../../services/explotaciones";
 import propietariosService from "../../services/propietarios";
+import Modal from '../Modal/Modal.jsx';
 import '../Style/forms.css'
-
 
 const FormParcela = () => {
 
@@ -12,6 +12,9 @@ const FormParcela = () => {
 
   const [explotaciones, setExplotaciones] = useState([]);
   const [propietarios, setPropietario] = useState([]);
+
+  // modal de confirmacion para crear
+  const [modalConfirm, setModalConfirm] = useState(false);
 
   const regexPoligono = /^\d{1,12}$/;
   const regexParcela = /^\d{1,4}$/;
@@ -64,37 +67,30 @@ const FormParcela = () => {
       mensaje = 'Debes seleccionar una opción';
       comprobar = false;
     }
-
     if (name === 'poligono' && !regexPoligono.test(value)) {
       mensaje = 'Número de 2 cifras';
       comprobar = false;
     }
-
     if (name === 'parcela' && !regexParcela.test(value)) {
       mensaje = 'Número de 2 cifras';
       comprobar = false;
     }
-
     if (name === 'variedad' && !regexVariedad.test(value)) {
       mensaje = 'Palabra de 8 letras máximo';
       comprobar = false;
     }
-
     if (name === 'dimension_hanegadas' && !regexDimension.test(value)) {
       mensaje = 'Número decimal ejemplo 2.34';
       comprobar = false;
     }
-
     if (name === 'num_arboles' && !regexNumArboles.test(value)) {
       mensaje = 'Número entero max 3000';
       comprobar = false;
     }
-
     if (name === 'fecha_plantacion' && value === "") {
       mensaje = 'La fecha es obligatoria';
       comprobar = false;
     }
-
     if (name === 'descripcion' && !regexDescripcion.test(value)) {
       mensaje = 'Mínimo 50 caracteres';
       comprobar = false;
@@ -110,6 +106,7 @@ const FormParcela = () => {
     validarCampos(name, value);
   }
 
+  // valida y abre el modal si todo está bien
   const enviarFormulario = (e) => {
     e.preventDefault();
 
@@ -125,34 +122,47 @@ const FormParcela = () => {
 
     if (explotacionOk && propietarioOk && poligonoOk && parcelaOk && variedadOk &&
       dimensionOk && numArbolesOk && fechaOk && descripcionOk) {
-
-      parcelaService.postCrear(formData)
-        .then(() => {
-          alert('Parcela creada correctamente');
-          navigate('/parcelas');
-        })
-        .catch(err => {
-          if (err.response?.status === 422) {
-            const erroresLaravel = err.response.data.errors;
-            const nuevosErrores = {};
-            for (const campo in erroresLaravel) {
-              nuevosErrores[campo] = erroresLaravel[campo][0];
-            }
-            setErrors(prev => ({ ...prev, ...nuevosErrores }));
-          } else {
-            alert('Error del servidor. Inténtalo de nuevo.');
-          }
-        });
+      setModalConfirm(true);
     }
   }
 
+  // el usuario confirma en el modal y se llama al back
+  const crearParcela = () => {
+    parcelaService.postCrear(formData)
+      .then(() => {
+        navigate('/parcelas');
+      })
+      .catch(err => {
+        setModalConfirm(false);
+        if (err.response?.status === 422) {
+          const erroresLaravel = err.response.data.errors;
+          const nuevosErrores = {};
+          for (const campo in erroresLaravel) {
+            nuevosErrores[campo] = erroresLaravel[campo][0];
+          }
+          setErrors(prev => ({ ...prev, ...nuevosErrores }));
+        } else {
+          alert('Error del servidor. Inténtalo de nuevo.');
+        }
+      });
+  };
+
   return (
     <div className="form-container">
+
+      {/* modal de confirmacion para crear */}
+      {modalConfirm && (
+        <Modal
+          mesajeError="¿Estás seguro de crear esta parcela?"
+          cerrarModal={() => setModalConfirm(false)}
+          onConfirmar={crearParcela}
+        />
+      )}
+
       <h1>Nueva Parcela</h1>
 
       <form className="form-grid" onSubmit={enviarFormulario}>
 
-        {/* Explotación */}
         <div className="form-grupo">
           <label htmlFor="explotacion_id">Explotación *</label>
           <select
@@ -172,7 +182,6 @@ const FormParcela = () => {
           {errors.explotacion_id && <span className="mensaje-error">{errors.explotacion_id}</span>}
         </div>
 
-        {/* Propietario */}
         <div className="form-grupo">
           <label htmlFor="propietarios_id">Propietario *</label>
           <select
@@ -192,7 +201,6 @@ const FormParcela = () => {
           {errors.propietarios_id && <span className="mensaje-error">{errors.propietarios_id}</span>}
         </div>
 
-        {/* Tipo de Riego */}
         <div className="form-grupo">
           <label htmlFor="riego">Tipo de Riego *</label>
           <select
@@ -206,7 +214,6 @@ const FormParcela = () => {
           </select>
         </div>
 
-        {/* Polígono */}
         <div className="form-grupo">
           <label htmlFor="poligono">Polígono *</label>
           <input
@@ -221,7 +228,6 @@ const FormParcela = () => {
           {errors.poligono && <span className="mensaje-error">{errors.poligono}</span>}
         </div>
 
-        {/* Parcela */}
         <div className="form-grupo">
           <label htmlFor="parcela">Parcela *</label>
           <input
@@ -236,7 +242,6 @@ const FormParcela = () => {
           {errors.parcela && <span className="mensaje-error">{errors.parcela}</span>}
         </div>
 
-        {/* Variedad */}
         <div className="form-grupo">
           <label htmlFor="variedad">Variedad *</label>
           <input
@@ -251,7 +256,6 @@ const FormParcela = () => {
           {errors.variedad && <span className="mensaje-error">{errors.variedad}</span>}
         </div>
 
-        {/* Hanegadas */}
         <div className="form-grupo">
           <label htmlFor="dimension_hanegadas">Hanegadas *</label>
           <input
@@ -267,7 +271,6 @@ const FormParcela = () => {
           {errors.dimension_hanegadas && <span className="mensaje-error">{errors.dimension_hanegadas}</span>}
         </div>
 
-        {/* Número de Árboles */}
         <div className="form-grupo">
           <label htmlFor="num_arboles">Número de Árboles *</label>
           <input
@@ -282,7 +285,6 @@ const FormParcela = () => {
           {errors.num_arboles && <span className="mensaje-error">{errors.num_arboles}</span>}
         </div>
 
-        {/* Fecha de Plantación */}
         <div className="form-grupo">
           <label htmlFor="fecha_plantacion">Fecha de Plantación *</label>
           <input
@@ -296,7 +298,6 @@ const FormParcela = () => {
           {errors.fecha_plantacion && <span className="mensaje-error">{errors.fecha_plantacion}</span>}
         </div>
 
-        {/* Nombre parcela */}
         <div className="form-grupo">
           <label>Nombre de la parcela</label>
           <input
@@ -309,7 +310,6 @@ const FormParcela = () => {
           />
         </div>
 
-        {/* Descripción */}
         <div className="form-grupo full-width">
           <label>Descripción</label>
           <textarea
@@ -326,7 +326,6 @@ const FormParcela = () => {
         <div className="form-actions full-width">
           <button type="submit">Guardar</button>
           <button type="button" onClick={() => navigate('/parcelas')} className="btn-cancel">Atrás</button>
-         
         </div>
 
       </form>
