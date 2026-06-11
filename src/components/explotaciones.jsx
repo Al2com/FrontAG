@@ -132,7 +132,7 @@ const Explotaciones = () => {
       <div className="filtro-explo">
         <div className="barra-search">
           <img src="./search.svg" alt="buscar" />
-          <input onChange={(e) => setBusqueda(e.target.value)} placeholder="Buscar" />
+          <input onChange={(e) => setBusqueda(e.target.value)} placeholder="Busca por nombre explotación" />
         </div>
         <div className="barra-select-lg">
           <select onChange={(e) => setFiltroTamaño(e.target.value)}>
