@@ -1,11 +1,15 @@
 import { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import fumigacionesService from '../../services/fumigaciones'
+import Modal from '../Modal/Modal.jsx'
 
 const EditarFumigacion = () => {
 
     const { id } = useParams()
     const navigate = useNavigate()
+
+    // modal de confirmacion para guardar cambios
+    const [modalConfirm, setModalConfirm] = useState(false)
 
     const [formData, setFormData] = useState({
         parcela_id: "",
@@ -31,15 +35,34 @@ const EditarFumigacion = () => {
         setFormData({ ...formData, [e.target.name]: e.target.value })
     }
 
+    // abre el modal al pulsar guardar
     const handleSubmit = (e) => {
         e.preventDefault()
+        setModalConfirm(true)
+    }
+
+    // el usuario confirma y se llama al back
+    const guardarCambios = () => {
         fumigacionesService.putActualizarFumigacion(id, formData)
             .then(() => navigate('/operaciones'))
-            .catch(err => console.error('Error al actualizar:', err))
+            .catch(err => {
+                setModalConfirm(false)
+                console.error('Error al actualizar:', err)
+            })
     }
 
     return (
         <div className="form-container">
+
+            {/* modal de confirmacion para guardar cambios */}
+            {modalConfirm && (
+                <Modal
+                    mesajeError="¿Estás seguro de guardar los cambios?"
+                    cerrarModal={() => setModalConfirm(false)}
+                    onConfirmar={guardarCambios}
+                />
+            )}
+
             <h1>Editar Fumigación</h1>
             <form onSubmit={handleSubmit} className="form-grid">
 

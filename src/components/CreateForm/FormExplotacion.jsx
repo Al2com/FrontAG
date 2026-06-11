@@ -4,12 +4,16 @@ import { useEffect } from 'react';
 import explotacionService from '../../services/explotaciones';
 import usuariosService from '../../services/usuarios';
 import propietariosService from '../../services/propietarios';
+import Modal from '../Modal/Modal.jsx';
 import '../Style/forms.css'
 
 const FormExplotacion = () => {
 
   const [usuarios, setUsers] = useState([]);
   const [propietarios, setPropietario] = useState([]);
+
+  // modal de confirmacion para crear
+  const [modalConfirm, setModalConfirm] = useState(false);
 
   useEffect(() => {
     usuariosService.getUsuarios()
@@ -77,6 +81,7 @@ const FormExplotacion = () => {
     validarCampos(name, value);
   }
 
+  // valida y abre el modal si todo está bien
   const enviarFormulario = (e) => {
     e.preventDefault();
 
@@ -87,28 +92,43 @@ const FormExplotacion = () => {
     const propietarioOk = validarCampos('propietario_id', formData.propietario_id);
 
     if (nombreOk && ubicacionOk && descripcionOk && usuarioOk && propietarioOk) {
-
-      explotacionService.postCrear(formData)
-        .then(() => {
-          navigate('/explotaciones');
-        })
-        .catch(err => {
-          if (err.response?.status === 422) {
-            const erroresLaravel = err.response.data.errors;
-            const nuevosErrores = {};
-            for (const campo in erroresLaravel) {
-              nuevosErrores[campo] = erroresLaravel[campo][0];
-            }
-            setErrors(prev => ({ ...prev, ...nuevosErrores }));
-          } else {
-            alert('Error del servidor. Inténtalo de nuevo.');
-          }
-        });
+      setModalConfirm(true);
     }
+  };
+
+  // el usuario confirma en el modal y se llama al back
+  const crearExplotacion = () => {
+    explotacionService.postCrear(formData)
+      .then(() => {
+        navigate('/explotaciones');
+      })
+      .catch(err => {
+        setModalConfirm(false);
+        if (err.response?.status === 422) {
+          const erroresLaravel = err.response.data.errors;
+          const nuevosErrores = {};
+          for (const campo in erroresLaravel) {
+            nuevosErrores[campo] = erroresLaravel[campo][0];
+          }
+          setErrors(prev => ({ ...prev, ...nuevosErrores }));
+        } else {
+          alert('Error del servidor. Inténtalo de nuevo.');
+        }
+      });
   };
 
   return (
     <div className="form-container">
+
+      {/* modal de confirmacion para crear */}
+      {modalConfirm && (
+        <Modal
+          mesajeError="¿Estás seguro de crear esta explotación?"
+          cerrarModal={() => setModalConfirm(false)}
+          onConfirmar={crearExplotacion}
+        />
+      )}
+
       <h1>Nueva Explotación</h1>
 
       <form className="form-grid" onSubmit={enviarFormulario}>
@@ -188,8 +208,7 @@ const FormExplotacion = () => {
 
         <div className="form-actions full-width">
           <button type="submit">Guardar</button>
-          <button type="submit" onClick={()=>{navigate('/explotaciones')}} className="btn-cancel">Atrás</button>
-
+          <button type="button" onClick={() => navigate('/explotaciones')} className="btn-cancel">Atrás</button>
         </div>
 
       </form>
