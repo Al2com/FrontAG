@@ -97,8 +97,8 @@ const Parcela = () => {
       <div className="filtro-explo">
         <div className="barra-search">
           <img src="./search.svg" alt="buscar" />
-          <input onChange={(e) => setBusqueda(e.target.value)} placeholder="Buscar" />
-        </div>
+          <input onChange={(e) => setBusqueda(e.target.value)} placeholder="Busca por variedad" />
+        </div> 
 
         <div className="barra-select">
           <select onChange={(e) => setFiltroRiego(e.target.value)}>
