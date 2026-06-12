@@ -2,32 +2,23 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import explotacionService from '../../services/explotaciones';
-import usuariosService from '../../services/usuarios';
 import propietariosService from '../../services/propietarios';
 import Modal from '../Modal/Modal.jsx';
 import '../Style/forms.css'
 
 const FormExplotacion = () => {
 
-  const [usuarios, setUsers] = useState([]);
   const [propietarios, setPropietario] = useState([]);
-
-  // modal de confirmacion para crear
   const [modalConfirm, setModalConfirm] = useState(false);
 
   useEffect(() => {
-    usuariosService.getUsuarios()
-      .then(data => setUsers(data.usuarios))
-      .catch(() => setErrorUsuarios('Error al cargar los usuarios'))
-
     propietariosService.getPropietarios()
       .then(data => setPropietario(data.propietarios))
-      .catch(() => setErrorPropietarios('Error al cargar los propietarios'))
+      .catch(() => console.error('Error al cargar los propietarios'))
   }, []);
 
   const [formData, setFormData] = useState({
     nombre: '',
-    user_id: '',
     ubicacion: '',
     descripcion: '',
     propietario_id: '',
@@ -35,7 +26,6 @@ const FormExplotacion = () => {
 
   const [errors, setErrors] = useState({
     nombre: '',
-    user_id: '',
     ubicacion: '',
     descripcion: '',
     propietario_id: '',
@@ -55,18 +45,15 @@ const FormExplotacion = () => {
       mensaje = 'Más de 3 letras, o menos de 25';
       comprobar = false;
     }
-
     if (name === 'ubicacion' && !regexUbicacion.test(value)) {
       mensaje = 'Solo letras, mínimo 3 caracteres';
       comprobar = false;
     }
-
     if (name === 'descripcion' && !regexDescripcion.test(value)) {
       mensaje = 'Mínimo 10 caracteres';
       comprobar = false;
     }
-
-    if ((name === 'user_id' || name === 'propietario_id') && value === "") {
+    if (name === 'propietario_id' && value === "") {
       mensaje = 'Debes seleccionar una opción';
       comprobar = false;
     }
@@ -81,22 +68,19 @@ const FormExplotacion = () => {
     validarCampos(name, value);
   }
 
-  // valida y abre el modal si todo está bien
   const enviarFormulario = (e) => {
     e.preventDefault();
 
     const nombreOk = validarCampos('nombre', formData.nombre);
     const ubicacionOk = validarCampos('ubicacion', formData.ubicacion);
     const descripcionOk = validarCampos('descripcion', formData.descripcion);
-    const usuarioOk = validarCampos('user_id', formData.user_id);
     const propietarioOk = validarCampos('propietario_id', formData.propietario_id);
 
-    if (nombreOk && ubicacionOk && descripcionOk && usuarioOk && propietarioOk) {
+    if (nombreOk && ubicacionOk && descripcionOk && propietarioOk) {
       setModalConfirm(true);
     }
   };
 
-  // el usuario confirma en el modal y se llama al back
   const crearExplotacion = () => {
     explotacionService.postCrear(formData)
       .then(() => {
@@ -120,7 +104,6 @@ const FormExplotacion = () => {
   return (
     <div className="form-container">
 
-      {/* modal de confirmacion para crear */}
       {modalConfirm && (
         <Modal
           mesajeError="¿Estás seguro de crear esta explotación?"
@@ -155,24 +138,6 @@ const FormExplotacion = () => {
             className={errors.ubicacion ? 'input-error' : ''}
           />
           {errors.ubicacion && <span className="mensaje-error">{errors.ubicacion}</span>}
-        </div>
-
-        <div className="form-grupo">
-          <label>Usuario</label>
-          <select
-            name="user_id"
-            value={formData.user_id}
-            onChange={handleChange}
-            className={errors.user_id ? 'input-error' : ''}
-          >
-            <option value="">Selecciona un usuario</option>
-            {usuarios.map(usuario => (
-              <option key={usuario.id} value={usuario.id}>
-                {usuario.name}
-              </option>
-            ))}
-          </select>
-          {errors.user_id && <span className="mensaje-error">{errors.user_id}</span>}
         </div>
 
         <div className="form-grupo">
