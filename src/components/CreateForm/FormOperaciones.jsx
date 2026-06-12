@@ -5,6 +5,7 @@ import operacionesService from '../../services/operaciones'
 import productosService from '../../services/productos'
 import Modal from '../Modal/Modal'
 import '../Style/forms.css'
+import axios from '../../services/axios'
 
 const FormOperacion = () => {
 
@@ -12,9 +13,9 @@ const FormOperacion = () => {
 
   const [parcelas, setParcelas] = useState([])
   const [productos, setProductos] = useState([])
+  const [trabajadores, setTrabajadores] = useState([])
   const [precioPorHora, setPrecioPorHora] = useState('')
 
-  // estados del modal de exito o error
   const [mostrarModal, setMostrarModal] = useState(false)
   const [mensajeModal, setMensajeModal] = useState('')
   const [esExito, setEsExito] = useState(false)
@@ -45,8 +46,18 @@ const FormOperacion = () => {
     dosis: ''
   })
 
-  // solo mostramos los campos de producto y dosis si el tipo es abonado
   const esAbonado = formData.tipo_operacion === 'abonado'
+
+  // cargamos los trabajadores del admin logueado
+  useEffect(() => {
+    axios.get('/api/trabajadores')
+      .then(res => setTrabajadores(res.data.usuarios))
+      .catch(() => {
+        setMensajeModal('Error al cargar los trabajadores.')
+        setEsExito(false)
+        setMostrarModal(true)
+      })
+  }, [])
 
   // cargamos las parcelas al montar el componente
   useEffect(() => {
@@ -70,13 +81,10 @@ const FormOperacion = () => {
       })
   }, [])
 
-  // si es abonado calculo el precio automaticamente multiplicando precio del producto por la dosis
   useEffect(() => {
     if (!esAbonado) return
-
     const producto = productos.find(p => p.id === parseInt(formData.producto_id))
     const dosis = parseFloat(formData.dosis)
-
     if (producto && !isNaN(dosis) && dosis > 0) {
       const precioCalculado = (producto.precio * dosis).toFixed(2)
       setFormData(prev => ({ ...prev, precio: precioCalculado }))
@@ -85,11 +93,9 @@ const FormOperacion = () => {
     }
   }, [formData.producto_id, formData.dosis, esAbonado])
 
-  // cuando cambia la duracion recalculo el precio total multiplicando precio por hora por las horas
   useEffect(() => {
     const hora = parseFloat(precioPorHora)
     const duracion = parseFloat(formData.duracion_minutos)
-
     if (!isNaN(hora) && !isNaN(duracion) && hora > 0 && duracion > 0) {
       const horas = duracion / 60
       const total = (hora * horas).toFixed(2)
@@ -111,28 +117,23 @@ const FormOperacion = () => {
       mensaje = 'Debe ser un número (máx. 4 cifras)'
       comprobar = false
     }
-
     if (name === 'descripcion' && !regexDescripcion.test(value)) {
       mensaje = 'Mínimo 10 caracteres'
       comprobar = false
     }
-
     if ((name === 'parcela_id' || name === 'tipo_operacion' || name === 'operario') && value === '') {
       mensaje = 'Debes seleccionar una opción'
       comprobar = false
     }
-
     if (name === 'hora_inicio' && value === '') {
       mensaje = 'La fecha y hora son obligatorias'
       comprobar = false
     }
-
     if (name === 'precio' && !regexPrecio.test(value)) {
       mensaje = 'Introduce un precio válido (ej: 12.50)'
       comprobar = false
     }
 
-    // prevErrors garantiza que cogemos el estado más reciente antes de actualizarlo
     setErrors(prevErrors => ({ ...prevErrors, [name]: mensaje }))
     return comprobar
   }
@@ -143,18 +144,13 @@ const FormOperacion = () => {
     validarCampos(name, value)
   }
 
-  // si fue exito navego a operaciones, si fue error solo cierro para corregir el formulario
   const cerrarModal = () => {
     setMostrarModal(false)
-    if (esExito) {
-      navigate('/operaciones')
-    }
+    if (esExito) navigate('/operaciones')
   }
 
   const enviarFormulario = (e) => {
     e.preventDefault()
-
-    // validamos todos los campos antes de enviar
     const parcelaOk     = validarCampos('parcela_id', formData.parcela_id)
     const operarioOk    = validarCampos('operario', formData.operario)
     const tipoOk        = validarCampos('tipo_operacion', formData.tipo_operacion)
@@ -166,14 +162,12 @@ const FormOperacion = () => {
     if (parcelaOk && operarioOk && tipoOk && fechaOk && duracionOk && descripcionOk && precioOk) {
       operacionesService.postCrear(formData)
         .then(() => {
-          // operacion creada correctamente, muestro modal de exito
           setMensajeModal('Operación creada correctamente')
           setEsExito(true)
           setMostrarModal(true)
         })
         .catch(err => {
           if (err.response?.status === 422) {
-            // Laravel manda los errores así: { errors: { campo: ["mensaje"] } }
             const erroresLaravel = err.response.data.errors
             const nuevosErrores = {}
             for (const campo in erroresLaravel) {
@@ -181,7 +175,6 @@ const FormOperacion = () => {
             }
             setErrors(prev => ({ ...prev, ...nuevosErrores }))
           } else {
-            // error generico de servidor
             setMensajeModal('Error del servidor. Inténtalo de nuevo.')
             setEsExito(false)
             setMostrarModal(true)
@@ -194,12 +187,8 @@ const FormOperacion = () => {
     <div className="form-container">
       <h1>Nueva Operación</h1>
 
-      {/* modal de exito o error al enviar el formulario */}
       {mostrarModal && (
-        <Modal
-          mesajeError={mensajeModal}
-          cerrarModal={cerrarModal}
-        />
+        <Modal mesajeError={mensajeModal} cerrarModal={cerrarModal} />
       )}
 
       <form onSubmit={enviarFormulario} className="form-grid">
@@ -232,9 +221,10 @@ const FormOperacion = () => {
             onChange={handleChange}
             className={errors.operario ? 'input-error' : ''}
           >
-            <option value="">Selecciona un usuario</option>
-            <option value="Luis Pérez">Luis Perez</option>
-            <option value="Pepe Martinez">Pepe Martinez</option>
+            <option value="">Selecciona un operario</option>
+            {trabajadores.map(t => (
+              <option key={t.id} value={t.name}>{t.name}</option>
+            ))}
           </select>
           {errors.operario && <span className="mensaje-error">{errors.operario}</span>}
         </div>
@@ -257,7 +247,6 @@ const FormOperacion = () => {
           {errors.tipo_operacion && <span className="mensaje-error">{errors.tipo_operacion}</span>}
         </div>
 
-        {/* campos extra que solo aparecen si el tipo de operacion es abonado */}
         {esAbonado && (
           <>
             <div className="form-grupo">
@@ -325,7 +314,6 @@ const FormOperacion = () => {
           {errors.duracion_minutos && <span className="mensaje-error">{errors.duracion_minutos}</span>}
         </div>
 
-        {/* precio por hora, el total se calcula automaticamente al introducir la duracion */}
         <div className="form-grupo">
           <label htmlFor="precioPorHora">Precio por hora (€/h) *</label>
           <input
