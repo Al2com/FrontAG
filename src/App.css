@@ -135,30 +135,53 @@ button:hover {
 }
 
 /* MEDIA QUERIES */
+
+/* Tablet: sidebar mas estrecho pero completo */
 @media (max-width: 1024px) {
-  .app-container { grid-template-columns: 80px 1fr; }
+  .app-container { grid-template-columns: 210px 1fr; }
+
+  .content { padding: 0 20px 20px; }
 }
 
+/* Movil: el sidebar pasa a drawer (navbar.css), el layout es una sola columna
+   con hueco arriba para la cabecera fija de 56px */
 @media (max-width: 768px) {
   .app-container {
     display: flex;
     flex-direction: column;
     height: 100vh;
+    height: 100dvh; /* evita saltos con la barra del navegador movil */
+    padding-top: 56px;
   }
 
   .main-content {
     flex: 1;
     overflow-y: auto;
-    padding-bottom: 70px;
   }
 
-  .content { padding: 15px; }
+  .content { padding: 12px; }
 
   .top-header {
-    padding: 12px 16px;
+    padding: 10px 12px;
     gap: var(--esp-xs);
-   
-  
-    
+    flex-wrap: wrap;
+  }
+
+  .btn-logout {
+    padding: 8px 14px;
+    font-size: 13px;
+  }
+
+  .user-name { font-size: 14px; }
+  .user-rol { font-size: 12px; }
+}
+
+/* Movil pequeño */
+@media (max-width: 480px) {
+  .content { padding: 10px 8px; }
+
+  button {
+    padding: 10px 16px;
+    font-size: 14px;
   }
 }

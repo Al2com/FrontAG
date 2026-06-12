@@ -31,6 +31,26 @@
 .barra-select { width: 120px; }
 .barra-select-lg { width: 160px; }
 
+/* -- Responsive --------------------------------------------- */
+@media (max-width: 768px) {
+  .barra-search {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .barra-search input {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .barra-select,
+  .barra-select-lg {
+    margin-left: 0;
+    flex: 1;
+    min-width: 110px;
+  }
+}
+
 .barra-select select,
 .barra-select-lg select {
   border: none;

@@ -163,6 +163,18 @@
 
   .form-login {
     width: 90%;
+    max-width: 400px;
     padding: var(--esp-xl);
+  }
+
+  .form-container { padding: var(--esp-sm); }
+
+  .form-actions {
+    flex-direction: column-reverse;
+  }
+
+  .form-actions button {
+    width: 100%;
+    justify-content: center;
   }
 }
