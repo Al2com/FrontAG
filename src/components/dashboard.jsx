@@ -8,6 +8,7 @@ import operacionesService from '../services/operaciones.js';
 import fumigacionesService from '../services/fumigaciones.js';
 import tareasService from '../services/tareas.js';
 import almacenService from '../services/almacen.js';
+import productosService from '../services/productos.js';
 import { useEffect, useState } from 'react';
 
 const Dashboard = () => {
@@ -15,6 +16,7 @@ const Dashboard = () => {
   const [numParcelas, setNumParcelas] = useState(0);
   const [totalOperaciones, setTotalOperaciones] = useState(0);
   const [totalFumigaciones, setTotalFumigaciones] = useState(0);
+  const [totalProductos, setTotalProductos] = useState(0);
   const [actividadReciente, setActividadReciente] = useState({ operaciones: [], fumigaciones: [] });
   const [productosStockBajo, setProductosStockBajo] = useState([]);
 
@@ -34,6 +36,10 @@ const Dashboard = () => {
     fumigacionesService.getLista()
       .then(data => setTotalFumigaciones(data.length))
       .catch(err => console.error('Error fumigaciones:', err));
+
+    productosService.getProducto()
+      .then(data => setTotalProductos(data))
+      .catch(err => console.error('Error productos;',err))
 
     tareasService.getActividadReciente()
       .then(data => setActividadReciente(data))
@@ -55,7 +61,7 @@ const Dashboard = () => {
     { iconImg: './parcela.svg',       texto: 'Parcelas',       valor: numParcelas,       comentario: 'Total Parcelas'     },
     { iconImg: './operaciones.svg',   texto: 'Operaciones',    valor: totalOperaciones,  comentario: 'Total Operaciones'  },
     { iconImg: './fumigar1.svg',       texto: 'Fumigaciones',   valor: totalFumigaciones, comentario: 'Total Fumigaciones' },
-    { iconImg: './almacen.svg',       texto: 'Productos',      valor: 9,                 comentario: 'En almacén'         },
+    { iconImg: './almacen.svg',       texto: 'Productos',      valor: totalProductos,                 comentario: 'En almacén'         },
   ];
 
   return (

@@ -121,7 +121,10 @@ const Gastos = () => {
         fum.productos.forEach(prod => {
           // reparto el material proporcionalmente segun hanegadas
           const cantidad = prod.pivot.dosis_introducida * unidades * proporcion
-          const coste = cantidad * Number(prod.precio || 0)
+          // precio HISTORICO congelado en la pivote al registrar la fumigacion;
+          // si no existe (fumigaciones antiguas) uso el precio actual del producto
+          const precioUnidad = Number(prod.pivot.precio ?? prod.precio ?? 0)
+          const coste = cantidad * precioUnidad
           if (mapa[prod.id]) {
             mapa[prod.id].cantidad += cantidad
             mapa[prod.id].coste += coste
@@ -130,7 +133,7 @@ const Gastos = () => {
               id: prod.id,
               nombre: prod.nombre,
               unidad: prod.unidad,
-              precioPorUnidad: Number(prod.precio || 0),
+              precioPorUnidad: precioUnidad,
               cantidad,
               coste,
             }
@@ -369,7 +372,8 @@ const Gastos = () => {
                             {fum.productos?.map(prod => {
                               // reparto el material por hanegadas igual que los litros
                               const cantidad = prod.pivot.dosis_introducida * fum.turbos * proporcion
-                              const coste = cantidad * Number(prod.precio || 0)
+                              // precio congelado en la pivote, con fallback al actual
+                              const coste = cantidad * Number(prod.pivot.precio ?? prod.precio ?? 0)
                               return (
                                 <tr key={`prod-t-${fum.id}-${prod.id}`} className="tabla-fila-material">
                                   <td>{prod.nombre}</td>
@@ -410,7 +414,8 @@ const Gastos = () => {
                           {fum.productos?.map(prod => {
                             // mochila va directo sin proporcion porque es una sola parcela
                             const cantidad = prod.pivot.dosis_introducida * fum.mochilas
-                            const coste = cantidad * Number(prod.precio || 0)
+                            // precio congelado en la pivote, con fallback al actual
+                            const coste = cantidad * Number(prod.pivot.precio ?? prod.precio ?? 0)
                             return (
                               <tr key={`prod-m-${fum.id}-${prod.id}`} className="tabla-fila-material">
                                 <td>{prod.nombre}</td>
