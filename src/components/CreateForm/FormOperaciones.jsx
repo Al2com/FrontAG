@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import parcelasService from '../../services/parcelas'
 import operacionesService from '../../services/operaciones'
 import productosService from '../../services/productos'
+import CampoOperario from './CampoOperario'
 import Modal from '../Modal/Modal'
 import '../Style/forms.css'
-import axios from '../../services/axios'
 
 const FormOperacion = () => {
 
@@ -13,7 +13,6 @@ const FormOperacion = () => {
 
   const [parcelas, setParcelas] = useState([])
   const [productos, setProductos] = useState([])
-  const [trabajadores, setTrabajadores] = useState([])
   const [precioPorHora, setPrecioPorHora] = useState('')
 
   const [mostrarModal, setMostrarModal] = useState(false)
@@ -28,6 +27,7 @@ const FormOperacion = () => {
     hora_inicio: '',
     duracion_minutos: '',
     precio: '',
+    precio_material: '',
     descripcion: '',
     producto_id: '',
     dosis: ''
@@ -47,17 +47,7 @@ const FormOperacion = () => {
   })
 
   const esAbonado = formData.tipo_operacion === 'abonado'
-
-  // cargamos los trabajadores del admin logueado
-  useEffect(() => {
-    axios.get('/api/trabajadores')
-      .then(res => setTrabajadores(res.data.usuarios))
-      .catch(() => {
-        setMensajeModal('Error al cargar los trabajadores.')
-        setEsExito(false)
-        setMostrarModal(true)
-      })
-  }, [])
+  const esMantenimiento = formData.tipo_operacion === 'mantenimiento'
 
   // cargamos las parcelas al montar el componente
   useEffect(() => {
@@ -96,14 +86,18 @@ const FormOperacion = () => {
   useEffect(() => {
     const hora = parseFloat(precioPorHora)
     const duracion = parseFloat(formData.duracion_minutos)
+    const material = parseFloat(formData.precio_material) || 0
     if (!isNaN(hora) && !isNaN(duracion) && hora > 0 && duracion > 0) {
       const horas = duracion / 60
-      const total = (hora * horas).toFixed(2)
+      const total = (hora * horas + material).toFixed(2)
       setFormData(prev => ({ ...prev, precio: total }))
+    } else if (material > 0) {
+      // mantenimiento sin mano de obra: el gasto es solo el material
+      setFormData(prev => ({ ...prev, precio: material.toFixed(2) }))
     } else {
       setFormData(prev => ({ ...prev, precio: '' }))
     }
-  }, [formData.duracion_minutos, precioPorHora])
+  }, [formData.duracion_minutos, precioPorHora, formData.precio_material])
 
   const regexDuracion = /^[0-9]{1,4}$/
   const regexDescripcion = /^.{10,}$/
@@ -212,22 +206,7 @@ const FormOperacion = () => {
           {errors.parcela_id && <span className="mensaje-error">{errors.parcela_id}</span>}
         </div>
 
-        <div className="form-grupo">
-          <label htmlFor="operario">Operario *</label>
-          <select
-            id="operario"
-            name="operario"
-            value={formData.operario}
-            onChange={handleChange}
-            className={errors.operario ? 'input-error' : ''}
-          >
-            <option value="">Selecciona un operario</option>
-            {trabajadores.map(t => (
-              <option key={t.id} value={t.name}>{t.name}</option>
-            ))}
-          </select>
-          {errors.operario && <span className="mensaje-error">{errors.operario}</span>}
-        </div>
+        <CampoOperario value={formData.operario} onChange={handleChange} error={errors.operario} />
 
         <div className="form-grupo">
           <label htmlFor="tipo_operacion">Tipo de Operación *</label>
@@ -246,6 +225,22 @@ const FormOperacion = () => {
           </select>
           {errors.tipo_operacion && <span className="mensaje-error">{errors.tipo_operacion}</span>}
         </div>
+
+        {esMantenimiento && (
+          <div className="form-grupo">
+            <label htmlFor="precio_material">Precio del material reparado (€)</label>
+            <input
+              type="number"
+              id="precio_material"
+              name="precio_material"
+              value={formData.precio_material}
+              onChange={handleChange}
+              placeholder="Ej: 35.00"
+              min="0"
+              step="0.01"
+            />
+          </div>
+        )}
 
         {esAbonado && (
           <>

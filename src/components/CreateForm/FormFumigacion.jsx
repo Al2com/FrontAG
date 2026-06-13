@@ -6,7 +6,7 @@ import parcelasService from '../../services/parcelas'
 import productoService from '../../services/productos'
 import fumigacionService from '../../services/fumigaciones'
 import Modal from '../Modal/Modal.jsx'
-import axios from '../../services/axios'
+import CampoOperario from './CampoOperario'
 
 const FormFumigacion = () => {
 
@@ -14,7 +14,6 @@ const FormFumigacion = () => {
 
   const [parcelas, setParcelas] = useState([]);
   const [productos, setProductos] = useState([]);
-  const [trabajadores, setTrabajadores] = useState([]);
   const [productosAñadidos, setProductosAñadidos] = useState([])
 
   const [mostrarModal, setMostrarModal] = useState(false)
@@ -59,11 +58,6 @@ const FormFumigacion = () => {
     productoService.getProductos()
       .then(data => setProductos(data))
       .catch(err => console.error('Error cargando productos:', err))
-
-    // cargamos los trabajadores del admin logueado
-    axios.get('/api/trabajadores')
-      .then(res => setTrabajadores(res.data.usuarios))
-      .catch(err => console.error('Error cargando trabajadores:', err))
   }, [])
 
   useEffect(() => {
@@ -362,24 +356,9 @@ const FormFumigacion = () => {
             </div>
           )}
 
-          {/* operario solo sale si es mochila, cargado desde la BD */}
+          {/* operario solo sale si es mochila */}
           {formData.metodo_aplicacion === 'mochila' && (
-            <div className="form-grupo">
-              <label htmlFor="operario">Operario *</label>
-              <select
-                id="operario"
-                name="operario"
-                value={formData.operario}
-                onChange={handleChange}
-                className={errors.operario ? 'input-error' : ''}
-              >
-                <option value="">Selecciona un operario</option>
-                {trabajadores.map(t => (
-                  <option key={t.id} value={t.name}>{t.name}</option>
-                ))}
-              </select>
-              {errors.operario && <span className="mensaje-error">{errors.operario}</span>}
-            </div>
+            <CampoOperario value={formData.operario} onChange={handleChange} error={errors.operario} />
           )}
 
           <div className="form-grupo">
