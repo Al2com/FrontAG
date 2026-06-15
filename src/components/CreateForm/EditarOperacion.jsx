@@ -70,7 +70,6 @@ const EditarOperacion = () => {
                     <label>Tipo operación</label>
                     <select name="tipo_operacion" value={formData.tipo_operacion} onChange={handleChange}>
                         <option value="poda">Poda</option>
-                        <option value="riego">Riego</option>
                         <option value="abonado">Abonado</option>
                         <option value="mantenimiento">Mantenimiento</option>
                         <option value="tractor">Tractor</option>

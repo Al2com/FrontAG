@@ -23,7 +23,7 @@ const FormOperacion = () => {
     parcela_id: '',
     usuario: '',
     operario: '',
-    tipo_operacion: 'riego',
+    tipo_operacion: 'poda',
     hora_inicio: '',
     duracion_minutos: '',
     precio: '',
@@ -218,7 +218,6 @@ const FormOperacion = () => {
             className={errors.tipo_operacion ? 'input-error' : ''}
           >
             <option value="poda">Poda</option>
-            <option value="riego">Riego</option>
             <option value="abonado">Abonado</option>
             <option value="mantenimiento">Mantenimiento</option>
             <option value="tractor">Tractor</option>

@@ -1,310 +1,125 @@
-import { useEffect, useState } from 'react';
-import tareasService from '../services/tareas';
-import parcelasService from '../services/parcelas';
-import './Style/cards.css';
+import { useEffect, useState, Fragment } from 'react'
+import gastosService from '../services/gastos'
+import GestionRiego from './GestionRiego'
+import './Style/cards.css'
 
 const Gastos = () => {
+  const anioActual = new Date().getFullYear()
 
-  const [listaOperaciones, setListaOperaciones] = useState([])
-  const [listaFumigaciones, setListaFumigaciones] = useState([])
-  const [listaParcelas, setListaParcelas] = useState([])
-  const [errorCarga, setErrorCarga] = useState('')
-  const [campañaSeleccionada, setCampañaSeleccionada] = useState(new Date().getFullYear().toString())
+  const [resumen, setResumen] = useState({ porExplotacion: [], porParcela: [] })
+  const [campaña, setCampaña] = useState(anioActual.toString())
   const [parcelaAbierta, setParcelaAbierta] = useState(null)
   const [explotacionAbierta, setExplotacionAbierta] = useState(null)
+  const [vista, setVista] = useState('resumen') // 'resumen' | 'gestion'
+  const [error, setError] = useState('')
 
-  // cargo datos al entrar
-  useEffect(() => {
-    tareasService.getLista()
-      .then(datos => {
-          const tractorFum = datos.fumigaciones.find(f => f.metodo_aplicacion === 'tractor')
-        console.log('hanegadas_parcela:', tractorFum?.hanegadas_parcela)
-        console.log('total_hanegadas:', tractorFum?.total_hanegadas)
-        setListaOperaciones(datos.operaciones)
-        setListaFumigaciones(datos.fumigaciones)
-      })
-      .catch(() => setErrorCarga('Error al cargar las tareas'))
-
-    parcelasService.getResumenP()
-      .then(datos => {
-        console.log('parcelas con hanegadas:', datos)
-        setListaParcelas(datos)
-      })
-      .catch(() => setErrorCarga('Error al cargar las parcelas'))
-  }, [])
-
-  const obtenerAños = () => {
-    const años = new Set()
-    listaOperaciones.forEach(op => años.add(op.hora_inicio.substring(0, 4)))
-    listaFumigaciones.forEach(fum => años.add(fum.hora_inicio.substring(0, 4)))
-    return Array.from(años).sort((a, b) => b - a)
+  // pido al back el resumen ya calculado cada vez que cambia la campaña
+  const cargar = () => {
+    setError('')
+    gastosService.getResumen(campaña)
+      .then(data => setResumen(data))
+      .catch(() => setError('Error al cargar los gastos'))
   }
 
-  const operacionesFiltradas = campañaSeleccionada === 'todas'
-    ? listaOperaciones
-    : listaOperaciones.filter(op => op.hora_inicio.startsWith(campañaSeleccionada))
+  useEffect(() => { cargar() }, [campaña])
 
-  const fumigacionesFiltradas = campañaSeleccionada === 'todas'
-    ? listaFumigaciones
-    : listaFumigaciones.filter(fum => fum.hora_inicio.startsWith(campañaSeleccionada))
+  const anios = [anioActual, anioActual - 1, anioActual - 2, anioActual - 3]
 
-  const getOperacionesParcela = (parcelaId) =>
-    operacionesFiltradas.filter(op => op.parcela_id === parcelaId)
-
-  const getFumigacionesParcela = (parcelaId) =>
-    fumigacionesFiltradas.filter(fum => fum.parcela_id === parcelaId)
-
-  // si es tractor reparto los litros por hanegadas de cada parcela proporcionalmente
-  // si es mochila va por parcela directa porque se aplica a una sola parcela
-  const calcularLitros = (fum) => {
-    const unidades = fum.metodo_aplicacion === 'tractor' ? fum.turbos : fum.mochilas
-    const litrosPorUnidad = fum.metodo_aplicacion === 'tractor' ? 1500 : 12
-    const litrosTotales = unidades * litrosPorUnidad
-
-    if (fum.metodo_aplicacion === 'tractor' && fum.total_hanegadas > 0) {
-      // reparto proporcional segun las hanegadas de esta parcela respecto al total
-      const proporcion = fum.hanegadas_parcela / fum.total_hanegadas
-      return litrosTotales * proporcion
-    }
-
-    // mochila va directo por parcela
-    const numParcelas = fum.num_parcelas || 1
-    return litrosTotales / numParcelas
-  }
-
-  // calcula la proporcion de hanegadas de una parcela respecto al total del lote
-  // si no hay hanegadas reparte igual entre todas las parcelas
-  const calcularProporcion = (fum) => {
-    if (fum.metodo_aplicacion === 'tractor' && fum.total_hanegadas > 0) {
-      return fum.hanegadas_parcela / fum.total_hanegadas
-    }
-    return 1 / (fum.num_parcelas || 1)
-  }
-
-  // formatea "2025-03-12 08:00:00" a "12/03"
-  const formatearFecha = (fechaStr) => {
-    const fecha = new Date(fechaStr)
-    const dia = String(fecha.getDate()).padStart(2, '0')
-    const mes = String(fecha.getMonth() + 1).padStart(2, '0')
-    return `${dia}/${mes}`
-  }
-
-  // agrupa operaciones por tipo y dentro por operario con sus fechas y horas
-  const agruparOperacionesPorTipo = (parcelaId) => {
-    const agrupado = {}
-    getOperacionesParcela(parcelaId).forEach(op => {
-      if (!agrupado[op.tipo_operacion]) agrupado[op.tipo_operacion] = {}
-      if (!agrupado[op.tipo_operacion][op.operario]) agrupado[op.tipo_operacion][op.operario] = []
-      agrupado[op.tipo_operacion][op.operario].push({
-        fecha: formatearFecha(op.hora_inicio),
-        horas: Number(op.duracion_minutos || 0) / 60,
-        precio: Number(op.precio || 0),
-      })
-    })
-    return agrupado
-  }
-
-  // agrupa productos de las fumigaciones de una parcela filtrando por metodo
-  // usa proporcion de hanegadas para tractor y num_parcelas para mochila
-//   La función getProductosPorMetodo agrupa todos los productos químicos usados en las fumigaciones de una parcela.
-// Primero filtra las fumigaciones de esa parcela por metodo (tractor o mochila). Para cada fumigación calcula la proporción de hanegadas que le corresponde a esa parcela respecto al total del lote, y con eso calcula qué cantidad de cada producto le toca y cuánto cuesta.
-// El mapa es un objeto que usa el id del producto como clave. Si el producto ya existe lo acumula sumando cantidad y coste, si no existe lo crea. Así si una parcela tiene varias fumigaciones con el mismo producto los agrupa en una sola línea en vez de mostrarlos por separado.
-// Al final devuelve los valores del mapa como un array para poder recorrerlos en el JSX.
-  const getProductosPorMetodo = (parcelaId, metodo) => {
-    const mapa = {}
-    getFumigacionesParcela(parcelaId)
-      .filter(f => f.metodo_aplicacion === metodo)
-      .forEach(fum => {
-        const unidades = metodo === 'tractor' ? fum.turbos : fum.mochilas
-        const proporcion = calcularProporcion(fum)
-        if (!fum.productos) return
-        fum.productos.forEach(prod => {
-          // reparto el material proporcionalmente segun hanegadas
-          const cantidad = prod.pivot.dosis_introducida * unidades * proporcion
-          // precio HISTORICO congelado en la pivote al registrar la fumigacion;
-          // si no existe (fumigaciones antiguas) uso el precio actual del producto
-          const precioUnidad = Number(prod.pivot.precio ?? prod.precio ?? 0)
-          const coste = cantidad * precioUnidad
-          if (mapa[prod.id]) {
-            mapa[prod.id].cantidad += cantidad
-            mapa[prod.id].coste += coste
-          } else {
-            mapa[prod.id] = {
-              id: prod.id,
-              nombre: prod.nombre,
-              unidad: prod.unidad,
-              precioPorUnidad: precioUnidad,
-              cantidad,
-              coste,
-            }
-          }
-        })
-      })
-    return Object.values(mapa)
-  }
-
-  // resumen de una explotacion agrupando todas sus parcelas
-  const getResumenExplotacion = (parcelas) => {
-    let horasOperaciones = 0, costeOperaciones = 0
-    let litrosTractor = 0, costeTractor = 0, materialTractor = 0
-    let litrosMochila = 0, costeMochila = 0, materialMochila = 0
-
-    parcelas.forEach(parcela => {
-      getOperacionesParcela(parcela.id).forEach(op => {
-        horasOperaciones += Number(op.duracion_minutos || 0)
-        costeOperaciones += Number(op.precio || 0)
-      })
-      getFumigacionesParcela(parcela.id).forEach(fum => {
-        const litros = calcularLitros(fum)
-        if (fum.metodo_aplicacion === 'tractor') {
-          litrosTractor += litros
-          costeTractor += Number(fum.precio || 0)
-        } else {
-          litrosMochila += litros
-          costeMochila += Number(fum.precio || 0)
-        }
-      })
-      getProductosPorMetodo(parcela.id, 'tractor').forEach(p => { materialTractor += p.coste })
-      getProductosPorMetodo(parcela.id, 'mochila').forEach(p => { materialMochila += p.coste })
-    })
-
-    return { horasOperaciones, costeOperaciones, litrosTractor, costeTractor, materialTractor, litrosMochila, costeMochila, materialMochila }
-  }
-
-  // coste total de una parcela sumando operaciones fumigaciones y material
-  const getCosteParcela = (parcelaId) => {
-    const gastoOps = getOperacionesParcela(parcelaId).reduce((acc, op) => acc + Number(op.precio || 0), 0)
-    const gastoFums = getFumigacionesParcela(parcelaId).reduce((acc, fum) => acc + Number(fum.precio || 0), 0)
-    const gastoMaterial = [
-      ...getProductosPorMetodo(parcelaId, 'tractor'),
-      ...getProductosPorMetodo(parcelaId, 'mochila')
-    ].reduce((acc, p) => acc + p.coste, 0)
-    return gastoOps + gastoFums + gastoMaterial
-  }
-
-  const toggleParcela = (parcelaId) =>
-    setParcelaAbierta(parcelaAbierta === parcelaId ? null : parcelaId)
-
+  const toggleParcela = (id) =>
+    setParcelaAbierta(parcelaAbierta === id ? null : id)
   const toggleExplotacion = (nombre) =>
     setExplotacionAbierta(explotacionAbierta === nombre ? null : nombre)
 
-  // agrupa parcelas por explotacion
+  // vista de gestion de riego (cards con editar/borrar/añadir)
+  if (vista === 'gestion') {
+    return <GestionRiego onVolver={() => { setVista('resumen'); cargar() }} />
+  }
+
+  // agrupo las parcelas por explotacion para el desplegable de arriba
   const parcelasPorExplotacion = {}
-  listaParcelas.forEach(parcela => {
-    const nombreExplo = parcela.explotacion?.nombre || 'Sin explotación'
-    if (!parcelasPorExplotacion[nombreExplo]) parcelasPorExplotacion[nombreExplo] = []
-    parcelasPorExplotacion[nombreExplo].push(parcela)
+  resumen.porParcela.forEach(p => {
+    if (!parcelasPorExplotacion[p.explotacion]) parcelasPorExplotacion[p.explotacion] = []
+    parcelasPorExplotacion[p.explotacion].push(p)
   })
 
   return (
     <div className="rentabilidad-contenedor">
       <div className="menuExplo">
-      <div className="menu-button">
-        <div className="filtro-explo">
-          <div className="barra-select">
-            <select value={campañaSeleccionada} onChange={(e) => setCampañaSeleccionada(e.target.value)}>
-              <option value="todas">Campaña ▾</option>
-              {obtenerAños().map(año => (
-                <option key={año} value={año}>{año}</option>
-              ))}
-            </select>
+        <div className="menu-button">
+          <div className="filtro-explo">
+            <div className="barra-select">
+              <select value={campaña} onChange={(e) => setCampaña(e.target.value)}>
+                <option value="todas">Campaña ▾</option>
+                {anios.map(a => <option key={a} value={a}>{a}</option>)}
+              </select>
+            </div>
           </div>
+          <button type="button" onClick={() => setVista('gestion')}>Gestión de riego</button>
         </div>
       </div>
-    </div>
-      
 
-      {errorCarga && <span className="mensaje-error">{errorCarga}</span>}
+      {error && <span className="mensaje-error">{error}</span>}
 
       {/* resumen por explotacion */}
       <h3 className="rentabilidad-titulo-seccion">Por Explotación</h3>
 
-      {Object.entries(parcelasPorExplotacion).map(([nombreExplo, parcelas]) => {
-        const costeExplo = parcelas.reduce((acc, p) => acc + getCosteParcela(p.id), 0)
-        const estaAbierta = explotacionAbierta === nombreExplo
-        const resumen = getResumenExplotacion(parcelas)
-
+      {resumen.porExplotacion.map(explo => {
+        const estaAbierta = explotacionAbierta === explo.nombre
+        const parcelas = parcelasPorExplotacion[explo.nombre] || []
         return (
-          <div key={nombreExplo} className="rentabilidad-card">
-            <div className="rentabilidad-cabecera" onClick={() => toggleExplotacion(nombreExplo)}>
+          <div key={explo.nombre} className="rentabilidad-card">
+            <div className="rentabilidad-cabecera" onClick={() => toggleExplotacion(explo.nombre)}>
               <div className="rentabilidad-cabecera-izq">
                 <img src="./explotaciones.svg" alt="explotacion" />
-                <h4>{nombreExplo}</h4>
+                <h4>{explo.nombre}</h4>
               </div>
               <div className="rentabilidad-cabecera-der">
-                <span className="rentabilidad-coste">{costeExplo.toFixed(2)} €</span>
+                <span className="rentabilidad-coste">{explo.coste.toFixed(2)} €</span>
                 <img src="./plus.png" alt="plus" />
               </div>
             </div>
 
             {estaAbierta && (
               <div className="rentabilidad-desplegable">
-                <div className="rentabilidad-fila-parcela">
-                  <span>Operaciones · {(resumen.horasOperaciones / 60).toFixed(1)} h</span>
-                  <span>{resumen.costeOperaciones.toFixed(2)} €</span>
-                </div>
-                {resumen.litrosTractor > 0 && (
-                  <div className="rentabilidad-fila-parcela">
-                    <span>Fumigaciones tractor · {resumen.litrosTractor.toLocaleString()} L</span>
-                    <span>{resumen.costeTractor.toFixed(2)} €</span>
+                {parcelas.map(p => (
+                  <div key={p.id} className="rentabilidad-fila-parcela">
+                    <span>{p.nombre}</span>
+                    <span>{p.costeTotal.toFixed(2)} €</span>
                   </div>
-                )}
-                {resumen.materialTractor > 0 && (
-                  <div className="rentabilidad-fila-parcela">
-                    <span>Material químico tractor</span>
-                    <span>{resumen.materialTractor.toFixed(2)} €</span>
-                  </div>
-                )}
-                {resumen.litrosMochila > 0 && (
-                  <div className="rentabilidad-fila-parcela">
-                    <span>Fumigaciones mochila · {resumen.litrosMochila.toLocaleString()} L</span>
-                    <span>{resumen.costeMochila.toFixed(2)} €</span>
-                  </div>
-                )}
-                {resumen.materialMochila > 0 && (
-                  <div className="rentabilidad-fila-parcela">
-                    <span>Material químico mochila</span>
-                    <span>{resumen.materialMochila.toFixed(2)} €</span>
-                  </div>
-                )}
+                ))}
               </div>
             )}
           </div>
         )
       })}
 
-      {/* desglose completo por parcela en tabla */}
+      {/* desglose completo por parcela */}
       <h3 className="rentabilidad-titulo-seccion">Por Parcela</h3>
 
-      {listaParcelas.map(parcela => {
-        const fumigacionesParcela = getFumigacionesParcela(parcela.id)
-        const operacionesAgrupadas = agruparOperacionesPorTipo(parcela.id)
-        const costeOperaciones = getOperacionesParcela(parcela.id).reduce((acc, op) => acc + Number(op.precio || 0), 0)
-        const costeFumigaciones = fumigacionesParcela.reduce((acc, fum) => acc + Number(fum.precio || 0), 0)
-        const productosTractor = getProductosPorMetodo(parcela.id, 'tractor')
-        const productosMochila = getProductosPorMetodo(parcela.id, 'mochila')
-        const costeProductosTractor = productosTractor.reduce((acc, p) => acc + p.coste, 0)
-        const costeProductosMochila = productosMochila.reduce((acc, p) => acc + p.coste, 0)
-        const costeTotal = costeOperaciones + costeFumigaciones + costeProductosTractor + costeProductosMochila
-        const fumigacionesTractor = fumigacionesParcela.filter(f => f.metodo_aplicacion === 'tractor')
-        const fumigacionesMochila = fumigacionesParcela.filter(f => f.metodo_aplicacion === 'mochila')
+      {resumen.porParcela.map(parcela => {
         const estaAbierta = parcelaAbierta === parcela.id
+
+        // agrupo el riego por concepto sumando los meses del año
+        const riegoPorConcepto = {}
+        parcela.riego.forEach(r => {
+          riegoPorConcepto[r.concepto] = (riegoPorConcepto[r.concepto] || 0) + r.importe
+        })
 
         return (
           <div key={parcela.id} className="rentabilidad-card">
             <div className="rentabilidad-cabecera" onClick={() => toggleParcela(parcela.id)}>
               <div className="rentabilidad-cabecera-izq">
                 <img src="./parcela.svg" alt="parcela" />
-                <h4>{parcela.nombre || `Pol. ${parcela.poligono} - Par. ${parcela.parcela}`}</h4>
+                <h4>{parcela.nombre}</h4>
               </div>
               <div className="rentabilidad-cabecera-der">
-                <span className="rentabilidad-coste">{costeTotal.toFixed(2)} €</span>
+                <span className="rentabilidad-coste">{parcela.costeTotal.toFixed(2)} €</span>
                 <img src="./plus.png" alt="plus" />
               </div>
             </div>
 
             <div className="rentabilidad-resumen">
-              <span>{parcela.explotacion?.nombre}</span>
+              <span>{parcela.explotacion}</span>
               <span>{parcela.variedad}</span>
             </div>
 
@@ -322,30 +137,25 @@ const Gastos = () => {
                   </thead>
                   <tbody>
 
-                    {/* operaciones agrupadas por tipo y operario con sus fechas */}
-                    {Object.entries(operacionesAgrupadas).map(([tipo, porOperario]) => {
-                      const precioTipo = Object.values(porOperario).flat().reduce((acc, e) => acc + e.precio, 0)
-                      return Object.entries(porOperario).map(([operario, entradas], i) => {
-                        const horasOperario = entradas.reduce((acc, e) => acc + e.horas, 0)
-                        const detalle = entradas.map(e => `${e.fecha} ${e.horas.toFixed(1)}h`).join(' · ')
-                        return (
-                          <tr key={`${tipo}-${operario}`}>
-                            <td style={{ textTransform: 'capitalize', fontWeight: i === 0 ? 600 : 400 }}>
-                              {i === 0 ? tipo : ''} — {operario}
-                            </td>
-                            <td className="detalle-fechas">{detalle}</td>
-                            <td>{horasOperario.toFixed(1)} h</td>
-                            <td>—</td>
-                            <td>{i === 0 ? `${precioTipo.toFixed(2)} €` : ''}</td>
-                          </tr>
-                        )
-                      })
-                    })}
+                    {/* operaciones agrupadas por tipo y operario */}
+                    {parcela.operaciones.map(op =>
+                      op.operarios.map((o, i) => (
+                        <tr key={`${op.tipo}-${o.operario}`}>
+                          <td style={{ textTransform: 'capitalize', fontWeight: i === 0 ? 600 : 400 }}>
+                            {i === 0 ? op.tipo : ''} — {o.operario}
+                          </td>
+                          <td className="detalle-fechas">{o.detalle}</td>
+                          <td>{o.horas.toFixed(1)} h</td>
+                          <td>—</td>
+                          <td>{i === 0 ? `${op.precioTipo.toFixed(2)} €` : ''}</td>
+                        </tr>
+                      ))
+                    )}
 
                     <tr className="tabla-separador"><td colSpan={5}></td></tr>
 
-                    {/* fumigaciones tractor con material indentado debajo */}
-                    {fumigacionesTractor.length === 0
+                    {/* fumigaciones tractor con material debajo */}
+                    {parcela.fumigacionesTractor.length === 0
                       ? (
                         <tr>
                           <td colSpan={5} style={{ fontStyle: 'italic', color: 'var(--c-texto-apagado)' }}>
@@ -353,46 +163,35 @@ const Gastos = () => {
                           </td>
                         </tr>
                       )
-                      : fumigacionesTractor.map(fum => {
-                        // calculo la proporcion de hanegadas para repartir litros y material
-                        const proporcion = calcularProporcion(fum)
-                        return (
-                          <>
-                            <tr key={`tractor-${fum.id}`}>
-                              <td>Tractor</td>
-                              <td className="detalle-fechas">
-                                {formatearFecha(fum.hora_inicio)} · {fum.turbos} turbo{fum.turbos !== 1 ? 's' : ''}
-                                {/* muestro las hanegadas para que se vea el reparto */}
-                                {fum.hanegadas_parcela > 0 && ` · ${fum.hanegadas_parcela} han.`}
-                              </td>
+                      : parcela.fumigacionesTractor.map(fum => (
+                        <Fragment key={`tractor-${fum.id}`}>
+                          <tr>
+                            <td>Tractor</td>
+                            <td className="detalle-fechas">
+                              {fum.fecha} · {fum.unidades} turbo{fum.unidades !== 1 ? 's' : ''}
+                              {fum.hanegadas > 0 && ` · ${fum.hanegadas} han.`}
+                            </td>
+                            <td>—</td>
+                            <td>{fum.litros} L</td>
+                            <td>{fum.precio.toFixed(2)} €</td>
+                          </tr>
+                          {fum.productos.map((prod, j) => (
+                            <tr key={`prod-t-${fum.id}-${j}`} className="tabla-fila-material">
+                              <td>{prod.nombre}</td>
+                              <td>{prod.dosis} {prod.unidad}/turbo · {prod.cantidad} {prod.unidad}</td>
                               <td>—</td>
-                              <td>{calcularLitros(fum).toFixed(0)} L</td>
-                              <td>{Number(fum.precio).toFixed(2)} €</td>
+                              <td>—</td>
+                              <td>{prod.coste.toFixed(2)} €</td>
                             </tr>
-                            {fum.productos?.map(prod => {
-                              // reparto el material por hanegadas igual que los litros
-                              const cantidad = prod.pivot.dosis_introducida * fum.turbos * proporcion
-                              // precio congelado en la pivote, con fallback al actual
-                              const coste = cantidad * Number(prod.pivot.precio ?? prod.precio ?? 0)
-                              return (
-                                <tr key={`prod-t-${fum.id}-${prod.id}`} className="tabla-fila-material">
-                                  <td>{prod.nombre}</td>
-                                  <td>{prod.pivot.dosis_introducida} {prod.unidad}/turbo · {cantidad.toFixed(2)} {prod.unidad}</td>
-                                  <td>—</td>
-                                  <td>—</td>
-                                  <td>{coste.toFixed(2)} €</td>
-                                </tr>
-                              )
-                            })}
-                          </>
-                        )
-                      })
+                          ))}
+                        </Fragment>
+                      ))
                     }
 
                     <tr className="tabla-separador"><td colSpan={5}></td></tr>
 
-                    {/* fumigaciones mochila con material indentado debajo */}
-                    {fumigacionesMochila.length === 0
+                    {/* fumigaciones mochila con material debajo */}
+                    {parcela.fumigacionesMochila.length === 0
                       ? (
                         <tr>
                           <td colSpan={5} style={{ fontStyle: 'italic', color: 'var(--c-texto-apagado)' }}>
@@ -400,40 +199,75 @@ const Gastos = () => {
                           </td>
                         </tr>
                       )
-                      : fumigacionesMochila.map(fum => (
-                        <>
-                          <tr key={`mochila-${fum.id}`}>
+                      : parcela.fumigacionesMochila.map(fum => (
+                        <Fragment key={`mochila-${fum.id}`}>
+                          <tr>
                             <td>Mochila hierba</td>
                             <td className="detalle-fechas">
-                              {formatearFecha(fum.hora_inicio)} · {fum.operario} · {fum.mochilas} mochila{fum.mochilas !== 1 ? 's' : ''}
+                              {fum.fecha} · {fum.operario} · {fum.unidades} mochila{fum.unidades !== 1 ? 's' : ''}
                             </td>
                             <td>{(fum.duracion_minutos / 60).toFixed(1)} h</td>
-                            <td>{calcularLitros(fum).toFixed(0)} L</td>
-                            <td>{Number(fum.precio).toFixed(2)} €</td>
+                            <td>{fum.litros} L</td>
+                            <td>{fum.precio.toFixed(2)} €</td>
                           </tr>
-                          {fum.productos?.map(prod => {
-                            // mochila va directo sin proporcion porque es una sola parcela
-                            const cantidad = prod.pivot.dosis_introducida * fum.mochilas
-                            // precio congelado en la pivote, con fallback al actual
-                            const coste = cantidad * Number(prod.pivot.precio ?? prod.precio ?? 0)
-                            return (
-                              <tr key={`prod-m-${fum.id}-${prod.id}`} className="tabla-fila-material">
-                                <td>{prod.nombre}</td>
-                                <td>{prod.pivot.dosis_introducida} {prod.unidad}/mochila · {cantidad.toFixed(2)} {prod.unidad}</td>
-                                <td>—</td>
-                                <td>—</td>
-                                <td>{coste.toFixed(2)} €</td>
-                              </tr>
-                            )
-                          })}
-                        </>
+                          {fum.productos.map((prod, j) => (
+                            <tr key={`prod-m-${fum.id}-${j}`} className="tabla-fila-material">
+                              <td>{prod.nombre}</td>
+                              <td>{prod.dosis} {prod.unidad}/mochila · {prod.cantidad} {prod.unidad}</td>
+                              <td>—</td>
+                              <td>—</td>
+                              <td>{prod.coste.toFixed(2)} €</td>
+                            </tr>
+                          ))}
+                        </Fragment>
                       ))
                     }
 
-                    {/* fila total */}
+                    {/* impuestos */}
+                    {parcela.impuestos.total > 0 && (
+                      <Fragment>
+                        <tr className="tabla-separador"><td colSpan={5}></td></tr>
+                        {parcela.impuestos.municipal > 0 && (
+                          <tr>
+                            <td>Impuesto municipal</td>
+                            <td>Anual</td>
+                            <td>—</td>
+                            <td>—</td>
+                            <td>{parcela.impuestos.municipal.toFixed(2)} €</td>
+                          </tr>
+                        )}
+                        {parcela.impuestos.cequiaje > 0 && (
+                          <tr>
+                            <td>Cequiaje</td>
+                            <td>Anual</td>
+                            <td>—</td>
+                            <td>—</td>
+                            <td>{parcela.impuestos.cequiaje.toFixed(2)} €</td>
+                          </tr>
+                        )}
+                      </Fragment>
+                    )}
+
+                    {/* gasto de riego agrupado por concepto */}
+                    {Object.keys(riegoPorConcepto).length > 0 && (
+                      <Fragment>
+                        <tr className="tabla-separador"><td colSpan={5}></td></tr>
+                        {Object.entries(riegoPorConcepto).map(([concepto, importe]) => (
+                          <tr key={`riego-${concepto}`}>
+                            <td style={{ textTransform: 'capitalize' }}>Riego · {concepto}</td>
+                            <td>Recibos del año</td>
+                            <td>—</td>
+                            <td>—</td>
+                            <td>{importe.toFixed(2)} €</td>
+                          </tr>
+                        ))}
+                      </Fragment>
+                    )}
+
+                    {/* total */}
                     <tr className="tabla-total">
                       <td colSpan={4}><strong>TOTAL</strong></td>
-                      <td><strong>{costeTotal.toFixed(2)} €</strong></td>
+                      <td><strong>{parcela.costeTotal.toFixed(2)} €</strong></td>
                     </tr>
 
                   </tbody>
