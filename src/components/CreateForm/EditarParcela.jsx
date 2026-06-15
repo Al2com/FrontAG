@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import parcelasService from '../../services/parcelas.js';
+import Modal from '../Modal/Modal.jsx';
 import '../Style/forms.css'
 
 const EditarParcela = () => {
-  const { id } = useParams();       
-  const navigate = useNavigate();   
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [modalConfirm, setModalConfirm] = useState(false);
 
   const [formData, setFormData] = useState({
     explotacion_id: '',
@@ -123,15 +125,20 @@ const regexDescripcion = /^.{10,}$/
 
  
 
-  // manda los datos al back
+  // al pulsar guardar abre el modal de confirmacion
   const enviarFormulario = (e) => {
     e.preventDefault();
+    setModalConfirm(true);
+  }
+
+  // el usuario confirma en el modal y se manda al back
+  const guardarCambios = () => {
     parcelasService.putActualizar(id, formData)
       .then(() => {
-        alert('Parcela actualizada correctamente');
         navigate('/parcelas');
       })
        .catch(err => {
+          setModalConfirm(false);
           if (err.response?.status === 422) {
             const erroresLaravel = err.response.data.errors;
             const nuevosErrores = {};
@@ -147,6 +154,15 @@ const regexDescripcion = /^.{10,}$/
 
   return (
      <div className="form-container">
+
+      {modalConfirm && (
+        <Modal
+          mesajeError="¿Estás seguro de guardar los cambios?"
+          cerrarModal={() => setModalConfirm(false)}
+          onConfirmar={guardarCambios}
+        />
+      )}
+
       <h1>Editar Parcela</h1>
       <form className="form-grid" onSubmit={enviarFormulario}>
 
