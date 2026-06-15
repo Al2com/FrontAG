@@ -19,6 +19,8 @@ const EditarParcela = () => {
     num_arboles: '',
     fecha_plantacion: '',
     descripcion: '',
+    impuesto_municipal: '',
+    impuesto_cequiaje: '',
   })
 
   const [errors,setErrors] = useState({
@@ -212,6 +214,16 @@ const regexDescripcion = /^.{10,}$/
           <input type="text" name="descripcion" value={formData.descripcion} onChange={handleChange} />
         </div>
           {errors.descripcion && <span className="mensaje-error">{errors.descripcion}</span>}
+
+        <div className="form-grupo">
+          <label>Impuesto municipal (€/año)</label>
+          <input type="number" step="0.01" min="0" name="impuesto_municipal" value={formData.impuesto_municipal ?? ''} onChange={handleChange} />
+        </div>
+
+        <div className="form-grupo">
+          <label>Impuesto de cequiaje (€/año)</label>
+          <input type="number" step="0.01" min="0" name="impuesto_cequiaje" value={formData.impuesto_cequiaje ?? ''} onChange={handleChange} />
+        </div>
 
          <div  className='menu-button'>
           <button type="submit">Guardar cambios</button>
