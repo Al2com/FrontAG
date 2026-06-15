@@ -55,18 +55,8 @@ function App() {
 
         ?<FormLogin setUser={setUser} />
         : <div className="app-container">
-            <MenuNav />
+            <MenuNav user={user} logout={logout} />
             <div className="main-content">
-           <header className="top-header">
-            <div className="header-user">
-              <img className="user-avatar" src="/usuario.png" alt="Usuario"/>
-              <div className="header-user-info">
-                <span className="user-name">{user.name}</span>
-                <span className="user-rol">{user.rol}</span>
-              </div>
-            </div>
-            <button className="btn-logout" onClick={logout}>Cerrar sesión</button>
-          </header>
               <main className="content">
                 <Routes>
               <Route path="/" element={<Dashboard />} />

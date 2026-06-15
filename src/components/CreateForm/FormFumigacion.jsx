@@ -51,7 +51,7 @@ const FormFumigacion = () => {
   });
 
   useEffect(() => {
-    parcelasService.getLista()
+    parcelasService.getResumenP()
       .then(data => setParcelas(data))
       .catch(err => console.error('Error cargando parcelas:', err))
 
@@ -106,6 +106,22 @@ const FormFumigacion = () => {
     const id = Number(e.target.value)
     setFormData({ ...formData, parcela_ids: id ? [id] : [] })
     setErrors(prev => ({ ...prev, parcela_ids: id ? '' : 'Selecciona una parcela' }))
+  }
+
+  // atajos de seleccion para tractor: todas / ninguna / por explotacion / por variedad
+  const marcarTodasParcelas = (marcar) => {
+    const ids = marcar ? parcelas.map(p => p.id) : []
+    setFormData({ ...formData, parcela_ids: ids })
+    setErrors(prev => ({ ...prev, parcela_ids: ids.length ? '' : 'Selecciona al menos una parcela' }))
+  }
+
+  const marcarGrupoParcelas = (tipo, valor) => {
+    if (!valor) return
+    const ids = parcelas
+      .filter(p => tipo === 'explo' ? (p.explotacion?.nombre === valor) : (p.variedad === valor))
+      .map(p => p.id)
+    setFormData({ ...formData, parcela_ids: ids })
+    setErrors(prev => ({ ...prev, parcela_ids: ids.length ? '' : 'Selecciona al menos una parcela' }))
   }
 
   const validarCampos = (name, value) => {
@@ -236,6 +252,12 @@ const FormFumigacion = () => {
     }
   };
 
+  // datos derivados para el selector de parcelas (tractor)
+  const explotacionesUnicas = [...new Set(parcelas.map(p => p.explotacion?.nombre).filter(Boolean))]
+  const variedadesUnicas = [...new Set(parcelas.map(p => p.variedad).filter(Boolean))]
+  const parcelasSeleccionadas = parcelas.filter(p => formData.parcela_ids.includes(p.id))
+  const totalHanegadasSel = parcelasSeleccionadas.reduce((a, p) => a + Number(p.dimension_hanegadas || 0), 0)
+
   return (
     <div className="form-container">
 
@@ -295,6 +317,26 @@ const FormFumigacion = () => {
           {formData.metodo_aplicacion === 'tractor' && (
             <div className="form-grupo">
               <label>Parcelas *</label>
+
+              {/* atajos de seleccion rapida */}
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '8px' }}>
+                <button type="button" onClick={() => marcarTodasParcelas(true)}>Todas</button>
+                <button type="button" onClick={() => marcarTodasParcelas(false)}>Ninguna</button>
+                <select value="" onChange={(e) => marcarGrupoParcelas('explo', e.target.value)} style={{ flex: 1, minWidth: '130px' }}>
+                  <option value="">Por explotación…</option>
+                  {explotacionesUnicas.map(ex => <option key={ex} value={ex}>{ex}</option>)}
+                </select>
+                <select value="" onChange={(e) => marcarGrupoParcelas('variedad', e.target.value)} style={{ flex: 1, minWidth: '130px' }}>
+                  <option value="">Por variedad…</option>
+                  {variedadesUnicas.map(v => <option key={v} value={v}>{v}</option>)}
+                </select>
+              </div>
+
+              {/* contador en vivo */}
+              <div style={{ background: 'var(--c-fondo-verde)', color: 'var(--c-primario-medio)', borderRadius: 'var(--rad-md)', padding: '8px 12px', marginBottom: '8px', fontWeight: 600, fontSize: '14px' }}>
+                {parcelasSeleccionadas.length} parcelas · {totalHanegadasSel.toFixed(2)} ha
+              </div>
+
               <div className="parcelas-checkboxes">
                 {parcelas.map(parcela => (
                   <label key={parcela.id} className="parcela-checkbox">
@@ -303,7 +345,8 @@ const FormFumigacion = () => {
                       checked={formData.parcela_ids.includes(parcela.id)}
                       onChange={() => toggleParcela(parcela.id)}
                     />
-                    {parcela.poligono} - {parcela.parcela} ({parcela.variedad})
+                    {parcela.poligono} - {parcela.parcela} · {parcela.variedad}
+                    {parcela.explotacion?.nombre ? ` (${parcela.explotacion.nombre})` : ''} — {Number(parcela.dimension_hanegadas).toFixed(2)} ha
                   </label>
                 ))}
               </div>

@@ -3,7 +3,7 @@ import MenuBar from './BarraBusqueda/MenuBar'
 import './Style/cards.css'
 import './Style/navbar.css'
 
-const MenuNav = () => {
+const MenuNav = ({ user, logout }) => {
 
   const rol = sessionStorage.getItem('rol');
 
@@ -18,8 +18,12 @@ const MenuNav = () => {
 
   return (
     <>
-      {/* Cabecera movil con boton hamburguesa (solo visible <=768px) */}
+      {/* Cabecera movil: logo a la izquierda, hamburguesa a la derecha */}
       <div className="mobile-header">
+        <div className="mobile-header-logo">
+          <img src="./AgroControl.webp" alt="AgroGestión" className="logo-img" />
+          <h4>AgroGestión</h4>
+        </div>
         <button
           className={`hamburger-btn ${menuAbierto ? 'abierto' : ''}`}
           onClick={() => setMenuAbierto(!menuAbierto)}
@@ -30,10 +34,6 @@ const MenuNav = () => {
           <span></span>
           <span></span>
         </button>
-        <div className="mobile-header-logo">
-          <img src="./AgroControl.webp" alt="AgroGestión" className="logo-img" />
-          <h4>AgroGestión</h4>
-        </div>
       </div>
 
       {/* Overlay oscuro al abrir el menu en movil */}
@@ -50,8 +50,16 @@ const MenuNav = () => {
           </div>
         </div>
 
-        <div className="navbar-divider"></div>
+        {/* Perfil: nombre y rol del usuario */}
+        <div className="navbar-perfil">
+          <img className="navbar-perfil-avatar" src="/usuario.png" alt="Usuario" />
+          <div className="navbar-perfil-info">
+            <span className="navbar-perfil-nombre">{user?.name}</span>
+            <span className="navbar-perfil-rol">{user?.rol}</span>
+          </div>
+        </div>
 
+        <div className="navbar-divider"></div>
 
         <div className="navbar-items">
           <MenuBar
@@ -81,7 +89,7 @@ const MenuNav = () => {
               isSeleccionado={botonActivo === 'Parcelas'}
               onClick={() => seleccionar('Parcelas')}
             />
-            )}
+          )}
 
           <MenuBar
             to="/operaciones"
@@ -92,48 +100,51 @@ const MenuNav = () => {
             onClick={() => seleccionar('Operaciones')}
           />
           {rol !== 'trabajador' && (
-          <MenuBar
-            to="/recoleccion"
-            iconImg="./iconRecoleccion.svg"
-            altText="Recoleccion"
-            texto="Recolección"
-            isSeleccionado={botonActivo === 'Recoleccion'}
-            onClick={() => seleccionar('Recoleccion')}
-          />
+            <MenuBar
+              to="/recoleccion"
+              iconImg="./iconRecoleccion.svg"
+              altText="Recoleccion"
+              texto="Recolección"
+              isSeleccionado={botonActivo === 'Recoleccion'}
+              onClick={() => seleccionar('Recoleccion')}
+            />
           )}
 
           {rol !== 'trabajador' && (
-          <MenuBar
-            to="/almacen"
-            iconImg="./iconAlmacen.svg"
-            altText="Almacen"
-            texto="Almacén"
-            isSeleccionado={botonActivo === 'Almacen'}
-            onClick={() => seleccionar('Almacen')}
-          />
-           )}
+            <MenuBar
+              to="/almacen"
+              iconImg="./iconAlmacen.svg"
+              altText="Almacen"
+              texto="Almacén"
+              isSeleccionado={botonActivo === 'Almacen'}
+              onClick={() => seleccionar('Almacen')}
+            />
+          )}
 
-            {rol !== 'trabajador' && (
-          <MenuBar
-            to="/gastos"
-            iconImg="./expenses.svg"
-            altText="Gastos"
-            texto="Gastos"
-            isSeleccionado={botonActivo === 'Gastos'}
-            onClick={() => seleccionar('Gastos')}
-          />
-           )}
-           {rol !== 'trabajador' && (
-          <MenuBar
-            to=""
-            iconImg="./analisis.svg"
-            altText="Análisis"
-            texto="Análisis"
-            // isSeleccionado={botonActivo === 'Gastos'}
-            // onClick={() => seleccionar('Gastos')}
-          />
-           )}
+          {rol !== 'trabajador' && (
+            <MenuBar
+              to="/gastos"
+              iconImg="./expenses.svg"
+              altText="Gastos"
+              texto="Gastos"
+              isSeleccionado={botonActivo === 'Gastos'}
+              onClick={() => seleccionar('Gastos')}
+            />
+          )}
+          {rol !== 'trabajador' && (
+            <MenuBar
+              to=""
+              iconImg="./analisis.svg"
+              altText="Análisis"
+              texto="Análisis"
+            />
+          )}
         </div>
+
+        {/* Cerrar sesion al final del menu */}
+        <button className="navbar-logout" onClick={logout}>
+          Cerrar sesión
+        </button>
       </nav>
     </>
   )
