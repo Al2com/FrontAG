@@ -415,12 +415,12 @@ const FormFumigacion = () => {
                     value={item.dosis_introducida}
                     onChange={(e) => handleChangeProducto(e, index)}
                   />
-                  <button type="button" onClick={() => pedirConfirmacionEliminar(index)}>Eliminar</button>
+                  <button type="button" className="btn-eliminar-producto" onClick={() => pedirConfirmacionEliminar(index)}>Eliminar</button>
                 </div>
               )
             })}
             {errors.productos && <span className="mensaje-error">{errors.productos}</span>}
-            <button type="button" onClick={añadirFila}>+ Añadir producto</button>
+            <button type="button" className="btn-add-producto" onClick={añadirFila}>+ Añadir producto</button>
           </div>
 
           {formData.metodo_aplicacion === 'mochila' && (

@@ -38,6 +38,8 @@ const FormParcela = () => {
     propietarios_id: "",
     nombre: "",
     rol: "manta",
+    impuesto_municipal: "",
+    impuesto_cequiaje: "",
     poligono: "",
     parcela: "",
     variedad: "",
@@ -307,6 +309,34 @@ const FormParcela = () => {
             value={formData.nombre}
             onChange={actualizaEstado}
             placeholder="Nombre de la parcela"
+          />
+        </div>
+
+        <div className="form-grupo">
+          <label htmlFor="impuesto_municipal">Impuesto municipal (€/año)</label>
+          <input
+            type="number"
+            id="impuesto_municipal"
+            name="impuesto_municipal"
+            step="0.01"
+            min="0"
+            value={formData.impuesto_municipal}
+            onChange={actualizaEstado}
+            placeholder="Ej: 45.00"
+          />
+        </div>
+
+        <div className="form-grupo">
+          <label htmlFor="impuesto_cequiaje">Impuesto de cequiaje (€/año)</label>
+          <input
+            type="number"
+            id="impuesto_cequiaje"
+            name="impuesto_cequiaje"
+            step="0.01"
+            min="0"
+            value={formData.impuesto_cequiaje}
+            onChange={actualizaEstado}
+            placeholder="Ej: 30.00"
           />
         </div>
 

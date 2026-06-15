@@ -71,6 +71,33 @@
   padding: 10px;
 }
 
+/* Botones del bloque de productos: mismo lenguaje visual que el resto */
+.form-dosisProduct button {
+  padding: var(--esp-sm) var(--esp-md);
+  border: none;
+  border-radius: var(--rad-md);
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 13px;
+  margin-top: var(--esp-sm);
+  transition: opacity 0.15s ease;
+}
+
+.form-dosisProduct button:hover { opacity: 0.88; }
+
+.form-dosisProduct .btn-eliminar-producto {
+  background-color: var(--c-peligro);
+  color: var(--c-blanco);
+  align-self: flex-end;
+  padding: 5px 12px;
+  font-size: 12px;
+}
+
+.btn-add-producto {
+  background-color: var(--c-primario);
+  color: var(--c-blanco);
+}
+
 /* -- Login -------------------------------------------------- */
 .login {
   display: flex;
