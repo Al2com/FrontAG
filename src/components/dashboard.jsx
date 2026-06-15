@@ -37,8 +37,8 @@ const Dashboard = () => {
       .then(data => setTotalFumigaciones(data.length))
       .catch(err => console.error('Error fumigaciones:', err));
 
-    productosService.getProducto()
-      .then(data => setTotalProductos(data))
+    productosService.getProductos()
+      .then(data => setTotalProductos(data.length))
       .catch(err => console.error('Error productos;',err))
 
     tareasService.getActividadReciente()
