@@ -24,6 +24,7 @@ const FormFumigacion = () => {
   const [indiceEliminar, setIndiceEliminar] = useState(null)
 
   const [precioPorHora, setPrecioPorHora] = useState('')
+  const [precioPorTanque, setPrecioPorTanque] = useState('') // CAMBIO: precio por turbo (tractor)
 
   const [formData, setFormData] = useState({
     parcela_ids: [],
@@ -64,15 +65,18 @@ const FormFumigacion = () => {
     setFormData(prev => ({ ...prev, parcela_ids: [] }))
   }, [formData.metodo_aplicacion])
 
+  // CAMBIO: el total se calcula desde el precio por turbo (estado propio), no machacando formData.precio
   useEffect(() => {
     if (formData.metodo_aplicacion !== 'tractor') return
-    const precioPorTanque = parseFloat(formData.precio)
+    const tanque = parseFloat(precioPorTanque)
     const turbos = parseFloat(formData.turbos)
-    if (!isNaN(precioPorTanque) && !isNaN(turbos) && precioPorTanque > 0 && turbos > 0) {
-      const total = (precioPorTanque * turbos).toFixed(2)
+    if (!isNaN(tanque) && !isNaN(turbos) && tanque > 0 && turbos > 0) {
+      const total = (tanque * turbos).toFixed(2)
       setFormData(prev => ({ ...prev, precio: total }))
+    } else {
+      setFormData(prev => ({ ...prev, precio: '' }))
     }
-  }, [formData.turbos])
+  }, [formData.turbos, precioPorTanque])
 
   useEffect(() => {
     if (formData.metodo_aplicacion !== 'mochila') return
@@ -230,7 +234,12 @@ const FormFumigacion = () => {
     setErrors(prev => ({ ...prev, productos: '' }));
 
     if (metodoOk && fechaOk && descripcionOk && operarioOk && duracionOk && mochilasOk && turbosOk && precioOk) {
-      fumigacionService.postCrearFumigacion({ ...formData, productos: productosAñadidos })
+      // CAMBIO: en tractor se envía precio_turbo (el precio por turbo del front)
+      fumigacionService.postCrearFumigacion({
+        ...formData,
+        productos: productosAñadidos,
+        ...(formData.metodo_aplicacion === 'tractor' ? { precio_turbo: precioPorTanque } : {})
+      })
         .then(() => {
           setMensajeModal('Fumigación creada correctamente')
           setEsExito(true)
@@ -369,21 +378,19 @@ const FormFumigacion = () => {
             </div>
           )}
 
+          {/* CAMBIO: el input se enlaza a precioPorTanque (precio por turbo), no a formData.precio */}
           {formData.metodo_aplicacion === 'tractor' && (
             <div className="form-grupo">
-              <label htmlFor="precio">Precio por tanque (€) *</label>
+              <label htmlFor="precioPorTanque">Precio por turbo/tanque (€) *</label>
               <input
                 type="number"
-                id="precio"
-                name="precio"
-                value={formData.precio}
-                onChange={handleChange}
-                placeholder="Ej: 45.00"
+                id="precioPorTanque"
+                value={precioPorTanque}
+                onChange={(e) => setPrecioPorTanque(e.target.value)}
+                placeholder="Ej: 60.00"
                 min="0"
                 step="0.01"
-                className={errors.precio ? 'input-error' : ''}
               />
-              {errors.precio && <span className="mensaje-error">{errors.precio}</span>}
             </div>
           )}
 
