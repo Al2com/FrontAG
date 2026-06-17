@@ -18,6 +18,7 @@ const FormProducto = () => {
     materia_activa: "",
     ubicacion: '',
     stock_minimo: '',
+    precio: '',
   })
 
   const [errors, setErrors] = useState({
@@ -25,6 +26,7 @@ const FormProducto = () => {
     materia_activa: "",
     ubicacion: '',
     stock_minimo: '',
+    precio: '',
   });
 
   // nombre y materia activa: letras, numeros y simbolos habituales (%, paréntesis, +, -, /, ., ,)
@@ -32,6 +34,7 @@ const FormProducto = () => {
   const regexMateria_activa = /^[A-Za-z0-9ÁÉÍÓÚáéíóúñÑ%().,+/\-\s]{2,50}$/
   const regexUbicacion = /^.{3,}$/
   const regexStock_minimo = /^[0-9]{1,4}$/
+  const regexPrecio = /^[0-9]{1,6}(\.[0-9]{1,2})?$/
 
   const validarCampos = (name, value) => {
     let mensaje = '';
@@ -57,6 +60,11 @@ const FormProducto = () => {
       comprobar = false;
     }
 
+    if (name === 'precio' && !regexPrecio.test(value)) {
+      mensaje = 'Precio válido (ej: 12.50)';
+      comprobar = false;
+    }
+
     // prevErrors garantiza que cogemos el estado más reciente antes de actualizarlo
     setErrors(prevErrors => ({ ...prevErrors, [name]: mensaje }));
     return comprobar;
@@ -76,8 +84,9 @@ const FormProducto = () => {
     const materiaOk = validarCampos('materia_activa', formData.materia_activa)
     const ubicacionOk = validarCampos('ubicacion', formData.ubicacion)
     const stockOk = validarCampos('stock_minimo', formData.stock_minimo)
+    const precioOk = validarCampos('precio', formData.precio)
 
-    if (nombreOk && materiaOk && ubicacionOk && stockOk) {
+    if (nombreOk && materiaOk && ubicacionOk && stockOk && precioOk) {
       setModalConfirm(true)
     }
   }
@@ -164,6 +173,20 @@ const FormProducto = () => {
             className={errors.stock_minimo ? 'input-error' : ''}
           />
           {errors.stock_minimo && <span className="mensaje-error">{errors.stock_minimo}</span>}
+        </div>
+
+        <div className="form-grupo">
+          <label>Precio / coste (€)</label>
+          <input
+            type="number"
+            step="0.01"
+            name="precio"
+            placeholder="Ej: 12.50"
+            value={formData.precio}
+            onChange={handleChange}
+            className={errors.precio ? 'input-error' : ''}
+          />
+          {errors.precio && <span className="mensaje-error">{errors.precio}</span>}
         </div>
 
         <div className="form-actions full-width">

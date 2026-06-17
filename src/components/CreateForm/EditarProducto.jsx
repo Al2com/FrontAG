@@ -94,12 +94,12 @@ const EditarProducto = () => {
         const nombreOk   = validarCampos('nombre', formProducto.nombre);
         const materiaOk  = validarCampos('materia_activa', formProducto.materia_activa);
         const ubicOk     = validarCampos('ubicacion', formProducto.ubicacion);
+        const precioOk   = validarCampos('precio', formProducto.precio);
         const stockAOk   = validarCampos('stock_actual', formProducto.stock_actual);
         const stockMOk   = validarCampos('stock_minimo', formProducto.stock_minimo);
         const dosisOk    = validarCampos('dosis_recomendada', formProducto.dosis_recomendada);
 
-        // el precio (coste) ya no se valida: es de solo lectura, lo calculan las compras
-        if (nombreOk && materiaOk && ubicOk && stockAOk && stockMOk && dosisOk) {
+        if (nombreOk && materiaOk && ubicOk && precioOk && stockAOk && stockMOk && dosisOk) {
             setModalConfirm(true);
         }
     };
@@ -147,9 +147,9 @@ const EditarProducto = () => {
                     {errors.materia_activa && <span className="mensaje-error">{errors.materia_activa}</span>}
                 </div>
                 <div className="form-grupo">
-                    <label>Coste medio (automático)</label>
-                    <input type="number" step="0.01" name="precio" value={formProducto.precio ?? ''} readOnly className="input-readonly" />
-                    <span className="texto-ayuda">Se calcula solo con las compras (precio medio ponderado).</span>
+                    <label>Precio / coste (€)</label>
+                    <input type="number" step="0.01" name="precio" value={formProducto.precio ?? ''} onChange={handleChange} className={errors.precio ? 'input-error' : ''} />
+                    {errors.precio && <span className="mensaje-error">{errors.precio}</span>}
                 </div>
                 <div className="form-grupo">
                     <label>Ubicación</label>
