@@ -1,11 +1,17 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import almacenService from '../../services/almacen'
+import Modal from '../Modal/Modal.jsx'
+import { parseErrores422, MENSAJE_ERROR_SERVIDOR } from '../../services/errores.js'
 import '../Style/forms.css'
 
 const FormProducto = () => {
 
   const navigate = useNavigate()
+
+  // modal de confirmacion para crear y error de servidor
+  const [modalConfirm, setModalConfirm] = useState(false)
+  const [errorServidor, setErrorServidor] = useState('')
 
   const [formData, setFormData] = useState({
     nombre: '',
@@ -21,8 +27,9 @@ const FormProducto = () => {
     stock_minimo: '',
   });
 
-  const regexNombre = /^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]{3,50}$/
-  const regexMateria_activa = /^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]{3,50}$/
+  // nombre y materia activa: letras, numeros y simbolos habituales (%, paréntesis, +, -, /, ., ,)
+  const regexNombre = /^[A-Za-z0-9ÁÉÍÓÚáéíóúñÑ%().,+/\-\s]{2,50}$/
+  const regexMateria_activa = /^[A-Za-z0-9ÁÉÍÓÚáéíóúñÑ%().,+/\-\s]{2,50}$/
   const regexUbicacion = /^.{3,}$/
   const regexStock_minimo = /^[0-9]{1,4}$/
 
@@ -31,12 +38,12 @@ const FormProducto = () => {
     let comprobar = true;
 
     if (name === 'nombre' && !regexNombre.test(value)) {
-      mensaje = 'Mínimo 3 letras, máximo 50';
+      mensaje = 'Entre 2 y 50 caracteres';
       comprobar = false;
     }
 
     if (name === 'materia_activa' && !regexMateria_activa.test(value)) {
-      mensaje = 'Mínimo 3 letras, máximo 50';
+      mensaje = 'Entre 2 y 50 caracteres';
       comprobar = false;
     }
 
@@ -61,6 +68,7 @@ const FormProducto = () => {
     validarCampos(name, value);
   }
 
+  // valida y, si todo esta bien, abre el modal de confirmacion
   const enviarFormulario = (e) => {
     e.preventDefault()
 
@@ -70,34 +78,40 @@ const FormProducto = () => {
     const stockOk = validarCampos('stock_minimo', formData.stock_minimo)
 
     if (nombreOk && materiaOk && ubicacionOk && stockOk) {
-
-      almacenService.createProducto(formData)
-        .then(() => {
-          navigate('/almacen')
-        })
-        .catch(err => {
-          if (err.response?.status === 422) {
-            // Laravel manda los errores así: { errors: { nombre: ["mensaje"] } }
-            const erroresLaravel = err.response.data.errors;
-            const nuevosErrores = {};
-            // recorremos cada campo que ha fallado en Laravel
-            for (const campo in erroresLaravel) {
-              // cogemos solo el primer mensaje de cada campo (Laravel manda un array)
-              nuevosErrores[campo] = erroresLaravel[campo][0];
-            }
-            // los metemos en el estado errors para que aparezcan en rojo debajo de cada input
-            setErrors(prev => ({ ...prev, ...nuevosErrores }));
-          } else {
-            // cualquier otro error (500, caída del servidor...)
-            alert('Error del servidor. Inténtalo de nuevo.');
-          }
-        });
+      setModalConfirm(true)
     }
+  }
+
+  // el usuario confirma en el modal y se crea el producto
+  const crearProducto = () => {
+    almacenService.createProducto(formData)
+      .then(() => navigate('/almacen'))
+      .catch(err => {
+        setModalConfirm(false)
+        const e422 = parseErrores422(err)
+        if (e422) {
+          setErrors(prev => ({ ...prev, ...e422 }))
+        } else {
+          setErrorServidor(MENSAJE_ERROR_SERVIDOR)
+        }
+      })
   }
 
   return (
     <div className="form-container">
+
+      {/* modal de confirmacion para crear */}
+      {modalConfirm && (
+        <Modal
+          mesajeError="¿Estás seguro de crear este producto?"
+          cerrarModal={() => setModalConfirm(false)}
+          onConfirmar={crearProducto}
+        />
+      )}
+
       <h1>Añadir Producto al Almacén</h1>
+
+      {errorServidor && <span className="mensaje-error">{errorServidor}</span>}
 
       <form className="form-grid" onSubmit={enviarFormulario}>
 

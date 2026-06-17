@@ -19,35 +19,38 @@ const Dashboard = () => {
   const [totalProductos, setTotalProductos] = useState(0);
   const [actividadReciente, setActividadReciente] = useState({ operaciones: [], fumigaciones: [] });
   const [productosStockBajo, setProductosStockBajo] = useState([]);
+  const [errorCarga, setErrorCarga] = useState('');
 
   useEffect(() => {
+    const avisarError = () => setErrorCarga('No se pudieron cargar todos los datos del panel');
+
     explotacionService.getCount()
       .then(data => setNumExplo(data.total))
-      .catch(err => console.error('Error explotaciones:', err));
+      .catch(avisarError);
 
     parcelasService.getCount()
       .then(data => setNumParcelas(data.total))
-      .catch(err => console.error('Error parcelas:', err));
+      .catch(avisarError);
 
     operacionesService.getLista()
       .then(data => setTotalOperaciones(data.total))
-      .catch(err => console.error('Error operaciones:', err));
+      .catch(avisarError);
 
     fumigacionesService.getLista()
       .then(data => setTotalFumigaciones(data.length))
-      .catch(err => console.error('Error fumigaciones:', err));
+      .catch(avisarError);
 
     productosService.getProductos()
       .then(data => setTotalProductos(data.length))
-      .catch(err => console.error('Error productos;',err))
+      .catch(avisarError);
 
     tareasService.getActividadReciente()
       .then(data => setActividadReciente(data))
-      .catch(err => console.error('Error actividad reciente:', err));
+      .catch(avisarError);
 
     almacenService.getStockBajo()
       .then(datos => setProductosStockBajo(datos))
-      .catch(err => console.error('Error stock:', err));
+      .catch(avisarError);
   }, []);
 
   // pendientes primero
@@ -66,6 +69,8 @@ const Dashboard = () => {
 
   return (
     <div>
+
+      {errorCarga && <span className="mensaje-error">{errorCarga}</span>}
 
       {/* tarjetas resumen */}
       <div className="primeraSeccion">

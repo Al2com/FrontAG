@@ -2,7 +2,7 @@ import './components/Style/variables.css'
 import './App.css'
 
 import { useState, useEffect } from 'react' 
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom'
 import MenuNav from './components/menuNav.jsx'
 import FormExplotacion from './components/CreateForm/FormExplotacion.jsx'
 import FormParcela from './components/CreateForm/FormParcela.jsx'
@@ -23,6 +23,15 @@ import EditarOperacion from './components/CreateForm/EditarOperacion.jsx'
 import FormComprarProducto from './components/CreateForm/FormComprarProducto.jsx'
 import EditarFumigacion from './components/CreateForm/EditarFumigacion.jsx'
 import Gastos from './components/gastos.jsx'
+import FormRecoleccion from './components/CreateForm/FormRecoleccion.jsx'
+import EditarRecoleccion from './components/CreateForm/EditarRecoleccion.jsx'
+
+// Bloquea rutas para el rol trabajador: si lo es, lo manda al dashboard.
+// El trabajador solo puede acceder a Dashboard y Operaciones.
+const SoloAdmin = ({ children }) => {
+  const rol = sessionStorage.getItem('rol')
+  return rol === 'trabajador' ? <Navigate to="/dashboard" replace /> : children
+}
 
 function App() {
 
@@ -59,27 +68,39 @@ function App() {
             <div className="main-content">
               <main className="content">
                 <Routes>
+              {/* accesibles para todos los roles (trabajador incluido) */}
               <Route path="/" element={<Dashboard />} />
               <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/explotaciones" element={<Explotaciones />} />
-              <Route path="/parcelas" element={<Parcelas />} />
               <Route path="/operaciones" element={<Operaciones />} />
-              <Route path="/recoleccion" element={<Recoleccion />} />
-              <Route path="/almacen" element={<Almacen />} />
-              <Route path="/nueva-explotacion" element={<FormExplotacion />} />
-              <Route path="/nueva-parcela" element={<FormParcela />} />
-              <Route path="/nueva-operacion" element={<FormOperaciones />} />
-              <Route path="/nueva-fumigacion" element={<FormFumigacion />} />
-              <Route path="/nuevo-producto" element={<FormProducto />} />
-              <Route path="/comprar-producto" element={<FormComprarProducto />} />
-              <Route path="/explotacion/:id" element={<EditarExplotacion />} />
-              <Route path="/parcela/:id" element={<EditarParcela/>} />
-              <Route path="/producto/:id" element={<EditarProducto/>} />
-              <Route path="/operacion/:id" element={<EditarOperacion/>} />
-              <Route path="/editar-fumigacion/:id" element={<EditarFumigacion />} />
-              <Route path="/gastos" element={<Gastos/>} />
-            
 
+              {/* solo administrador: el trabajador es redirigido al dashboard */}
+              <Route path="/explotaciones" element={<SoloAdmin><Explotaciones /></SoloAdmin>} />
+              <Route path="/parcelas" element={<SoloAdmin><Parcelas /></SoloAdmin>} />
+              <Route path="/recoleccion" element={<SoloAdmin><Recoleccion /></SoloAdmin>} />
+              <Route path="/nueva-recoleccion" element={<SoloAdmin><FormRecoleccion /></SoloAdmin>} />
+              <Route path="/recoleccion/:id" element={<SoloAdmin><EditarRecoleccion /></SoloAdmin>} />
+              <Route path="/almacen" element={<SoloAdmin><Almacen /></SoloAdmin>} />
+              <Route path="/nueva-explotacion" element={<SoloAdmin><FormExplotacion /></SoloAdmin>} />
+              <Route path="/nueva-parcela" element={<SoloAdmin><FormParcela /></SoloAdmin>} />
+              <Route path="/nueva-operacion" element={<SoloAdmin><FormOperaciones /></SoloAdmin>} />
+              <Route path="/nueva-fumigacion" element={<SoloAdmin><FormFumigacion /></SoloAdmin>} />
+              <Route path="/nuevo-producto" element={<SoloAdmin><FormProducto /></SoloAdmin>} />
+              <Route path="/comprar-producto" element={<SoloAdmin><FormComprarProducto /></SoloAdmin>} />
+              <Route path="/explotacion/:id" element={<SoloAdmin><EditarExplotacion /></SoloAdmin>} />
+              <Route path="/parcela/:id" element={<SoloAdmin><EditarParcela/></SoloAdmin>} />
+              <Route path="/producto/:id" element={<SoloAdmin><EditarProducto/></SoloAdmin>} />
+              <Route path="/operacion/:id" element={<SoloAdmin><EditarOperacion/></SoloAdmin>} />
+              <Route path="/editar-fumigacion/:id" element={<SoloAdmin><EditarFumigacion /></SoloAdmin>} />
+              <Route path="/gastos" element={<SoloAdmin><Gastos/></SoloAdmin>} />
+
+              {/* ruta comodin: cualquier direccion no definida cae aqui */}
+              <Route path="*" element={
+                <div className="form-container" style={{ textAlign: 'center' }}>
+                  <h1>Página no encontrada</h1>
+                  <p>La dirección a la que intentas acceder no existe.</p>
+                  <Link to="/dashboard">Volver al inicio</Link>
+                </div>
+              } />
 
                 </Routes>
               </main>

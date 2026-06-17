@@ -133,10 +133,10 @@ const MenuNav = ({ user, logout }) => {
           )}
           {rol !== 'trabajador' && (
             <MenuBar
-              to=""
               iconImg="./analisis.svg"
               altText="Análisis"
               texto="Análisis"
+              disabled
             />
           )}
         </div>
