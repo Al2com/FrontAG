@@ -14,6 +14,13 @@ const FormComprarProducto = () => {
     const [productos, setProductos] = useState([]);
     const [proveedores, setProveedores] = useState([]);
     const [mensajeModal, setMensajeModal] = useState("");
+    // modal de confirmacion para registrar la compra
+    const [modalConfirm, setModalConfirm] = useState(false);
+
+    // alta rapida de proveedor desde la propia compra
+    const [mostrarNuevoProv, setMostrarNuevoProv] = useState(false);
+    const [nuevoProv, setNuevoProv] = useState({ nombre_empresa: '', direccion: '', telefono: '' });
+    const [errorProv, setErrorProv] = useState('');
 
     const [formData, setFormData] = useState({
         producto_id: "",
@@ -31,16 +38,45 @@ const FormComprarProducto = () => {
         precio: "",
     });
 
+    // recarga la lista de proveedores (la uso al montar y tras crear uno nuevo)
+    const cargarProveedores = () => {
+        return proveedoresService.getProveedores()
+            .then(data => setProveedores(data))
+            .catch(() => setMensajeModal("Error al cargar los proveedores. Inténtalo de nuevo."));
+    };
+
     // Cargamos productos y proveedores al montar el componente
     useEffect(() => {
         productosService.getProductos()
             .then(data => setProductos(data))
             .catch(() => setMensajeModal("Error al cargar los productos. Inténtalo de nuevo."));
 
-        proveedoresService.getProveedores()
-            .then(data => setProveedores(data))
-            .catch(() => setMensajeModal("Error al cargar los proveedores. Inténtalo de nuevo."));
+        cargarProveedores();
     }, []);
+
+    // crea un proveedor desde el mini-formulario y lo deja seleccionado
+    const crearProveedor = () => {
+        setErrorProv('');
+        if (!nuevoProv.nombre_empresa.trim() || !nuevoProv.direccion.trim()) {
+            setErrorProv('El nombre de empresa y la dirección son obligatorios');
+            return;
+        }
+        proveedoresService.postCrear(nuevoProv)
+            .then(creado => {
+                cargarProveedores();
+                // selecciona automáticamente el proveedor recién creado
+                setFormData(prev => ({ ...prev, proveedor_id: creado.id }));
+                setErrors(prev => ({ ...prev, proveedor_id: '' }));
+                setNuevoProv({ nombre_empresa: '', direccion: '', telefono: '' });
+                setMostrarNuevoProv(false);
+            })
+            .catch(err => {
+                const msg = err.response?.data?.errors
+                    ? Object.values(err.response.data.errors)[0][0]
+                    : 'No se pudo crear el proveedor';
+                setErrorProv(msg);
+            });
+    };
 
     const regexDecimal = /^[0-9]{1,5}(\.[0-9]{1,2})?$/;
 
@@ -95,13 +131,18 @@ const FormComprarProducto = () => {
         const precioOk = validarCampos("precio", formData.precio);
 
         if (productoOk && proveedorOk && fechaOk && cantidadOk && precioOk) {
-            comprasService.postCrearCompra(formData)
-                .then(() => {
-                    alert("Compra registrada correctamente");
-                    navigate("/almacen");
-                })
-                .catch(() => setMensajeModal("Error al registrar la compra. Inténtalo de nuevo."));
+            setModalConfirm(true);
         }
+    };
+
+    // el usuario confirma en el modal y se registra la compra
+    const crearCompra = () => {
+        comprasService.postCrearCompra(formData)
+            .then(() => navigate("/almacen"))
+            .catch(() => {
+                setModalConfirm(false);
+                setMensajeModal("Error al registrar la compra. Inténtalo de nuevo.");
+            });
     };
 
     return (
@@ -113,6 +154,15 @@ const FormComprarProducto = () => {
                 <Modal
                     mesajeError={mensajeModal}
                     cerrarModal={() => setMensajeModal("")}
+                />
+            )}
+
+            {/* Modal de confirmacion para registrar la compra */}
+            {modalConfirm && (
+                <Modal
+                    mesajeError="¿Estás seguro de registrar esta compra?"
+                    cerrarModal={() => setModalConfirm(false)}
+                    onConfirmar={crearCompra}
                 />
             )}
 
@@ -138,20 +188,55 @@ const FormComprarProducto = () => {
 
                 <div className="form-grupo">
                     <label>Proveedor *</label>
-                    <select
-                        name="proveedor_id"
-                        value={formData.proveedor_id}
-                        onChange={handleChange}
-                        className={errors.proveedor_id ? 'input-error' : ''}
-                    >
-                        <option value="">Selecciona un proveedor</option>
-                        {proveedores.map(proveedor => (
-                            <option key={proveedor.id} value={proveedor.id}>
-                                {proveedor.nombre_empresa}
-                            </option>
-                        ))}
-                    </select>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                        <select
+                            name="proveedor_id"
+                            value={formData.proveedor_id}
+                            onChange={handleChange}
+                            className={errors.proveedor_id ? 'input-error' : ''}
+                            style={{ flex: 1 }}
+                        >
+                            <option value="">Selecciona un proveedor</option>
+                            {proveedores.map(proveedor => (
+                                <option key={proveedor.id} value={proveedor.id}>
+                                    {proveedor.nombre_empresa}
+                                </option>
+                            ))}
+                        </select>
+                        <button
+                            type="button"
+                            onClick={() => setMostrarNuevoProv(!mostrarNuevoProv)}
+                            title="Crear proveedor"
+                        >
+                            +
+                        </button>
+                    </div>
                     {errors.proveedor_id && <span className="mensaje-error">{errors.proveedor_id}</span>}
+
+                    {mostrarNuevoProv && (
+                        <div className="nuevo-proveedor" style={{ marginTop: '8px', display: 'grid', gap: '6px' }}>
+                            <input
+                                type="text"
+                                placeholder="Nombre de la empresa *"
+                                value={nuevoProv.nombre_empresa}
+                                onChange={e => setNuevoProv({ ...nuevoProv, nombre_empresa: e.target.value })}
+                            />
+                            <input
+                                type="text"
+                                placeholder="Dirección *"
+                                value={nuevoProv.direccion}
+                                onChange={e => setNuevoProv({ ...nuevoProv, direccion: e.target.value })}
+                            />
+                            <input
+                                type="text"
+                                placeholder="Teléfono"
+                                value={nuevoProv.telefono}
+                                onChange={e => setNuevoProv({ ...nuevoProv, telefono: e.target.value })}
+                            />
+                            <button type="button" onClick={crearProveedor}>Crear proveedor</button>
+                            {errorProv && <span className="mensaje-error">{errorProv}</span>}
+                        </div>
+                    )}
                 </div>
 
                 <div className="form-grupo">

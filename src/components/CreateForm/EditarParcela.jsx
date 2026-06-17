@@ -2,12 +2,14 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import parcelasService from '../../services/parcelas.js';
 import Modal from '../Modal/Modal.jsx';
+import { parseErrores422, MENSAJE_ERROR_SERVIDOR } from '../../services/errores.js';
 import '../Style/forms.css'
 
 const EditarParcela = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [modalConfirm, setModalConfirm] = useState(false);
+  const [errorServidor, setErrorServidor] = useState('');
 
   const [formData, setFormData] = useState({
     explotacion_id: '',
@@ -45,13 +47,15 @@ const regexParcela = /^[0-9]{1,4}$/
 const regexVariedad = /^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]{3,50}$/       
 const regexDimension = /^[0-9]+([.,][0-9]{1,2})?$/            
 const regexNumArboles = /^[0-9]{1,5}$/                       
-const regexFecha = /^\d{4}-\d{2}-\d{2}$/                   
+const regexFecha = /^\d{4}-\d{2}-\d{2}/
 const regexDescripcion = /^.{10,}$/ 
 
 
- // actualiza el estado cuando el usuario escribe
+ // actualiza el estado cuando el usuario escribe y valida ese campo
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+    validarCampos(name, value);
   }
 
   //Valida los campos con regex
@@ -125,10 +129,23 @@ const regexDescripcion = /^.{10,}$/
 
  
 
-  // al pulsar guardar abre el modal de confirmacion
+  // al pulsar guardar valida todo y, si es correcto, abre el modal de confirmacion
   const enviarFormulario = (e) => {
     e.preventDefault();
-    setModalConfirm(true);
+
+    const nombreOk      = validarCampos('nombre', formData.nombre);
+    const poligonoOk    = validarCampos('poligono', formData.poligono);
+    const parcelaOk     = validarCampos('parcela', formData.parcela);
+    const variedadOk    = validarCampos('variedad', formData.variedad);
+    const dimensionOk   = validarCampos('dimension_hanegadas', formData.dimension_hanegadas);
+    const numArbolesOk  = validarCampos('num_arboles', formData.num_arboles);
+    const fechaOk       = validarCampos('fecha_plantacion', formData.fecha_plantacion);
+    const descripcionOk = validarCampos('descripcion', formData.descripcion);
+
+    if (nombreOk && poligonoOk && parcelaOk && variedadOk &&
+        dimensionOk && numArbolesOk && fechaOk && descripcionOk) {
+      setModalConfirm(true);
+    }
   }
 
   // el usuario confirma en el modal y se manda al back
@@ -139,15 +156,11 @@ const regexDescripcion = /^.{10,}$/
       })
        .catch(err => {
           setModalConfirm(false);
-          if (err.response?.status === 422) {
-            const erroresLaravel = err.response.data.errors;
-            const nuevosErrores = {};
-            for (const campo in erroresLaravel) {
-              nuevosErrores[campo] = erroresLaravel[campo][0];
-            }
-            setErrors(prev => ({ ...prev, ...nuevosErrores }));
+          const e422 = parseErrores422(err);
+          if (e422) {
+            setErrors(prev => ({ ...prev, ...e422 }));
           } else {
-            alert('Error del servidor. Inténtalo de nuevo.');
+            setErrorServidor(MENSAJE_ERROR_SERVIDOR);
           }
         });
   }
@@ -164,6 +177,9 @@ const regexDescripcion = /^.{10,}$/
       )}
 
       <h1>Editar Parcela</h1>
+
+      {errorServidor && <span className="mensaje-error">{errorServidor}</span>}
+
       <form className="form-grid" onSubmit={enviarFormulario}>
 
         <div className="form-grupo">

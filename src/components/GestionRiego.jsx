@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import gastosRiegoService from '../services/gastosRiego'
 import FormGastoRiego from './CreateForm/FormGastoRiego'
+import Modal from './Modal/Modal.jsx'
 import './Style/cards.css'
 
 const meses = [
@@ -15,6 +16,8 @@ const GestionRiego = ({ onVolver }) => {
   const [filtroAnio, setFiltroAnio] = useState('todos')
   const [mostrarTabla, setMostrarTabla] = useState(false)
   const [modal, setModal] = useState(null) // null | 'nuevo' | { inicial }
+  // recibo pendiente de confirmar su borrado (null = no hay modal)
+  const [reciboABorrar, setReciboABorrar] = useState(null)
 
   const cargar = () => {
     setError('')
@@ -58,11 +61,17 @@ const GestionRiego = ({ onVolver }) => {
   const parcelasUnicas = [...new Map(gastos.map(g => [g.parcela_id, nombreParcela(g)])).entries()]
   const aniosUnicos = [...new Set(gastos.map(g => g.anio))].sort((a, b) => b - a)
 
+  // abre el modal de confirmacion
   const borrarRecibo = (recibo) => {
-    if (!window.confirm(`¿Borrar el recibo de ${recibo.parcela_nombre} (${meses[recibo.mes - 1]} ${recibo.anio})?`)) return
-    Promise.all(recibo.ids.map(id => gastosRiegoService.borrar(id)))
-      .then(() => cargar())
-      .catch(() => setError('No se pudo borrar el recibo'))
+    setReciboABorrar(recibo)
+  }
+
+  // el usuario confirma en el modal y se borra de verdad
+  const confirmarBorrarRecibo = () => {
+    if (!reciboABorrar) return
+    Promise.all(reciboABorrar.ids.map(id => gastosRiegoService.borrar(id)))
+      .then(() => { cargar(); setReciboABorrar(null) })
+      .catch(() => { setError('No se pudo borrar el recibo'); setReciboABorrar(null) })
   }
 
   const editarRecibo = (recibo) => {
@@ -184,6 +193,15 @@ const GestionRiego = ({ onVolver }) => {
           </div>
         </div>
       ))}
+
+      {/* modal de confirmacion para borrar un recibo */}
+      {reciboABorrar && (
+        <Modal
+          mesajeError={`¿Borrar el recibo de ${reciboABorrar.parcela_nombre} (${meses[reciboABorrar.mes - 1]} ${reciboABorrar.anio})?`}
+          cerrarModal={() => setReciboABorrar(null)}
+          onConfirmar={confirmarBorrarRecibo}
+        />
+      )}
 
       {modal === 'nuevo' && (
         <FormGastoRiego

@@ -4,17 +4,19 @@ import { useEffect } from 'react';
 import explotacionService from '../../services/explotaciones';
 import propietariosService from '../../services/propietarios';
 import Modal from '../Modal/Modal.jsx';
+import { parseErrores422, MENSAJE_ERROR_SERVIDOR } from '../../services/errores.js';
 import '../Style/forms.css'
 
 const FormExplotacion = () => {
 
   const [propietarios, setPropietario] = useState([]);
   const [modalConfirm, setModalConfirm] = useState(false);
+  const [errorServidor, setErrorServidor] = useState('');
 
   useEffect(() => {
     propietariosService.getPropietarios()
       .then(data => setPropietario(data.propietarios))
-      .catch(() => console.error('Error al cargar los propietarios'))
+      .catch(() => setErrorServidor('No se pudieron cargar los propietarios'))
   }, []);
 
   const [formData, setFormData] = useState({
@@ -88,15 +90,11 @@ const FormExplotacion = () => {
       })
       .catch(err => {
         setModalConfirm(false);
-        if (err.response?.status === 422) {
-          const erroresLaravel = err.response.data.errors;
-          const nuevosErrores = {};
-          for (const campo in erroresLaravel) {
-            nuevosErrores[campo] = erroresLaravel[campo][0];
-          }
-          setErrors(prev => ({ ...prev, ...nuevosErrores }));
+        const e422 = parseErrores422(err);
+        if (e422) {
+          setErrors(prev => ({ ...prev, ...e422 }));
         } else {
-          alert('Error del servidor. Inténtalo de nuevo.');
+          setErrorServidor(MENSAJE_ERROR_SERVIDOR);
         }
       });
   };
@@ -113,6 +111,8 @@ const FormExplotacion = () => {
       )}
 
       <h1>Nueva Explotación</h1>
+
+      {errorServidor && <span className="mensaje-error">{errorServidor}</span>}
 
       <form className="form-grid" onSubmit={enviarFormulario}>
 

@@ -19,12 +19,16 @@ const FormFumigacion = () => {
   const [mostrarModal, setMostrarModal] = useState(false)
   const [mensajeModal, setMensajeModal] = useState('')
   const [esExito, setEsExito] = useState(false)
+  // modal de confirmacion para crear
+  const [modalConfirm, setModalConfirm] = useState(false)
 
   const [mostrarModalEliminar, setMostrarModalEliminar] = useState(false)
   const [indiceEliminar, setIndiceEliminar] = useState(null)
 
   const [precioPorHora, setPrecioPorHora] = useState('')
   const [precioPorTanque, setPrecioPorTanque] = useState('') // CAMBIO: precio por turbo (tractor)
+  // tipo de mochila: estandar (16 L), pilas (5 L) u otra (litros a mano)
+  const [tipoMochila, setTipoMochila] = useState('estandar')
 
   const [formData, setFormData] = useState({
     parcela_ids: [],
@@ -35,6 +39,7 @@ const FormFumigacion = () => {
     duracion_minutos: "",
     mochilas: "",
     turbos: "",
+    litros_agua: 16, // litros de agua por mochila (solo informativo, no cambia el coste)
     descripcion: ""
   });
 
@@ -167,6 +172,15 @@ const FormFumigacion = () => {
     validarCampos(name, value);
   }
 
+  // al cambiar el tipo de mochila pongo los litros por defecto; "otra" deja teclear
+  const cambiarTipoMochila = (e) => {
+    const tipo = e.target.value
+    setTipoMochila(tipo)
+    if (tipo === 'estandar') setFormData(prev => ({ ...prev, litros_agua: 16 }))
+    else if (tipo === 'pilas') setFormData(prev => ({ ...prev, litros_agua: 5 }))
+    else setFormData(prev => ({ ...prev, litros_agua: '' })) // otra: a mano
+  }
+
   const handleChangeProducto = (e, index) => {
     const { name, value } = e.target
     setProductosAñadidos(productosAñadidos.map((item, i) =>
@@ -234,31 +248,37 @@ const FormFumigacion = () => {
     setErrors(prev => ({ ...prev, productos: '' }));
 
     if (metodoOk && fechaOk && descripcionOk && operarioOk && duracionOk && mochilasOk && turbosOk && precioOk) {
-      // CAMBIO: en tractor se envía precio_turbo (el precio por turbo del front)
-      fumigacionService.postCrearFumigacion({
-        ...formData,
-        productos: productosAñadidos,
-        ...(formData.metodo_aplicacion === 'tractor' ? { precio_turbo: precioPorTanque } : {})
-      })
-        .then(() => {
-          setMensajeModal('Fumigación creada correctamente')
-          setEsExito(true)
-          setMostrarModal(true)
-        })
-        .catch(err => {
-          if (err.response?.status === 422) {
-            const nuevosErrores = {};
-            for (const campo in err.response.data.errors) {
-              nuevosErrores[campo] = err.response.data.errors[campo][0];
-            }
-            setErrors(prev => ({ ...prev, ...nuevosErrores }));
-          } else {
-            setMensajeModal('Error del servidor. Inténtalo de nuevo.')
-            setEsExito(false)
-            setMostrarModal(true)
-          }
-        });
+      setModalConfirm(true)
     }
+  };
+
+  // el usuario confirma en el modal y se crea la fumigacion
+  const crearFumigacion = () => {
+    setModalConfirm(false)
+    // en tractor se envía precio_turbo (el precio por turbo del front)
+    fumigacionService.postCrearFumigacion({
+      ...formData,
+      productos: productosAñadidos,
+      ...(formData.metodo_aplicacion === 'tractor' ? { precio_turbo: precioPorTanque } : {})
+    })
+      .then(() => {
+        setMensajeModal('Fumigación creada correctamente')
+        setEsExito(true)
+        setMostrarModal(true)
+      })
+      .catch(err => {
+        if (err.response?.status === 422) {
+          const nuevosErrores = {};
+          for (const campo in err.response.data.errors) {
+            nuevosErrores[campo] = err.response.data.errors[campo][0];
+          }
+          setErrors(prev => ({ ...prev, ...nuevosErrores }));
+        } else {
+          setMensajeModal('Error del servidor. Inténtalo de nuevo.')
+          setEsExito(false)
+          setMostrarModal(true)
+        }
+      });
   };
 
   // datos derivados para el selector de parcelas (tractor)
@@ -272,6 +292,15 @@ const FormFumigacion = () => {
 
       {mostrarModal && (
         <Modal mesajeError={mensajeModal} cerrarModal={cerrarModal} />
+      )}
+
+      {/* modal de confirmacion para crear */}
+      {modalConfirm && (
+        <Modal
+          mesajeError="¿Estás seguro de crear esta fumigación?"
+          cerrarModal={() => setModalConfirm(false)}
+          onConfirmar={crearFumigacion}
+        />
       )}
 
       {mostrarModalEliminar && (
@@ -472,6 +501,33 @@ const FormFumigacion = () => {
             {errors.productos && <span className="mensaje-error">{errors.productos}</span>}
             <button type="button" className="btn-add-producto" onClick={añadirFila}>+ Añadir producto</button>
           </div>
+
+          {formData.metodo_aplicacion === 'mochila' && (
+            <div className="form-grupo">
+              <label htmlFor="tipoMochila">Tipo de mochila *</label>
+              <select id="tipoMochila" value={tipoMochila} onChange={cambiarTipoMochila}>
+                <option value="estandar">Mochila estándar (16 L)</option>
+                <option value="pilas">Máquina de pilas (5 L)</option>
+                <option value="otra">Otra…</option>
+              </select>
+            </div>
+          )}
+
+          {formData.metodo_aplicacion === 'mochila' && tipoMochila === 'otra' && (
+            <div className="form-grupo">
+              <label htmlFor="litros_agua">Litros de agua por mochila *</label>
+              <input
+                type="number"
+                id="litros_agua"
+                name="litros_agua"
+                value={formData.litros_agua}
+                onChange={handleChange}
+                step="0.1"
+                min="0"
+                placeholder="Ej: 8"
+              />
+            </div>
+          )}
 
           {formData.metodo_aplicacion === 'mochila' && (
             <div className="form-grupo">

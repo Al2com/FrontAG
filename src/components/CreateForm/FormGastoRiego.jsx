@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import parcelasService from '../../services/parcelas'
 import gastosRiegoService from '../../services/gastosRiego'
+import Modal from '../Modal/Modal.jsx'
 
 const meses = [
   'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -20,6 +21,8 @@ const FormGastoRiego = ({ onClose, onGuardado, inicial = null }) => {
   })
   const [mensaje, setMensaje] = useState('')
   const [error, setError] = useState('')
+  // modal de confirmacion para guardar
+  const [modalConfirm, setModalConfirm] = useState(false)
 
   // en edicion no hace falta el desplegable de parcelas
   useEffect(() => {
@@ -38,6 +41,7 @@ const FormGastoRiego = ({ onClose, onGuardado, inicial = null }) => {
     setForm({ ...form, [name]: value })
   }
 
+  // valida y abre el modal de confirmacion
   const guardar = () => {
     setError(''); setMensaje('')
     if (!form.parcela_id) { setError('Elige una parcela'); return }
@@ -48,6 +52,13 @@ const FormGastoRiego = ({ onClose, onGuardado, inicial = null }) => {
       setError('Mete al menos un importe (agua, abono o mantenimiento)')
       return
     }
+
+    setModalConfirm(true)
+  }
+
+  // el usuario confirma en el modal y se guarda de verdad
+  const confirmarGuardar = () => {
+    setModalConfirm(false)
 
     const datos = {
       parcela_id: Number(form.parcela_id),
@@ -128,6 +139,15 @@ const FormGastoRiego = ({ onClose, onGuardado, inicial = null }) => {
           <button type="button" onClick={onClose} className="btn-cancel">Cerrar</button>
         </div>
       </div>
+
+      {/* modal de confirmacion para guardar el gasto de riego */}
+      {modalConfirm && (
+        <Modal
+          mesajeError={esEdicion ? '¿Guardar los cambios de este recibo?' : '¿Estás seguro de guardar este gasto de riego?'}
+          cerrarModal={() => setModalConfirm(false)}
+          onConfirmar={confirmarGuardar}
+        />
+      )}
     </div>
   )
 }

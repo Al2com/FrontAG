@@ -6,4 +6,8 @@ const getProveedores = () => {
     return axios.get(base).then(response => response.data);
 };
 
-export default { getProveedores };
+const postCrear = (datos) => {
+    return axios.post(base, datos).then(response => response.data);
+};
+
+export default { getProveedores, postCrear };

@@ -5,6 +5,7 @@ import parcelasService from '../services/parcelas.js';
 import ParcelaCard from './InfoPanel/ParcelaCard.jsx';
 import BtnSubmit from './buttons/BtnSubmit.jsx';
 import BtnEliminar from './buttons/btnEliminar.jsx';
+import Modal from './Modal/Modal.jsx';
 import './Style/cards.css';
 import './Style/forms.css';
 import './Style/search.css';
@@ -29,6 +30,9 @@ const Parcela = () => {
   // controla si se ve tabla o tarjetas
   const [mostrarTabla, setMostrarTabla] = useState(false);
 
+  // modal de confirmacion para eliminar
+  const [modalConfirm, setModalConfirm] = useState({ visible: false, id: null });
+
   const rol = sessionStorage.getItem('rol');
 
   // al entrar pido los datos al back
@@ -44,7 +48,7 @@ const Parcela = () => {
 
     parcelasService.getResumenP()
       .then(data => setParResumen(data))
-      .catch(err => console.error('Error al obtener resumen:', err))
+      .catch(() => setErrorCarga('Error al cargar las parcelas'))
   }, [])
 
   // filtro por variedad y ordeno segun los selects
@@ -57,17 +61,34 @@ const Parcela = () => {
       return 0;
     });
 
+  const confirmarEliminar = (id) => {
+    setModalConfirm({ visible: true, id });
+  };
+
   // pido confirmacion antes de borrar y actualizo la lista sin recargar
-  const eliminarParcela = (id) => {
-    if (window.confirm('Estas seguro de eliminar esta parcela?')) {
-      parcelasService.borrarParcela(id)
-        .then(() => setParResumen(parResumen.filter(p => p.id !== id)))
-        .catch(() => setErrorCarga('Error al eliminar la parcela'))
-    }
+  const eliminarParcela = () => {
+    parcelasService.borrarParcela(modalConfirm.id)
+      .then(() => {
+        setParResumen(parResumen.filter(p => p.id !== modalConfirm.id));
+        setModalConfirm({ visible: false, id: null });
+      })
+      .catch(() => {
+        setErrorCarga('Error al eliminar la parcela');
+        setModalConfirm({ visible: false, id: null });
+      })
   };
 
   return (
     <div>
+      {/* modal de confirmacion para eliminar */}
+      {modalConfirm.visible && (
+        <Modal
+          mesajeError="¿Estás seguro de eliminar esta parcela?"
+          cerrarModal={() => setModalConfirm({ visible: false, id: null })}
+          onConfirmar={eliminarParcela}
+        />
+      )}
+
       <div className="menuExplo">
         
         <div className="menu-button">
@@ -147,7 +168,7 @@ const Parcela = () => {
                   <td>
                     <div className="tabla-botones">
                       <BtnSubmit texto="Editar" to={`/parcela/${parcela.id}`} />
-                      <BtnEliminar texto="Eliminar" onClick={() => eliminarParcela(parcela.id)} />
+                      <BtnEliminar texto="Eliminar" onClick={() => confirmarEliminar(parcela.id)} />
                     </div>
                   </td>
                 )}
@@ -176,7 +197,7 @@ const Parcela = () => {
                   <BtnSubmit texto="Editar" to={`/parcela/${parcela.id}`} />
                 )}
                 {rol !== 'trabajador' && (
-                  <BtnEliminar texto="Eliminar" onClick={() => eliminarParcela(parcela.id)} />
+                  <BtnEliminar texto="Eliminar" onClick={() => confirmarEliminar(parcela.id)} />
                 )}
               </div>
             </ParcelaCard>

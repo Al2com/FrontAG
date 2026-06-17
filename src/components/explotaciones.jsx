@@ -71,11 +71,11 @@ const Explotaciones = () => {
         setParGot(data.parcelasgoteo);
         setParMan(data.parcelasmanta);
       })
-      .catch(err => console.error('Error al obtener parcelas:', err))
+      .catch(() => setErrorCarga('Error al cargar los contadores'))
 
     explotacionService.getResumen()
       .then(data => setResumen(data))
-      .catch(err => console.error('Error al obtener resumen:', err))
+      .catch(() => setErrorCarga('Error al cargar las explotaciones'))
   }, [])
 
   // filtro por nombre y ordeno segun lo que haya seleccionado en los selects

@@ -10,6 +10,13 @@
   color: var(--c-texto);
 }
 
+/* texto de ayuda bajo un campo (p. ej. coste automatico) */
+.texto-ayuda {
+  font-size: 12px;
+  color: var(--c-texto-apagado);
+  margin-top: 2px;
+}
+
 .form-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);

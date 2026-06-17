@@ -1,12 +1,17 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import explotacionService from '../../services/explotaciones.js';
+import Modal from '../Modal/Modal.jsx';
+import { parseErrores422, MENSAJE_ERROR_SERVIDOR } from '../../services/errores.js';
 import '../Style/forms.css';
 
 const EditarExplotacion = () => {
 
   const { id } = useParams();
   const navigate = useNavigate();
+
+  const [modalConfirm, setModalConfirm] = useState(false);
+  const [errorServidor, setErrorServidor] = useState('');
 
   const [formData, setFormData] = useState({
     nombre: '',
@@ -29,7 +34,7 @@ const EditarExplotacion = () => {
   useEffect(() => {
     explotacionService.getExplo(id)
       .then(data => setFormData(data))
-      .catch(err => console.error('Error al cargar explotación:', err))
+      .catch(() => setErrorServidor('No se pudieron cargar los datos de la explotación'))
   }, [id])
 
   const validarCampos = (name, value) => {
@@ -61,6 +66,7 @@ const EditarExplotacion = () => {
     validarCampos(name, value);
   }
 
+  // valida y abre el modal de confirmacion
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -69,29 +75,39 @@ const EditarExplotacion = () => {
     const descripcionOk = validarCampos('descripcion', formData.descripcion);
 
     if (nombreOk && ubicacionOk && descripcionOk) {
-
-      explotacionService.putActualizar(id, formData)
-        .then(() => {
-          navigate('/explotaciones');
-        })
-        .catch(err => {
-          if (err.response?.status === 422) {
-            const erroresLaravel = err.response.data.errors;
-            const nuevosErrores = {};
-            for (const campo in erroresLaravel) {
-              nuevosErrores[campo] = erroresLaravel[campo][0];
-            }
-            setErrors(prev => ({ ...prev, ...nuevosErrores }));
-          } else {
-            alert('Error del servidor. Inténtalo de nuevo.');
-          }
-        });
+      setModalConfirm(true);
     }
+  }
+
+  // el usuario confirma en el modal y se manda al back
+  const guardarCambios = () => {
+    explotacionService.putActualizar(id, formData)
+      .then(() => navigate('/explotaciones'))
+      .catch(err => {
+        setModalConfirm(false);
+        const e422 = parseErrores422(err);
+        if (e422) {
+          setErrors(prev => ({ ...prev, ...e422 }));
+        } else {
+          setErrorServidor(MENSAJE_ERROR_SERVIDOR);
+        }
+      });
   }
 
   return (
     <div className="form-container">
+
+      {modalConfirm && (
+        <Modal
+          mesajeError="¿Estás seguro de guardar los cambios?"
+          cerrarModal={() => setModalConfirm(false)}
+          onConfirmar={guardarCambios}
+        />
+      )}
+
       <h1>Editar Explotación</h1>
+
+      {errorServidor && <span className="mensaje-error">{errorServidor}</span>}
 
       <form onSubmit={handleSubmit} className="form-grid">
 

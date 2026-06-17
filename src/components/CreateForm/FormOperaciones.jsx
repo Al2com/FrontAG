@@ -18,6 +18,8 @@ const FormOperacion = () => {
   const [mostrarModal, setMostrarModal] = useState(false)
   const [mensajeModal, setMensajeModal] = useState('')
   const [esExito, setEsExito] = useState(false)
+  // modal de confirmacion para crear
+  const [modalConfirm, setModalConfirm] = useState(false)
 
   const [formData, setFormData] = useState({
     parcela_id: '',
@@ -154,27 +156,33 @@ const FormOperacion = () => {
     const descripcionOk = validarCampos('descripcion', formData.descripcion)
 
     if (parcelaOk && operarioOk && tipoOk && fechaOk && duracionOk && descripcionOk && precioOk) {
-      operacionesService.postCrear(formData)
-        .then(() => {
-          setMensajeModal('Operación creada correctamente')
-          setEsExito(true)
-          setMostrarModal(true)
-        })
-        .catch(err => {
-          if (err.response?.status === 422) {
-            const erroresLaravel = err.response.data.errors
-            const nuevosErrores = {}
-            for (const campo in erroresLaravel) {
-              nuevosErrores[campo] = erroresLaravel[campo][0]
-            }
-            setErrors(prev => ({ ...prev, ...nuevosErrores }))
-          } else {
-            setMensajeModal('Error del servidor. Inténtalo de nuevo.')
-            setEsExito(false)
-            setMostrarModal(true)
-          }
-        })
+      setModalConfirm(true)
     }
+  }
+
+  // el usuario confirma en el modal y se crea la operacion
+  const crearOperacion = () => {
+    setModalConfirm(false)
+    operacionesService.postCrear(formData)
+      .then(() => {
+        setMensajeModal('Operación creada correctamente')
+        setEsExito(true)
+        setMostrarModal(true)
+      })
+      .catch(err => {
+        if (err.response?.status === 422) {
+          const erroresLaravel = err.response.data.errors
+          const nuevosErrores = {}
+          for (const campo in erroresLaravel) {
+            nuevosErrores[campo] = erroresLaravel[campo][0]
+          }
+          setErrors(prev => ({ ...prev, ...nuevosErrores }))
+        } else {
+          setMensajeModal('Error del servidor. Inténtalo de nuevo.')
+          setEsExito(false)
+          setMostrarModal(true)
+        }
+      })
   }
 
   return (
@@ -183,6 +191,15 @@ const FormOperacion = () => {
 
       {mostrarModal && (
         <Modal mesajeError={mensajeModal} cerrarModal={cerrarModal} />
+      )}
+
+      {/* modal de confirmacion para crear */}
+      {modalConfirm && (
+        <Modal
+          mesajeError="¿Estás seguro de crear esta operación?"
+          cerrarModal={() => setModalConfirm(false)}
+          onConfirmar={crearOperacion}
+        />
       )}
 
       <form onSubmit={enviarFormulario} className="form-grid">

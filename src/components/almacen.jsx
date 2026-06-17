@@ -3,6 +3,7 @@ import productosService from '../services/productos.js';
 import BtnCrear from './buttons/BtnCrear.jsx';
 import BtnSubmit from './buttons/BtnSubmit.jsx';
 import BtnEliminar from './buttons/btnEliminar.jsx';
+import Modal from './Modal/Modal.jsx';
 import './Style/cards.css';
 import './Style/forms.css';
 import './Style/search.css';
@@ -11,6 +12,8 @@ const Almacen = () => {
   const [productos, setProductos] = useState([]);
   const [errorCarga, setErrorCarga] = useState('');
   const [mostrarTabla, setMostrarTabla] = useState(false);
+  // modal de confirmacion para eliminar
+  const [modalConfirm, setModalConfirm] = useState({ visible: false, id: null });
 
   const rol = sessionStorage.getItem('rol');
 
@@ -20,16 +23,32 @@ const Almacen = () => {
       .catch(() => setErrorCarga('Error al cargar los productos'));
   }, []);
 
-  const eliminarProducto = (id) => {
-    if (window.confirm('¿Estás seguro de eliminar este producto?')) {
-      productosService.borrarProducto(id)
-        .then(() => setProductos(productos.filter(p => p.id !== id)))
-        .catch(() => setErrorCarga('Error al eliminar el producto'));
-    }
+  const confirmarEliminar = (id) => {
+    setModalConfirm({ visible: true, id });
+  };
+
+  const eliminarProducto = () => {
+    productosService.borrarProducto(modalConfirm.id)
+      .then(() => {
+        setProductos(productos.filter(p => p.id !== modalConfirm.id));
+        setModalConfirm({ visible: false, id: null });
+      })
+      .catch(() => {
+        setErrorCarga('Error al eliminar el producto');
+        setModalConfirm({ visible: false, id: null });
+      });
   };
 
   return (
     <div>
+      {/* modal de confirmacion para eliminar */}
+      {modalConfirm.visible && (
+        <Modal
+          mesajeError="¿Estás seguro de eliminar este producto?"
+          cerrarModal={() => setModalConfirm({ visible: false, id: null })}
+          onConfirmar={eliminarProducto}
+        />
+      )}
       <div className="menuExplo">
       
         <div className="menu-button">
@@ -78,7 +97,7 @@ const Almacen = () => {
                   <td>
                     <div className="tabla-botones">
                       <BtnSubmit texto="Editar" to={`/producto/${producto.id}`} />
-                      <BtnEliminar texto="Eliminar" onClick={() => eliminarProducto(producto.id)} />
+                      <BtnEliminar texto="Eliminar" onClick={() => confirmarEliminar(producto.id)} />
                     </div>
                   </td>
                 )}
@@ -100,7 +119,7 @@ const Almacen = () => {
                 <BtnSubmit texto="Editar" to={`/producto/${producto.id}`} />
               )}
               {rol !== 'trabajador' && (
-                <BtnEliminar texto="Eliminar" onClick={() => eliminarProducto(producto.id)} />
+                <BtnEliminar texto="Eliminar" onClick={() => confirmarEliminar(producto.id)} />
               )}
             </div>
           </div>

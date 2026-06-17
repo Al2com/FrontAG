@@ -4,6 +4,7 @@ import parcelaService from '../../services/parcelas';
 import explotacionesService from "../../services/explotaciones";
 import propietariosService from "../../services/propietarios";
 import Modal from '../Modal/Modal.jsx';
+import { parseErrores422, MENSAJE_ERROR_SERVIDOR } from '../../services/errores.js';
 import '../Style/forms.css'
 
 const FormParcela = () => {
@@ -15,13 +16,15 @@ const FormParcela = () => {
 
   // modal de confirmacion para crear
   const [modalConfirm, setModalConfirm] = useState(false);
+  const [errorServidor, setErrorServidor] = useState('');
 
-  const regexPoligono = /^\d{1,12}$/;
+  const regexPoligono = /^\d{1,4}$/;
   const regexParcela = /^\d{1,4}$/;
   const regexVariedad = /^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]{1,15}$/;
   const regexDimension = /^\d{1,4}(\.\d{1,2})?$/;
-  const regexNumArboles = /^([1-9]\d{0,2}|[12]\d{4}|3000)$/;
-  const regexDescripcion = /^(\S+\s*){1,50}$/;
+  // entero de 1 a 3000
+  const regexNumArboles = /^([1-9]|[1-9]\d|[1-9]\d\d|[12]\d\d\d|3000)$/;
+  const regexDescripcion = /^.{10,}$/;
 
   useEffect(() => {
     explotacionesService.getCount()
@@ -70,15 +73,15 @@ const FormParcela = () => {
       comprobar = false;
     }
     if (name === 'poligono' && !regexPoligono.test(value)) {
-      mensaje = 'Número de 2 cifras';
+      mensaje = 'Número entero (máx. 4 cifras)';
       comprobar = false;
     }
     if (name === 'parcela' && !regexParcela.test(value)) {
-      mensaje = 'Número de 2 cifras';
+      mensaje = 'Número entero (máx. 4 cifras)';
       comprobar = false;
     }
     if (name === 'variedad' && !regexVariedad.test(value)) {
-      mensaje = 'Palabra de 8 letras máximo';
+      mensaje = 'Solo letras, máximo 15 caracteres';
       comprobar = false;
     }
     if (name === 'dimension_hanegadas' && !regexDimension.test(value)) {
@@ -86,7 +89,7 @@ const FormParcela = () => {
       comprobar = false;
     }
     if (name === 'num_arboles' && !regexNumArboles.test(value)) {
-      mensaje = 'Número entero max 3000';
+      mensaje = 'Número entero entre 1 y 3000';
       comprobar = false;
     }
     if (name === 'fecha_plantacion' && value === "") {
@@ -94,7 +97,7 @@ const FormParcela = () => {
       comprobar = false;
     }
     if (name === 'descripcion' && !regexDescripcion.test(value)) {
-      mensaje = 'Mínimo 50 caracteres';
+      mensaje = 'Mínimo 10 caracteres';
       comprobar = false;
     }
 
@@ -136,15 +139,11 @@ const FormParcela = () => {
       })
       .catch(err => {
         setModalConfirm(false);
-        if (err.response?.status === 422) {
-          const erroresLaravel = err.response.data.errors;
-          const nuevosErrores = {};
-          for (const campo in erroresLaravel) {
-            nuevosErrores[campo] = erroresLaravel[campo][0];
-          }
-          setErrors(prev => ({ ...prev, ...nuevosErrores }));
+        const e422 = parseErrores422(err);
+        if (e422) {
+          setErrors(prev => ({ ...prev, ...e422 }));
         } else {
-          alert('Error del servidor. Inténtalo de nuevo.');
+          setErrorServidor(MENSAJE_ERROR_SERVIDOR);
         }
       });
   };
@@ -162,6 +161,8 @@ const FormParcela = () => {
       )}
 
       <h1>Nueva Parcela</h1>
+
+      {errorServidor && <span className="mensaje-error">{errorServidor}</span>}
 
       <form className="form-grid" onSubmit={enviarFormulario}>
 
@@ -204,11 +205,11 @@ const FormParcela = () => {
         </div>
 
         <div className="form-grupo">
-          <label htmlFor="riego">Tipo de Riego *</label>
+          <label htmlFor="rol">Tipo de Riego *</label>
           <select
-            id="riego"
-            name="riego"
-            value={formData.riego}
+            id="rol"
+            name="rol"
+            value={formData.rol}
             onChange={actualizaEstado}
           >
             <option value="manta">Manta</option>
