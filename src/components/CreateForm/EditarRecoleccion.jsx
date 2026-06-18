@@ -12,6 +12,10 @@ const EditarRecoleccion = () => {
   const [modalConfirm, setModalConfirm] = useState(false)
   const [errorServidor, setErrorServidor] = useState('')
 
+  // Campos que el usuario ha modificado. Al editar solo validamos estos,
+  // así un dato cargado de la BD que no se toca no bloquea el guardado.
+  const [camposTocados, setCamposTocados] = useState({})
+
   const [formData, setFormData] = useState({
     parcela_id: '',
     fecha: '',
@@ -59,17 +63,18 @@ const EditarRecoleccion = () => {
   const handleChange = (e) => {
     const { name, value } = e.target
     setFormData({ ...formData, [name]: value })
+    setCamposTocados(prev => ({ ...prev, [name]: true })) // marcamos el campo como editado
     validarCampos(name, value)
   }
 
+  // valida solo los campos tocados al pulsar guardar
   const enviarFormulario = (e) => {
     e.preventDefault()
 
-    const fechaOk = validarCampos('fecha', formData.fecha)
-    const kilosOk = validarCampos('kilos', formData.kilos)
-    const precioOk = validarCampos('precio_medio_kg', formData.precio_medio_kg)
+    // map en vez de every para que se muestren todos los errores a la vez
+    const resultados = Object.keys(camposTocados).map(campo => validarCampos(campo, formData[campo]))
 
-    if (fechaOk && kilosOk && precioOk) {
+    if (resultados.every(Boolean)) {
       setModalConfirm(true)
     }
   }

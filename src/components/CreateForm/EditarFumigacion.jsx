@@ -13,6 +13,11 @@ const EditarFumigacion = () => {
     const [modalConfirm, setModalConfirm] = useState(false)
     const [errorCarga, setErrorCarga] = useState('')
 
+    // Campos que el usuario ha modificado. Al editar solo validamos estos,
+    // así un dato cargado de la BD que no se toca no bloquea el guardado
+    // (p.ej. en tractor el precio llega como null y antes rompía la edición).
+    const [camposTocados, setCamposTocados] = useState({})
+
     const [formData, setFormData] = useState({
         parcela_id: "",
         usuario_id: "",
@@ -23,7 +28,8 @@ const EditarFumigacion = () => {
         mochilas: "",
         turbos: "",
         litros_agua: "",
-        precio: "",
+        precio: "",        // precio total (solo mochila)
+        precio_turbo: "",  // precio por turbo (solo tractor): es el coste real del tractor
         descripcion: "",
         estado: "",
     })
@@ -40,7 +46,7 @@ const EditarFumigacion = () => {
 
     const regexEntero = /^[0-9]{1,4}$/
     const regexPrecio = /^\d+(\.\d{1,2})?$/
-    const regexDescripcion = /^.{10,}$/
+    const regexDescripcion = /^[\s\S]{10,}$/ // [\s\S] para admitir saltos de línea en la descripción
 
     // Cargamos los datos de la fumigacion al entrar
     useEffect(() => {
@@ -57,8 +63,13 @@ const EditarFumigacion = () => {
             mensaje = 'La fecha y hora son obligatorias'
             comprobar = false
         }
-        if (name === 'precio' && !regexPrecio.test(value)) {
+        // el precio total solo aplica a mochila; en tractor el coste sale de precio_turbo
+        if (name === 'precio' && formData.metodo_aplicacion === 'mochila' && !regexPrecio.test(value)) {
             mensaje = 'Introduce un precio válido (ej: 12.50)'
+            comprobar = false
+        }
+        if (name === 'precio_turbo' && formData.metodo_aplicacion === 'tractor' && !regexPrecio.test(value)) {
+            mensaje = 'Introduce un precio por turbo válido (ej: 12.50)'
             comprobar = false
         }
         if (name === 'descripcion' && !regexDescripcion.test(value)) {
@@ -81,25 +92,18 @@ const EditarFumigacion = () => {
     const handleChange = (e) => {
         const { name, value } = e.target
         setFormData({ ...formData, [name]: value })
+        setCamposTocados(prev => ({ ...prev, [name]: true })) // marcamos el campo como editado
         validarCampos(name, value)
     }
 
-    // valida segun el metodo y abre el modal al pulsar guardar
+    // valida solo los campos tocados al pulsar guardar
     const handleSubmit = (e) => {
         e.preventDefault()
 
-        const esMochila = formData.metodo_aplicacion === 'mochila'
+        // map en vez de every para que se muestren todos los errores a la vez
+        const resultados = Object.keys(camposTocados).map(campo => validarCampos(campo, formData[campo]))
 
-        const fechaOk       = validarCampos('hora_inicio', formData.hora_inicio)
-        const precioOk      = validarCampos('precio', formData.precio)
-        const descripcionOk = validarCampos('descripcion', formData.descripcion)
-
-        const operarioOk = esMochila ? validarCampos('operario', formData.operario) : true
-        const duracionOk = esMochila ? validarCampos('duracion_minutos', formData.duracion_minutos) : true
-        const mochilasOk = esMochila ? validarCampos('mochilas', formData.mochilas) : true
-        const turbosOk   = !esMochila ? validarCampos('turbos', formData.turbos) : true
-
-        if (fechaOk && precioOk && descripcionOk && operarioOk && duracionOk && mochilasOk && turbosOk) {
+        if (resultados.every(Boolean)) {
             setModalConfirm(true)
         }
     }
@@ -201,11 +205,22 @@ const EditarFumigacion = () => {
                     {errors.hora_inicio && <span className="mensaje-error">{errors.hora_inicio}</span>}
                 </div>
 
-                <div className="form-grupo">
-                    <label>Precio (€)</label>
-                    <input type="number" name="precio" value={formData.precio} onChange={handleChange} step="0.01" min="0" className={errors.precio ? 'input-error' : ''} />
-                    {errors.precio && <span className="mensaje-error">{errors.precio}</span>}
-                </div>
+                {/* mochila: precio total. tractor: precio por turbo (coste real del tractor) */}
+                {formData.metodo_aplicacion === 'mochila' && (
+                    <div className="form-grupo">
+                        <label>Precio total (€)</label>
+                        <input type="number" name="precio" value={formData.precio ?? ''} onChange={handleChange} step="0.01" min="0" className={errors.precio ? 'input-error' : ''} />
+                        {errors.precio && <span className="mensaje-error">{errors.precio}</span>}
+                    </div>
+                )}
+
+                {formData.metodo_aplicacion === 'tractor' && (
+                    <div className="form-grupo">
+                        <label>Precio por turbo (€)</label>
+                        <input type="number" name="precio_turbo" value={formData.precio_turbo ?? ''} onChange={handleChange} step="0.01" min="0" className={errors.precio_turbo ? 'input-error' : ''} />
+                        {errors.precio_turbo && <span className="mensaje-error">{errors.precio_turbo}</span>}
+                    </div>
+                )}
 
                 <div className="form-grupo">
                     <label>Estado</label>

@@ -11,6 +11,12 @@ const EditarParcela = () => {
   const [modalConfirm, setModalConfirm] = useState(false);
   const [errorServidor, setErrorServidor] = useState('');
 
+  // Guarda qué campos ha modificado el usuario. Al editar solo validamos
+  // estos: un dato que viene de la BD y no se toca no se revalida, así un
+  // formato que el regex no reconozca (decimales extra, nulos...) no impide
+  // guardar el resto del formulario.
+  const [camposTocados, setCamposTocados] = useState({});
+
   const [formData, setFormData] = useState({
     explotacion_id: '',
     propietarios_id: '',
@@ -45,16 +51,19 @@ const regexNombre = /^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]{3,50}$/
 const regexPoligono = /^[0-9]{1,4}$/                          
 const regexParcela = /^[0-9]{1,4}$/                        
 const regexVariedad = /^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]{3,50}$/       
-const regexDimension = /^[0-9]+([.,][0-9]{1,2})?$/            
+const regexDimension = /^[0-9]+([.,][0-9]{1,3})?$/  // la columna es decimal(6,3): MySQL devuelve 3 decimales (12.500), hay que admitirlos
+
 const regexNumArboles = /^[0-9]{1,5}$/                       
 const regexFecha = /^\d{4}-\d{2}-\d{2}/
-const regexDescripcion = /^.{10,}$/ 
+const regexDescripcion = /^[\s\S]{10,}$/  // [\s\S] en vez de . para que admita saltos de línea
+
 
 
  // actualiza el estado cuando el usuario escribe y valida ese campo
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+    setCamposTocados(prev => ({ ...prev, [name]: true })); // marcamos el campo como editado
     validarCampos(name, value);
   }
 
@@ -129,21 +138,16 @@ const regexDescripcion = /^.{10,}$/
 
  
 
-  // al pulsar guardar valida todo y, si es correcto, abre el modal de confirmacion
+  // al pulsar guardar valida solo lo que el usuario ha tocado y, si todo es
+  // correcto, abre el modal de confirmacion
   const enviarFormulario = (e) => {
     e.preventDefault();
 
-    const nombreOk      = validarCampos('nombre', formData.nombre);
-    const poligonoOk    = validarCampos('poligono', formData.poligono);
-    const parcelaOk     = validarCampos('parcela', formData.parcela);
-    const variedadOk    = validarCampos('variedad', formData.variedad);
-    const dimensionOk   = validarCampos('dimension_hanegadas', formData.dimension_hanegadas);
-    const numArbolesOk  = validarCampos('num_arboles', formData.num_arboles);
-    const fechaOk       = validarCampos('fecha_plantacion', formData.fecha_plantacion);
-    const descripcionOk = validarCampos('descripcion', formData.descripcion);
+    // validamos cada campo modificado (con map, no con every, para que se
+    // muestren todos los errores a la vez y no solo el primero)
+    const resultados = Object.keys(camposTocados).map(campo => validarCampos(campo, formData[campo]));
 
-    if (nombreOk && poligonoOk && parcelaOk && variedadOk &&
-        dimensionOk && numArbolesOk && fechaOk && descripcionOk) {
+    if (resultados.every(Boolean)) {
       setModalConfirm(true);
     }
   }
@@ -236,7 +240,7 @@ const regexDescripcion = /^.{10,}$/
 
         <div className="form-grupo">
           <label>Fecha plantacion</label>
-          <input type="date" name="fecha_plantacion" value={formData.fecha_plantacion} onChange={handleChange} />
+          <input type="date" name="fecha_plantacion" value={formData.fecha_plantacion?.substring(0, 10) ?? ''} onChange={handleChange} />
         </div>
           {errors.fecha_plantacion && <span className="mensaje-error">{errors.fecha_plantacion}</span>}
 

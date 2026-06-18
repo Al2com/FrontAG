@@ -11,6 +11,10 @@ const EditarProducto = () => {
     // modal de confirmacion para guardar y error de servidor
     const [modalConfirm, setModalConfirm] = useState(false);
     const [errorServidor, setErrorServidor] = useState('');
+
+    // Campos que el usuario ha modificado. Al editar solo validamos estos,
+    // así un dato cargado de la BD que no se toca no bloquea el guardado.
+    const [camposTocados, setCamposTocados] = useState({});
     const [formProducto, setFormProducto] = useState({
         nombre: "",
         materia_activa: "",
@@ -36,7 +40,7 @@ const EditarProducto = () => {
     const regexTexto = /^[A-Za-z0-9ÁÉÍÓÚáéíóúñÑ%().,+/\-\s]{2,50}$/;
     const regexUbicacion = /^.{3,}$/;
     const regexDecimal = /^[0-9]{1,6}(\.[0-9]{1,2})?$/;
-    const regexEntero = /^[0-9]{1,5}$/;
+    const regexEntero = /^[0-9]{1,7}$/; // stock_actual lo suben las compras: dejamos margen (hasta 7 cifras)
 
     useEffect(() => {
         productosService.getProducto(id)
@@ -85,21 +89,18 @@ const EditarProducto = () => {
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormProducto({ ...formProducto, [name]: value });
+        setCamposTocados(prev => ({ ...prev, [name]: true })); // marcamos el campo como editado
         validarCampos(name, value);
     };
 
+    // valida solo los campos tocados al pulsar guardar
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        const nombreOk   = validarCampos('nombre', formProducto.nombre);
-        const materiaOk  = validarCampos('materia_activa', formProducto.materia_activa);
-        const ubicOk     = validarCampos('ubicacion', formProducto.ubicacion);
-        const precioOk   = validarCampos('precio', formProducto.precio);
-        const stockAOk   = validarCampos('stock_actual', formProducto.stock_actual);
-        const stockMOk   = validarCampos('stock_minimo', formProducto.stock_minimo);
-        const dosisOk    = validarCampos('dosis_recomendada', formProducto.dosis_recomendada);
+        // map en vez de every para que se muestren todos los errores a la vez
+        const resultados = Object.keys(camposTocados).map(campo => validarCampos(campo, formProducto[campo]));
 
-        if (nombreOk && materiaOk && ubicOk && precioOk && stockAOk && stockMOk && dosisOk) {
+        if (resultados.every(Boolean)) {
             setModalConfirm(true);
         }
     };

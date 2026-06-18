@@ -33,8 +33,9 @@ const Almacen = () => {
         setProductos(productos.filter(p => p.id !== modalConfirm.id));
         setModalConfirm({ visible: false, id: null });
       })
-      .catch(() => {
-        setErrorCarga('Error al eliminar el producto');
+      .catch((err) => {
+        // mostramos el mensaje real del back (p.ej. producto con historial) si viene
+        setErrorCarga(err.response?.data?.mensaje || 'Error al eliminar el producto');
         setModalConfirm({ visible: false, id: null });
       });
   };
