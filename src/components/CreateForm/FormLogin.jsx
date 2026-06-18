@@ -2,6 +2,7 @@ import Modal from "../Modal/Modal.jsx"
 import authService from '../../services/auth'
 import '../Style/forms.css'
 import { useState } from "react"
+import { Link } from "react-router-dom"
 
 const FormLogin = ({setUser}) =>{
 
@@ -127,8 +128,7 @@ const cerrarModal = () => setModalError({ visible: false, mensaje: '' })
                 </div>
                 <button type="submit">Iniciar Sesión</button>
                 <p className="olvidar-contasena">
-                    {/* pendiente de implementar: deshabilitado para no enlazar a una ruta inexistente */}
-                    <span className="enlace-deshabilitado" title="Próximamente" aria-disabled="true">¿Olvidaste tu contraseña?</span>
+                    <Link to="/forgot-password">¿Olvidaste tu contraseña?</Link>
                 </p>
             </div>
         </form>

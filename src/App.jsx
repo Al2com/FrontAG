@@ -25,6 +25,8 @@ import EditarFumigacion from './components/CreateForm/EditarFumigacion.jsx'
 import Gastos from './components/gastos.jsx'
 import FormRecoleccion from './components/CreateForm/FormRecoleccion.jsx'
 import EditarRecoleccion from './components/CreateForm/EditarRecoleccion.jsx'
+import FormForgotPassword from './components/CreateForm/FormForgotPassword.jsx'
+import FormResetPassword from './components/CreateForm/FormResetPassword.jsx'
 
 // Bloquea rutas para el rol trabajador: si lo es, lo manda al dashboard.
 // El trabajador solo puede acceder a Dashboard y Operaciones.
@@ -62,7 +64,14 @@ function App() {
    <Router>
       {user===null
 
-        ?<FormLogin setUser={setUser} />
+        // Sin sesión: además del login, dejamos públicas las pantallas de
+        // recuperación. El enlace del correo (/reset-password?token=...) lo abre
+        // un usuario deslogueado, así que tienen que ser accesibles aquí.
+        ? <Routes>
+            <Route path="/forgot-password" element={<FormForgotPassword />} />
+            <Route path="/reset-password" element={<FormResetPassword />} />
+            <Route path="*" element={<FormLogin setUser={setUser} />} />
+          </Routes>
         : <div className="app-container">
             <MenuNav user={user} logout={logout} />
             <div className="main-content">
