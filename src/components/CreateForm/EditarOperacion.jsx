@@ -12,6 +12,10 @@ const EditarOperacion = () => {
     const [modalConfirm, setModalConfirm] = useState(false)
     const [errorCarga, setErrorCarga] = useState('')
 
+    // Campos que el usuario ha modificado. Al editar solo validamos estos,
+    // así un dato cargado de la BD que no se toca no bloquea el guardado.
+    const [camposTocados, setCamposTocados] = useState({})
+
     const [formData, setFormData] = useState({
         parcela_id: "",
         operario: "",
@@ -33,7 +37,7 @@ const EditarOperacion = () => {
 
     const regexDuracion = /^[0-9]{1,4}$/
     const regexPrecio = /^\d+(\.\d{1,2})?$/
-    const regexDescripcion = /^.{10,}$/
+    const regexDescripcion = /^[\s\S]{10,}$/ // [\s\S] para admitir saltos de línea en la descripción
 
     // Carga los datos de la operacion al entrar
     useEffect(() => {
@@ -74,20 +78,18 @@ const EditarOperacion = () => {
     const handleChange = (e) => {
         const { name, value } = e.target
         setFormData({ ...formData, [name]: value })
+        setCamposTocados(prev => ({ ...prev, [name]: true })) // marcamos el campo como editado
         validarCampos(name, value)
     }
 
-    // valida y abre el modal al pulsar guardar
+    // valida solo los campos tocados y abre el modal al pulsar guardar
     const handleSubmit = (e) => {
         e.preventDefault()
 
-        const operarioOk    = validarCampos('operario', formData.operario)
-        const fechaOk       = validarCampos('hora_inicio', formData.hora_inicio)
-        const duracionOk    = validarCampos('duracion_minutos', formData.duracion_minutos)
-        const precioOk      = validarCampos('precio', formData.precio)
-        const descripcionOk = validarCampos('descripcion', formData.descripcion)
+        // map en vez de every para que se muestren todos los errores a la vez
+        const resultados = Object.keys(camposTocados).map(campo => validarCampos(campo, formData[campo]))
 
-        if (operarioOk && fechaOk && duracionOk && precioOk && descripcionOk) {
+        if (resultados.every(Boolean)) {
             setModalConfirm(true)
         }
     }

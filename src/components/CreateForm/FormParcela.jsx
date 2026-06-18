@@ -21,7 +21,7 @@ const FormParcela = () => {
   const regexPoligono = /^\d{1,4}$/;
   const regexParcela = /^\d{1,4}$/;
   const regexVariedad = /^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]{1,15}$/;
-  const regexDimension = /^\d{1,4}(\.\d{1,2})?$/;
+  const regexDimension = /^\d{1,4}(\.\d{1,3})?$/; // la columna es decimal(6,3): admitimos hasta 3 decimales
   // entero de 1 a 3000
   const regexNumArboles = /^([1-9]|[1-9]\d|[1-9]\d\d|[12]\d\d\d|3000)$/;
   const regexDescripcion = /^.{10,}$/;

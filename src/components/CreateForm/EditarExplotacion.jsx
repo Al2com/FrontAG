@@ -13,6 +13,10 @@ const EditarExplotacion = () => {
   const [modalConfirm, setModalConfirm] = useState(false);
   const [errorServidor, setErrorServidor] = useState('');
 
+  // Campos que el usuario ha modificado. Al editar solo validamos estos,
+  // así un dato cargado de la BD que no se toca no bloquea el guardado.
+  const [camposTocados, setCamposTocados] = useState({});
+
   const [formData, setFormData] = useState({
     nombre: '',
     ubicacion: '',
@@ -29,7 +33,7 @@ const EditarExplotacion = () => {
 
   const regexNombre = /^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]{3,50}$/
   const regexUbicacion = /^.{3,}$/
-  const regexDescripcion = /^.{10,}$/
+  const regexDescripcion = /^[\s\S]{10,}$/ // [\s\S] para admitir saltos de línea en la descripción
 
   useEffect(() => {
     explotacionService.getExplo(id)
@@ -63,18 +67,18 @@ const EditarExplotacion = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+    setCamposTocados(prev => ({ ...prev, [name]: true })); // marcamos el campo como editado
     validarCampos(name, value);
   }
 
-  // valida y abre el modal de confirmacion
+  // valida solo los campos tocados y abre el modal de confirmacion
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    const nombreOk = validarCampos('nombre', formData.nombre);
-    const ubicacionOk = validarCampos('ubicacion', formData.ubicacion);
-    const descripcionOk = validarCampos('descripcion', formData.descripcion);
+    // map en vez de every para que se muestren todos los errores a la vez
+    const resultados = Object.keys(camposTocados).map(campo => validarCampos(campo, formData[campo]));
 
-    if (nombreOk && ubicacionOk && descripcionOk) {
+    if (resultados.every(Boolean)) {
       setModalConfirm(true);
     }
   }

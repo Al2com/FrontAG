@@ -18,4 +18,10 @@ const putActualizarProductos = (id, formData) => {
   return axios.put(`${baseUrl}/${id}`, formData).then(res => res.data)
 
 }
-export default { getProductos,getProducto,putActualizarProductos }
+
+// elimina un producto del almacén; el back rechaza el borrado si tiene historial
+const borrarProducto = (id) => {
+  return axios.delete(`${baseUrl}/${id}`).then(res => res.data)
+}
+
+export default { getProductos,getProducto,putActualizarProductos,borrarProducto }
