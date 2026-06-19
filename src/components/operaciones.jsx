@@ -23,6 +23,11 @@ const Operaciones = () => {
   const [mesFumigacion, setMesFumigacion] = useState('todos')
   const [mostrarTabla, setMostrarTabla] = useState(false)
 
+  // filtros nuevos: parcela en operaciones; variedad y parcela en fumigaciones
+  const [parcelaOperacion, setParcelaOperacion] = useState('todas')
+  const [variedadFumigacion, setVariedadFumigacion] = useState('todas')
+  const [parcelaFumigacion, setParcelaFumigacion] = useState('todas')
+
   const rol = sessionStorage.getItem('rol')
 
   // cargo los datos cuando se monta el compoenente
@@ -43,6 +48,17 @@ const Operaciones = () => {
     return Array.from(años).sort((a, b) => b - a)
   }
 
+  // formato de parcela tal como ya se muestra en pantalla: "polígono - parcela"
+  const formatoParcela = (p) => p ? `${p.poligono} - ${p.parcela}` : ''
+
+  // valores distintos para los nuevos selectores, a partir de los datos ya cargados
+  // (mismo patrón que obtenerAñosDisponibles)
+  const obtenerParcelas = (lista) =>
+    Array.from(new Set(lista.map(item => formatoParcela(item.parcela)).filter(Boolean))).sort()
+
+  const obtenerVariedades = (lista) =>
+    Array.from(new Set(lista.map(item => item.parcela?.variedad).filter(Boolean))).sort()
+
   // filtro las operaciones segun la campaña el mes y el tipo
   const operacionesFiltradas = listaOperaciones.filter(operacion => {
     const año = parseInt(operacion.hora_inicio.substring(0, 4))
@@ -50,7 +66,8 @@ const Operaciones = () => {
     const coincideAño = campañaSeleccionada === 'todas' || año === Number(campañaSeleccionada)
     const coincideMes = mesSeleccionado === 'todos' || mes === Number(mesSeleccionado)
     const coincideTipo = tipoSeleccionado === 'todos' || operacion.tipo_operacion === tipoSeleccionado
-    return coincideAño && coincideMes && coincideTipo
+    const coincideParcela = parcelaOperacion === 'todas' || formatoParcela(operacion.parcela) === parcelaOperacion
+    return coincideAño && coincideMes && coincideTipo && coincideParcela
   })
 
   // filtro fumigaciones con sus propios filtros, no afectan a las operaciones
@@ -59,7 +76,9 @@ const Operaciones = () => {
     const mes = parseInt(fumigacion.hora_inicio.substring(5, 7))
     const coincideAño = campañaFumigacion === 'todas' || año === Number(campañaFumigacion)
     const coincideMes = mesFumigacion === 'todos' || mes === Number(mesFumigacion)
-    return coincideAño && coincideMes
+    const coincideVariedad = variedadFumigacion === 'todas' || fumigacion.parcela?.variedad === variedadFumigacion
+    const coincideParcela = parcelaFumigacion === 'todas' || formatoParcela(fumigacion.parcela) === parcelaFumigacion
+    return coincideAño && coincideMes && coincideVariedad && coincideParcela
   })
 
   // marco la operacion o fumigacion como realizada y recargo la lista
@@ -166,6 +185,12 @@ const Operaciones = () => {
             <option value="tractor">Tractor</option>
           </select>
         </div>
+        <div className="barra-select-lg">
+          <select value={parcelaOperacion} onChange={(e) => setParcelaOperacion(e.target.value)}>
+            <option value="todas">Parcela ▾</option>
+            {obtenerParcelas(listaOperaciones).map(p => <option key={p} value={p}>{p}</option>)}
+          </select>
+        </div>
       </div>
 
       <h2>Operaciones</h2>
@@ -248,6 +273,18 @@ const Operaciones = () => {
             <option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
           </select>
         </div>
+        <div className="barra-select-lg">
+          <select value={variedadFumigacion} onChange={(e) => setVariedadFumigacion(e.target.value)}>
+            <option value="todas">Variedad ▾</option>
+            {obtenerVariedades(listaFumigaciones).map(v => <option key={v} value={v}>{v}</option>)}
+          </select>
+        </div>
+        <div className="barra-select-lg">
+          <select value={parcelaFumigacion} onChange={(e) => setParcelaFumigacion(e.target.value)}>
+            <option value="todas">Parcela ▾</option>
+            {obtenerParcelas(listaFumigaciones).map(p => <option key={p} value={p}>{p}</option>)}
+          </select>
+        </div>
       </div>
 
       <h2>Fumigaciones</h2>
@@ -256,8 +293,8 @@ const Operaciones = () => {
         <table className="tabla-operaciones">
           <thead>
             <tr>
-              <th>Método</th><th>Parcela</th><th>Operario</th><th>Fecha</th>
-              <th>Duración</th><th>Estado</th><th>Acciones</th>
+              <th>Método</th><th>Parcela</th><th>Descripción</th><th>Fecha</th>
+              <th>Hanegadas</th><th>Estado</th><th>Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -265,9 +302,9 @@ const Operaciones = () => {
               <tr key={fumigacion.id}>
                 <td>{fumigacion.metodo_aplicacion}</td>
                 <td>{fumigacion.parcela?.poligono} - {fumigacion.parcela?.parcela}</td>
-                <td>{fumigacion.operario}</td>
+                <td>{fumigacion.descripcion}</td>
                 <td>{fumigacion.hora_inicio}</td>
-                <td>{fumigacion.duracion_minutos} min</td>
+                <td>{fumigacion.parcela?.dimension_hanegadas}</td>
                 <td>{fumigacion.estado}</td>
                 <td>
                   <div className="tabla-botones">
