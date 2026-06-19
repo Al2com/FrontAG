@@ -129,8 +129,8 @@ const Gastos = () => {
                   <thead>
                     <tr>
                       <th>Concepto</th>
+                      <th>Cantidades</th>
                       <th>Detalle</th>
-                      <th>Horas</th>
                       <th>Litros</th>
                       <th>Importe</th>
                     </tr>
@@ -171,7 +171,7 @@ const Gastos = () => {
                               {fum.fecha} · {fum.unidades} turbo{fum.unidades !== 1 ? 's' : ''}
                               {fum.hanegadas > 0 && ` · ${fum.hanegadas} han.`}
                             </td>
-                            <td>—</td>
+                            <td>{fum.descripcion}</td>
                             <td>{fum.litros} L</td>
                             <td>{fum.precio.toFixed(2)} €</td>
                           </tr>
