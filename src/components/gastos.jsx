@@ -129,8 +129,8 @@ const Gastos = () => {
                   <thead>
                     <tr>
                       <th>Concepto</th>
-                      <th>Cantidades</th>
                       <th>Detalle</th>
+                      <th>Horas</th>
                       <th>Litros</th>
                       <th>Importe</th>
                     </tr>

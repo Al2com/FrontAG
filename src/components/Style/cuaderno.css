@@ -1,0 +1,227 @@
+/* ====== Cuaderno de campo ====== */
+
+.cuaderno-contenedor {
+  padding: 20px;
+}
+
+/* Barra superior de controles (no se imprime) */
+.cuaderno-barra {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.cuaderno-barra h2 {
+  margin: 0;
+}
+
+.cuaderno-barra p {
+  margin: 4px 0 0;
+  color: #5f5e5a;
+  font-size: 14px;
+}
+
+.cuaderno-controles {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.cuaderno-toggle {
+  display: inline-flex;
+  border: 1px solid #bdc0c4;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.cuaderno-toggle button {
+  border: none;
+  background: white;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.cuaderno-toggle button.activo {
+  background: #1b4332;
+  color: white;
+}
+
+.cuaderno-controles select {
+  padding: 8px 12px;
+  border: 1px solid #bdc0c4;
+  border-radius: 8px;
+  background: white;
+}
+
+.cuaderno-descargar {
+  padding: 8px 18px;
+  border: none;
+  border-radius: 8px;
+  background: #1b4332;
+  color: white;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.cuaderno-descargar:hover {
+  background: #2d6a4f;
+}
+
+/* Hoja imprimible */
+.cuaderno-hoja {
+  background: white;
+  border: 1px solid #888780;
+  padding: 14px;
+  overflow-x: auto;
+}
+
+.cuaderno-tabla {
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: 100%;
+  min-width: 900px;
+}
+
+.cuaderno-tabla td,
+.cuaderno-tabla th {
+  border: 0.5px solid #bdc0c4;
+  padding: 4px 6px;
+  font-size: 11px;
+  line-height: 1.3;
+  text-align: left;
+  vertical-align: middle;
+}
+
+/* Cabecera */
+.cc-logo {
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #2d6a4f;
+  font-size: 14px;
+  border: none !important;
+}
+
+.cc-titulo {
+  font-weight: 700;
+  background: #f7e9a0;
+  text-align: center;
+}
+
+.cc-num {
+  width: 34px;
+  text-align: center;
+  font-weight: 700;
+}
+
+.cc-lbl {
+  background: #efefe9;
+  font-weight: 600;
+  font-size: 10px;
+}
+
+.cc-lbl.der {
+  text-align: right;
+}
+
+.cc-dato {
+  font-weight: 500;
+}
+
+.cc-parcelas {
+  text-align: center;
+  font-weight: 600;
+  background: #efefe9;
+}
+
+.cc-fecha {
+  text-align: center;
+  font-weight: 600;
+}
+
+.cc-litros,
+.cc-maq {
+  text-align: center;
+  font-size: 10px;
+  color: #5f5e5a;
+}
+
+.cc-cabecera th {
+  background: #efefe9;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+/* Cuerpo */
+.cc-inc {
+  font-size: 10px;
+  color: #5f5e5a;
+}
+
+.cc-reg {
+  font-size: 10px;
+}
+
+.cc-com {
+  font-weight: 500;
+}
+
+.cc-x {
+  text-align: center;
+  font-weight: 700;
+  color: #1b4332;
+}
+
+.cc-usado {
+  background: #eaf3de;
+}
+
+.cuaderno-pie {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+  font-size: 10px;
+  color: #5f5e5a;
+}
+
+/* ====== Impresión ====== */
+@media print {
+  /* apaisado, igual que el impreso de la cooperativa */
+  @page {
+    size: A4 landscape;
+    margin: 8mm;
+  }
+
+  /* fuera todo lo que no sea la hoja */
+  .no-imprimir,
+  .navbar,
+  .mobile-header,
+  .navbar-overlay {
+    display: none !important;
+  }
+
+  .cuaderno-contenedor {
+    padding: 0;
+  }
+
+  .cuaderno-hoja {
+    border: none;
+    padding: 0;
+    overflow: visible;
+  }
+
+  .cuaderno-tabla {
+    min-width: 0;
+  }
+
+  /* fuerza los colores de fondo al imprimir */
+  .cuaderno-tabla td,
+  .cuaderno-tabla th {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

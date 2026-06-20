@@ -23,6 +23,7 @@ import EditarOperacion from './components/CreateForm/EditarOperacion.jsx'
 import FormComprarProducto from './components/CreateForm/FormComprarProducto.jsx'
 import EditarFumigacion from './components/CreateForm/EditarFumigacion.jsx'
 import Gastos from './components/gastos.jsx'
+import Cuaderno from './components/cuaderno.jsx'
 import FormRecoleccion from './components/CreateForm/FormRecoleccion.jsx'
 import EditarRecoleccion from './components/CreateForm/EditarRecoleccion.jsx'
 import FormForgotPassword from './components/CreateForm/FormForgotPassword.jsx'
@@ -101,6 +102,7 @@ function App() {
               <Route path="/operacion/:id" element={<SoloAdmin><EditarOperacion/></SoloAdmin>} />
               <Route path="/editar-fumigacion/:id" element={<SoloAdmin><EditarFumigacion /></SoloAdmin>} />
               <Route path="/gastos" element={<SoloAdmin><Gastos/></SoloAdmin>} />
+              <Route path="/cuaderno" element={<SoloAdmin><Cuaderno/></SoloAdmin>} />
 
               {/* ruta comodin: cualquier direccion no definida cae aqui */}
               <Route path="*" element={
