@@ -133,6 +133,16 @@ const MenuNav = ({ user, logout }) => {
           )}
           {rol !== 'trabajador' && (
             <MenuBar
+              to="/cuaderno"
+              iconImg="./operaciones.svg"
+              altText="Cuaderno"
+              texto="Cuaderno"
+              isSeleccionado={botonActivo === 'Cuaderno'}
+              onClick={() => seleccionar('Cuaderno')}
+            />
+          )}
+          {rol !== 'trabajador' && (
+            <MenuBar
               iconImg="./analisis.svg"
               altText="Análisis"
               texto="Análisis"
