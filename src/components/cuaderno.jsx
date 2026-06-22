@@ -1,13 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import cuadernoService from '../services/cuaderno.js'
 import './Style/cuaderno.css'
 
-// NOTA: de momento el componente trabaja con datos de ejemplo (MOCK).
-// La estructura es la misma que devolverá el endpoint cuando se monte el back
-// (GET /api/cuaderno-campo?anio=&cultivo=), así que enchufarlo será sustituir
-// estos objetos por la respuesta del servicio, sin tocar el render.
-
 // Catálogo oficial de Canso por cultivo. Es fijo: cada fila es un producto del
-// impreso. Las marcas (X) solo se ponen en los productos realmente aplicados.
+// impreso (incidencia, materia activa, dosis, P.S., nº registro, comercial).
+// La X solo se pone en los productos realmente aplicados, que llegan del back.
 const CATALOGOS = {
   citrico: {
     titulo: 'CÍTRICOS',
@@ -59,43 +56,45 @@ const CATALOGOS = {
   },
 }
 
-// Datos de campaña de ejemplo: las fechas son las columnas (hasta 7), y "marcas"
-// dice, por nombre comercial, en qué columnas lleva X ese producto.
-const MOCK = {
-  citrico: {
-    socio: { num: '142', nombre: 'Álvaro Comenge' },
-    parcelas: 'Todas las parcelas',
-    fechas: ['14/3', '28/4', '2/6', '15/7', '10/9', '', ''],
-    litros: ['2000', '2000', '2000', '2000', '2000', '', ''],
-    maquinaria: 'Tractor / turbo',
-    marcas: {
-      'Albelda ce': [1], 'Oxicoop 50': [1], 'Atominal EC': [2],
-      Closer: [3], 'Spintor Cebo': [3], Gazel: [4], 'Aliette wg': [5],
-    },
-  },
-  kaki: {
-    socio: { num: '142', nombre: 'Álvaro Comenge' },
-    parcelas: 'Todas las parcelas',
-    fechas: ['25/4', '20/5', '1/6', '25/6', '15/7', '1/8', '20/8'],
-    litros: ['', '', '', '', '', '', ''],
-    maquinaria: '',
-    marcas: {
-      'Dipel DF': [3], 'Movento Gold': [3], 'Albelda ce': [6], Score: [1],
-      Sercadis: [2], Closer: [3, 6, 7], 'OMITE TOP': [3, 6, 7],
-    },
-  },
-}
-
 const COLS = [1, 2, 3, 4, 5, 6, 7]
+
+// normaliza para casar productos: minúsculas y sin espacios sobrantes
+const norm = (s) => (s || '').toString().toLowerCase().trim()
 
 const Cuaderno = () => {
   const anioActual = new Date().getFullYear()
   const [anio, setAnio] = useState(anioActual.toString())
   const [cultivo, setCultivo] = useState('citrico')
+  const [datos, setDatos] = useState(null)
+  const [error, setError] = useState('')
 
   const anios = [anioActual, anioActual - 1, anioActual - 2, anioActual - 3]
   const catalogo = CATALOGOS[cultivo]
-  const datos = MOCK[cultivo]
+
+  // socio = usuario logueado (el impreso no maneja nº de socio en la app)
+  const usuario = JSON.parse(sessionStorage.getItem('usuario') || 'null')
+
+  // pido al back los datos cada vez que cambia el año o el cultivo
+  useEffect(() => {
+    setError('')
+    cuadernoService.getCuaderno(anio, cultivo)
+      .then(setDatos)
+      .catch(() => setError('No se pudieron cargar los datos del cuaderno'))
+  }, [anio, cultivo])
+
+  // construyo dos índices para casar: por nombre comercial (preferente) y por
+  // materia activa (respaldo, por si el producto se registró con otro nombre)
+  const porNombre = {}
+  const porMateria = {}
+  ;(datos?.productos || []).forEach(p => {
+    porNombre[norm(p.nombre)] = p.columnas
+    if (p.materia_activa) porMateria[norm(p.materia_activa)] = p.columnas
+  })
+
+  const columnasDe = (fila) =>
+    porNombre[norm(fila[5])] || porMateria[norm(fila[1])] || []
+
+  const fechas = datos?.fechas || []
 
   const imprimir = () => window.print()
 
@@ -107,6 +106,7 @@ const Cuaderno = () => {
         <div>
           <h2>Cuaderno de campo</h2>
           <p>Genera la hoja de tratamientos de la cooperativa lista para entregar</p>
+          {error && <span className="mensaje-error">{error}</span>}
         </div>
         <div className="cuaderno-controles">
           <div className="cuaderno-toggle">
@@ -139,22 +139,22 @@ const Cuaderno = () => {
             </tr>
             <tr>
               <td className="cc-lbl">Nº Socio</td>
-              <td className="cc-dato">{datos.socio.num}</td>
+              <td className="cc-dato"></td>
               <td colSpan={2} className="cc-lbl">Nombre socio</td>
-              <td colSpan={2} className="cc-dato">{datos.socio.nombre}</td>
-              <td colSpan={7} className="cc-parcelas">{datos.parcelas}</td>
+              <td colSpan={2} className="cc-dato">{usuario?.name || ''}</td>
+              <td colSpan={7} className="cc-parcelas">{datos?.parcelas || 'Todas las parcelas'}</td>
             </tr>
             <tr>
               <td colSpan={6} className="cc-lbl der">FECHA</td>
-              {datos.fechas.map((f, i) => <td key={i} className="cc-fecha">{f}</td>)}
+              {COLS.map((n, i) => <td key={n} className="cc-fecha">{fechas[i] || ''}</td>)}
             </tr>
             <tr>
               <td colSpan={6} className="cc-lbl der">LITROS</td>
-              {datos.litros.map((l, i) => <td key={i} className="cc-litros">{l}</td>)}
+              {COLS.map(n => <td key={n} className="cc-litros"></td>)}
             </tr>
             <tr>
               <td colSpan={6} className="cc-lbl der">MAQUINARIA</td>
-              <td colSpan={7} className="cc-maq">{datos.maquinaria}</td>
+              <td colSpan={7} className="cc-maq"></td>
             </tr>
             <tr className="cc-cabecera">
               <th>Incidencia</th>
@@ -168,8 +168,8 @@ const Cuaderno = () => {
           </thead>
           <tbody>
             {catalogo.filas.map((fila, idx) => {
-              const marcas = datos.marcas[fila[5]] || []
-              const usado = marcas.length > 0
+              const columnas = columnasDe(fila)
+              const usado = columnas.length > 0
               return (
                 <tr key={idx} className={usado ? 'cc-usado' : ''}>
                   <td className="cc-inc">{fila[0]}</td>
@@ -179,7 +179,7 @@ const Cuaderno = () => {
                   <td className="cc-reg">{fila[4]}</td>
                   <td className="cc-com">{fila[5]}</td>
                   {COLS.map(n => (
-                    <td key={n} className="cc-x">{marcas.includes(n) ? 'X' : ''}</td>
+                    <td key={n} className="cc-x">{columnas.includes(n) ? 'X' : ''}</td>
                   ))}
                 </tr>
               )
