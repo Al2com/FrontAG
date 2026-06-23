@@ -180,6 +180,109 @@
   background: #eaf3de;
 }
 
+/* Título del bloque "Manejo del suelo" */
+.cc-seccion {
+  margin: var(--esp-md) 0 var(--esp-xs);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--c-primario);
+}
+
+/* Logo de la cooperativa (se ve en cuanto exista public/canso.png) */
+.cc-logo-img {
+  height: 36px;
+  display: inline-block;
+}
+.cc-logo-hueco {
+  padding: 6px 10px;
+  border: 1px dashed var(--c-borde-oscuro);
+  color: var(--c-texto-apagado);
+  font-size: 11px;
+  letter-spacing: 1px;
+}
+
+/* Separación entre hojas en pantalla */
+.cuaderno-hoja + .cuaderno-hoja {
+  margin-top: var(--esp-xl);
+}
+
+/* Tablas "libres" (abonado, riego, entregas): sin el ancho mínimo de la rejilla */
+.cuaderno-tabla-libre {
+  min-width: 0;
+  margin-top: var(--esp-xs);
+}
+.cc-entregas {
+  max-width: 520px;
+  margin: var(--esp-sm) 0;
+}
+.cc-center {
+  text-align: center;
+}
+
+.cc-obs {
+  font-size: 11px;
+  color: var(--c-texto-apagado);
+  margin: var(--esp-xs) 0 var(--esp-lg);
+}
+
+/* Validación (la rellena el técnico) y firma */
+.cc-validacion,
+.cc-recuadros {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--esp-sm);
+  margin-top: var(--esp-sm);
+}
+.cc-recuadro {
+  border: 1px solid var(--c-borde-oscuro);
+  border-radius: var(--rad-sm);
+  padding: var(--esp-xs) var(--esp-lg);
+  font-size: 11px;
+  color: var(--c-texto);
+}
+.cc-recuadro p {
+  margin: 4px 0;
+}
+.cc-no-rellenar {
+  color: var(--c-texto-apagado);
+  font-size: 10px;
+}
+.cc-firma {
+  font-size: 11px;
+  margin-top: var(--esp-sm);
+}
+
+/* Textos y listas (documentación a conservar, hoja 3) */
+.cc-texto {
+  font-size: 11px;
+  color: var(--c-texto);
+  line-height: 1.5;
+  margin: 6px 0;
+}
+.cc-lista {
+  font-size: 11px;
+  color: var(--c-texto);
+  line-height: 1.5;
+  margin: var(--esp-xs) 0 var(--esp-sm) 18px;
+  padding: 0;
+}
+.cc-lista li {
+  margin: 3px 0;
+}
+
+/* Impresión: cada hoja en su propia página */
+@media print {
+  .cuaderno-hoja {
+    page-break-after: always;
+  }
+  .cuaderno-hoja:last-child {
+    page-break-after: auto;
+  }
+  .cuaderno-hoja + .cuaderno-hoja {
+    margin-top: 0;
+  }
+}
+
 .cuaderno-pie {
   display: flex;
   justify-content: space-between;
