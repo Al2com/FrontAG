@@ -2,91 +2,113 @@ import { useState, useEffect } from 'react'
 import cuadernoService from '../services/cuaderno.js'
 import './Style/cuaderno.css'
 
-// Catálogo oficial de Canso por cultivo. Es fijo: cada fila es un producto del
-// impreso (incidencia, materia activa, dosis, P.S., nº registro, comercial).
-// La X solo se pone en los productos realmente aplicados, que llegan del back.
-const CATALOGOS = {
+// ============================================================================
+// Datos EXACTOS de las plantillas de Canso 2025 (CC CÍTRICOS 2025 / CANSO CAQUI
+// 2025). Cada cultivo tiene su catálogo de fitosanitarios, su fila de manejo del
+// suelo (un único herbicida, Glifosato) y su tabla de variedades/entregas.
+// La X solo se marca en los productos realmente aplicados, que llegan del back.
+// ============================================================================
+const REF = {
   citrico: {
     titulo: 'CÍTRICOS',
-    filas: [
-      ['Acaros, Cochinillas', 'Aceite parafina 79%', '10 L', 'np', '20036', 'Albelda ce'],
-      ['Acaros', 'Hexitiazox 10%', '200 g', '14', '24383', 'Cesar'],
-      ['Acaros, Mosca B.', 'Piridaben 10%', '1,5 l', '14', 'ES-00114', 'Poseidon'],
+    // [incidencia, materia activa, dosis, P.S., nº registro, nombre comercial]
+    fito: [
+      ['Ácaros, Cochinillas', 'Aceite parafina 79%', '10 L', 'np', '20036', 'Albelda ce'],
+      ['Ácaros', 'Hexitiazox 10%', '200 g', '14', '24383', 'Cesar'],
+      ['Ácaros, Mosca B.', 'Piridaben 10%', '1,5 l', '14', 'ES-00114', 'Poseidon'],
       ['Acaros', 'Acequinocil 16,4%', '1 l', '28', '25360', 'Dinamite'],
-      ['Pulgón, Minador', 'Acetamiprid 20%', '350 g', '14', '23377', 'Gazel'],
-      ['Acaros', 'Fenpiroximato 5,12%', '1 l', '14', '19241', 'Flash um'],
+      ['Pulgón, Minador, M.B.', 'Acetamiprid 20 %', '350 g', '14', '23377', 'Gazel'],
+      ['Ácaros', 'Fenpiroximato 5,12%', '1 l', '14', '19241', 'Flash um'],
       ['Trip', 'Tau Fluvalinato 24%', '100 cc', '14', '18498', 'Evure'],
-      ['Pulgón, Minador', 'Acetamiprid 20%', '250 cc', '14', 'ES-00629', 'Carnadine'],
+      ['Pulgón, Minador, M.B.', 'Acetamiprid 20 %', '250 cc', '14', 'ES-00629', 'Carnadine'],
       ['P. Rojo', 'Piriproxifen 10%', '500 cc', '30', '19675', 'Atominal EC'],
-      ['Cotonet i mosca B.', 'Sulfoxaflor 12%', '400 cc', '7', 'ES-00461', 'Closer'],
-      ['Aguado, Cons. piel', 'Fosetil-Al 80%', '2,5 kg', '14', '15907', 'Aliette wg'],
-      ['Aguado, Alternaria', 'Ox. Cl. Cobre 50%', '1 kg', '14', '14612', 'Oxicoop 50'],
-      ['Conserv. piel', 'Ac. Giberélico 40%', '50 g', 'np', '25361', 'Beretox 40 SG'],
-      ['Mosca blanca', 'Aceite parafina 79%', '10 l', 'np', '15173', 'Citrolina'],
-      ['Ceratitis', 'Spinosad 0,024%', '—', '1', '23808', 'Spintor Cebo'],
-      ['Trip, Ceratitis', 'Etofenprox 28,75%', '1,5 l', '14', '23333', 'Shark'],
+      ['P. Rojo, Cotonet', 'Spirotetramat 15%', '400 cc', '14', '25298', 'Movento o-teq'],
+      ['Aguado, Cons. piel', 'Fosetil-Al 80 %', '2,5 kg', '14', '15907', 'Aliette wg'],
+      ['Aguado, Alternaria', 'Oxi. Cl. Cobre 50 %', '1 kg', '14', '14612', 'Oxicoop 50'],
+      ['Conserv. Piel', 'Ac. Giberelico 40%', '50 g', 'np', '25361', 'Berelex 40 SG'],
+      ['Coadyuvante', 'Alquil poliglicol 20%', '500 cc', 'np', '24477', 'Mojante Norton'],
+      ['Ceratitis', 'Spinosad 0,024%', '-', '1', '23808', 'Spintor Cebo'],
+      ['Trip, Ceratitis', 'Etofenprox 28,75%', '1 l', '7', '23333', 'Shark'],
       ['Acaros, Minador', 'Milbemectina 0,93%', '1,5 l', '14', '25931', 'Koromite'],
-      ['Acaros, Minador', 'Hexitiazox 25,87%', '50 cc', '14', 'ES-00234', 'Tiazosac'],
-      ['Trips', 'Spinosad 48%', '250 cc', '120', '22939', 'Spintor 480 SC'],
+      ['Ácaros', 'Hexiziatox 25,87%', '50 cc', '14', 'ES-00234', 'Tiazosac'],
     ],
+    // manejo del suelo: en cítricos la 2ª columna se llama "Tipo de operación"
+    suelo: {
+      col2: 'Tipo de operación',
+      // [labor, tipo operación / nº reg, materia activa, dosis, P.S., comercial]
+      // Glifosato es el único del impreso 2025; U46 y Goal se añaden porque el
+      // usuario también los aplica (se casan por materia activa).
+      filas: [
+        ['', 'ES-00725, ES-00743', 'Glifosato 36 %', '3-6', 'NP', 'Roundup Plus, Touchdown'],
+        ['', '—', 'MCPA 50%', '—', '—', 'U46'],
+        ['', '—', 'Oxifluorfén 24%', '—', '—', 'Goal'],
+      ],
+    },
+    variedades: [
+      ['Okitsu, Iwasaki, Clausellina', '15 Agosto al 30 Agosto'],
+      ['Arrufatina, Beatriz, Mioro', '15 Agosto al 30 Agosto'],
+      ['Satsuma, Orogrande, Clemenules', '1 Septiembre al 15 Septiembre'],
+      ['Navelina, Clemenvilla, Navel', '1 Septiembre al 15 Septiembre'],
+      ['Salustiana, Lane Late, Valencia Late', '1 Septiembre al 15 Septiembre'],
+    ],
+    notaFinal: 'La ficha se entregará al menos 15 días antes de empezar la recolección.',
   },
   kaki: {
     titulo: 'CAQUI',
-    filas: [
-      ['Orugas', 'Bacillus Thuringiensis K.', '500 g', 'np', '23738', 'Dipel DF'],
-      ['Ceratitis, pulgón', 'Azadiractin 3,2%', '750 cc', '3', '23291', 'Align'],
+    fito: [
+      ['Orugas', 'Bacillus Thurigensis K.', '500 g', 'np', '23738', 'Dipel DF'],
+      ['Ceratitis, pulgon', 'Azadiractin 3,2 %', '750 cc', '3', '23291', 'Align'],
       ['Ceratitis', 'Etofenprox 28,75%', '1 l', '3', '23333', 'Shark'],
       ['Ceratitis', 'Lambda Cihalotrin 10%', 'parcheo', '7', '22398', 'Karate Zeon'],
       ['Ceratitis', 'Spinosad 0,024%', 'parcheo', '1', '23808', 'Spintor Cebo'],
       ['Cotonet i mosca B.', 'Spirotetramat 10%', '1 l', '21', 'ES-00024', 'Movento Gold'],
-      ['Mosca blanca', 'Piriproxifen 10%', '400 cc', 'np', '19675', 'Junival'],
-      ['Mosca blanca', 'Aceite de parafina 80%', '10 l', '20', 'ES-00079', 'Ovipron Top'],
+      ['Mosca blanca', 'Prirproxifen 10%', '400 cc', 'np', '19675', 'Junival'],
+      ['Mosca blanca', 'Aceite de parafina 80%', '10 l', 'np', 'ES-00079', 'Ovipron Top'],
       ['Mosca blanca', 'Aceite de parafina 79%', '12 l', 'np', '20036', 'Albelda ce'],
-      ['Mycosphae. Nawae', 'Piraclostrobin 20%', '400 g', '100', 'ES-00065', 'Cabrio wg'],
+      ['Mycosphae. Nawae', 'Piraclostrobin 20 %', '400 g', '100', 'ES-00065', 'Cabrio wg'],
       ['Mycosphae. Nawae', 'Azoxistrobin 25%', '500 cc', 'np', '22000', 'Ortiva'],
       ['Mycosphae. Nawae', 'Difenoconazol 25%', '250 cc', 'np', '18767', 'Score'],
-      ['Mycosphae. Nawae', 'Potasio 66% + captan 36%', '2 l', 'np', 'ES-00689', 'Merplus'],
       ['Mycosphae. Nawae', 'Fluxapyroxad 30%', '200 cc', '120', 'ES-00381', 'Sercadis'],
       ['Fitorregulador', 'Etefon 48%', '70 cc', '10', '16103', 'Fruitel'],
-      ['Conservar piel', 'Ácido giberélico 40%', '120 g', 'np', '25361', 'Berelex'],
-      ['Coadyuvante', 'Alquil poliglicol 20%', '500 cc', 'np', '24477', 'Mojante Norton'],
+      ['Conservar piel', 'Ácido giberelico 40%', '120 g', 'np', '25361', 'Berelex'],
+      ['Coadyuvante', 'Alquil poliglicol 20%', '500cc', 'np', '24477', 'Mojante Norton'],
       ['Cotonet i mosca B.', 'Sulfoxaflor 12%', '400 cc', '7', 'ES-00461', 'Closer'],
-      ['', '', '', '', '', 'OMITE TOP'],
     ],
+    // en caqui la 2ª columna se llama "Nº registro"
+    suelo: {
+      col2: 'Nº registro',
+      // Glifosato es el único del impreso 2025; U46 y Goal añadidos porque el
+      // usuario también los aplica (se casan por materia activa).
+      filas: [
+        ['', '25449', 'Glifosato 36%', '3-6', 'NP', 'Glifocoop'],
+        ['', '—', 'MCPA 50%', '—', '—', 'U46'],
+        ['', '—', 'Oxifluorfén 24%', '—', '—', 'Goal'],
+      ],
+    },
+    variedades: [
+      ['Adelanto', '15 Agosto al 30 Agosto'],
+      ['Normal 1', '15 Agosto al 30 Agosto'],
+      ['Normal 2', '1 Septiembre al 15 Septiembre'],
+      ['Conservación', '1 Septiembre al 15 Septiembre'],
+    ],
+    notaFinal: '',
   },
 }
-
-// Catálogo de herbicidas del bloque "Manejo del suelo" de la plantilla.
-// Se casa por MATERIA ACTIVA, porque el nombre comercial del impreso (Glifocoop)
-// no coincide con el del almacén (Insecticida Glifosato).
-// [labor efectuada, nº registro, materia activa, dosis, P.S., nombre comercial]
-const HERBICIDAS = [
-  ['Herbicida', '25449', 'Glifosato 36%', '3-6 L', 'NP', 'Glifocoop'],
-  ['Herbicida', '—', 'MCPA 50%', '—', '—', 'U46'],
-  ['Herbicida', '—', 'Oxifluorfén 24%', '—', '—', 'Goal'],
-]
 
 const COLS = [1, 2, 3, 4, 5, 6, 7]
 const MESES_RIEGO = ['Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre']
 
-// Tabla de variedades y fechas de entrega (hoja 3, texto fijo de la plantilla)
-const VARIEDADES_ENTREGA = [
-  ['Adelanto', '15 Agosto al 30 Agosto'],
-  ['Normal 1', '15 Agosto al 30 Agosto'],
-  ['Normal 2', '1 Septiembre al 15 Septiembre'],
-  ['Conservación', '1 Septiembre al 15 Septiembre'],
-]
+// normaliza para casar productos: minúsculas y SIN espacios, así "Glifosato 36 %"
+// y "Glifosato 36%" se reconocen igual (las plantillas no son consistentes).
+const norm = (s) => (s || '').toString().toLowerCase().replace(/\s+/g, '')
 
-// normaliza para casar productos: minúsculas y sin espacios sobrantes
-const norm = (s) => (s || '').toString().toLowerCase().trim()
-
-// Logo de la cooperativa. Mientras no exista public/canso.png se muestra un
-// hueco con el texto; en cuanto se coloque el archivo, aparece la imagen sola.
+// Logo de la cooperativa. Debe estar en public/logoCanso.png (Vite sirve public/
+// en la raíz). Si falta, se muestra un hueco con el texto.
 const Logo = () => (
   <>
     <img
-      src="./canso.png"
-      alt="CANSO"
+      src="/logoCanso.png"
+      alt="Canso"
       className="cc-logo-img"
       onError={(e) => {
         e.currentTarget.style.display = 'none'
@@ -105,7 +127,7 @@ const Cuaderno = () => {
   const [error, setError] = useState('')
 
   const anios = [anioActual, anioActual - 1, anioActual - 2, anioActual - 3]
-  const catalogo = CATALOGOS[cultivo]
+  const ref = REF[cultivo]
 
   // socio = usuario logueado (el impreso no maneja nº de socio en la app)
   const usuario = JSON.parse(sessionStorage.getItem('usuario') || 'null')
@@ -130,7 +152,7 @@ const Cuaderno = () => {
 
   const fechas = datos?.fechas || []
 
-  // bloque "Manejo del suelo" (herbicidas): sus propias fechas, casado por materia activa
+  // bloque "Manejo del suelo": sus propias fechas, casado por materia activa
   const manejoSuelo = datos?.manejoSuelo || { fechas: [], productos: [] }
   const fechasSuelo = manejoSuelo.fechas || []
   const porMateriaSuelo = {}
@@ -139,6 +161,7 @@ const Cuaderno = () => {
     if (p.materia_activa) porMateriaSuelo[norm(p.materia_activa)] = p.columnas
     porNombreSuelo[norm(p.nombre)] = p.columnas
   })
+  // en manejo del suelo casamos por materia activa (col 2 = materia)
   const columnasDeHerbicida = (fila) =>
     porMateriaSuelo[norm(fila[2])] || porNombreSuelo[norm(fila[5])] || []
 
@@ -149,7 +172,7 @@ const Cuaderno = () => {
     <thead>
       <tr>
         <td colSpan={2} className="cc-logo"><Logo /></td>
-        <td colSpan={4} className="cc-titulo">{catalogo.titulo} {anio}</td>
+        <td colSpan={4} className="cc-titulo">{ref.titulo} {anio}</td>
         {COLS.map(n => <th key={n} className="cc-num">{n}</th>)}
       </tr>
       <tr>
@@ -201,12 +224,13 @@ const Cuaderno = () => {
         <table className="cuaderno-tabla">
           {cabecera(fechas)}
           <tbody>
+            <tr className="cc-titulo-bloque"><td colSpan={13}>F I T O S A N I T A R I O S</td></tr>
             <tr className="cc-cabecera">
-              <th>Incidencia</th><th>Materia activa</th><th>Dosis</th>
-              <th>P.S.</th><th>Nº Reg.</th><th>Comercial</th>
+              <th>Incidencia Principal</th><th>Materia activa</th><th>Dosis / 1000 L</th>
+              <th>P.S.</th><th>Nº Registro</th><th>Nombre comercial</th>
               {COLS.map(n => <th key={n} className="cc-num"></th>)}
             </tr>
-            {catalogo.filas.map((fila, idx) => {
+            {ref.fito.map((fila, idx) => {
               const columnas = columnasDe(fila)
               return (
                 <tr key={idx} className={columnas.length ? 'cc-usado' : ''}>
@@ -229,18 +253,18 @@ const Cuaderno = () => {
         </div>
       </div>
 
-      {/* ===================== HOJA 2 — Manejo del suelo, abonado, riego ===================== */}
+      {/* ============ HOJA 2 — Manejo del suelo, abonado, riego, validación ============ */}
       <div className="cuaderno-hoja">
-        {/* Manejo del suelo (herbicidas) con la cabecera repetida */}
         <table className="cuaderno-tabla">
           {cabecera(fechasSuelo)}
           <tbody>
+            <tr className="cc-titulo-bloque"><td colSpan={13}>MANEJO DEL SUELO</td></tr>
             <tr className="cc-cabecera">
-              <th>Labor efectuada</th><th>Nº Reg.</th><th>Materia activa</th>
-              <th>Dosis</th><th>P.S.</th><th>Comercial</th>
+              <th>Labor efectuada</th><th>{ref.suelo.col2}</th><th>Materia activa</th>
+              <th>Dosis</th><th>P.S.</th><th>Nombre comercial</th>
               {COLS.map(n => <th key={n} className="cc-num"></th>)}
             </tr>
-            {HERBICIDAS.map((fila, idx) => {
+            {ref.suelo.filas.map((fila, idx) => {
               const columnas = columnasDeHerbicida(fila)
               return (
                 <tr key={idx} className={columnas.length ? 'cc-usado' : ''}>
@@ -284,13 +308,10 @@ const Cuaderno = () => {
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td></td>
-              {MESES_RIEGO.map(m => <td key={m}></td>)}
-            </tr>
+            <tr><td></td>{MESES_RIEGO.map(m => <td key={m}></td>)}</tr>
           </tbody>
         </table>
-        <p className="cc-obs">Orientación M³/Hg por riego (a manta): 50 M³/Hg · Observaciones:</p>
+        <p className="cc-obs">*Orientación M³/Hg por riego (a manta): 50 M³/Hg · Comunidad de regantes (goteo): · Observaciones:</p>
 
         {/* Validaciones (las rellena el técnico) y firma del productor */}
         <div className="cc-validacion">
@@ -321,7 +342,7 @@ const Cuaderno = () => {
           <li>Contratos con las empresas o personas físicas que hayan realizado los tratamientos fitosanitarios.</li>
           <li>Certificado de inspección de los equipos de aplicación de producto fitosanitario.</li>
           <li>Justificantes de entrega de envases vacíos de los productos fitosanitarios en el correspondiente punto de recogida.</li>
-          <li>Boletines de análisis de residuos de productos fitosanitarios realizados sobre cultivo y producciones, y en su caso, agua de riego.</li>
+          <li>Boletines de análisis de residuos de productos fitosanitarios realizados sobre cultivos y producciones, y en su caso, agua de riego.</li>
           <li>Documentación relativa al asesoramiento recibido.</li>
         </ul>
 
@@ -330,7 +351,7 @@ const Cuaderno = () => {
             <tr className="cc-cabecera"><th>Variedades</th><th>Fechas entrega</th></tr>
           </thead>
           <tbody>
-            {VARIEDADES_ENTREGA.map(([v, f], i) => (
+            {ref.variedades.map(([v, f], i) => (
               <tr key={i}><td>{v}</td><td>{f}</td></tr>
             ))}
           </tbody>
@@ -344,6 +365,7 @@ const Cuaderno = () => {
               <li>En caso de utilizar algún producto que no esté en la lista, detallarlo en las líneas en blanco.</li>
               <li>Marcar con una X las casillas correspondientes.</li>
             </ul>
+            {ref.notaFinal && <p className="cc-center"><strong>{ref.notaFinal}</strong></p>}
           </div>
           <div className="cc-recuadro">
             <p><strong>NOTA:</strong> Ante cualquier modificación con respecto a la fertilización y a los tratamientos fitosanitarios, ya sea de dosificación, cambio de materias activas, eliminación o adición, o cambio de fecha en la realización del tratamiento, deberá ser supervisado por el servicio técnico y ser aprobado por este, conforme a las características de la parcela o de las incidencias que se puedan dar durante el ciclo del cultivo.</p>

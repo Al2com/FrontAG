@@ -112,6 +112,15 @@
   text-align: center;
 }
 
+/* Banda "FITOSANITARIOS" / "MANEJO DEL SUELO" */
+.cc-titulo-bloque td {
+  background: var(--c-primario);
+  color: var(--c-blanco);
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-align: center;
+}
+
 .cc-num {
   width: 34px;
   text-align: center;

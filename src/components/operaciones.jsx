@@ -27,6 +27,8 @@ const Operaciones = () => {
   const [parcelaOperacion, setParcelaOperacion] = useState('todas')
   const [variedadFumigacion, setVariedadFumigacion] = useState('todas')
   const [parcelaFumigacion, setParcelaFumigacion] = useState('todas')
+  // filtro por método de aplicación: tractor o mochila (campo metodo_aplicacion)
+  const [metodoFumigacion, setMetodoFumigacion] = useState('todas')
 
   const rol = sessionStorage.getItem('rol')
 
@@ -78,7 +80,8 @@ const Operaciones = () => {
     const coincideMes = mesFumigacion === 'todos' || mes === Number(mesFumigacion)
     const coincideVariedad = variedadFumigacion === 'todas' || fumigacion.parcela?.variedad === variedadFumigacion
     const coincideParcela = parcelaFumigacion === 'todas' || formatoParcela(fumigacion.parcela) === parcelaFumigacion
-    return coincideAño && coincideMes && coincideVariedad && coincideParcela
+    const coincideMetodo = metodoFumigacion === 'todas' || fumigacion.metodo_aplicacion === metodoFumigacion
+    return coincideAño && coincideMes && coincideVariedad && coincideParcela && coincideMetodo
   })
 
   // marco la operacion o fumigacion como realizada y recargo la lista
@@ -283,6 +286,13 @@ const Operaciones = () => {
           <select value={parcelaFumigacion} onChange={(e) => setParcelaFumigacion(e.target.value)}>
             <option value="todas">Parcela ▾</option>
             {obtenerParcelas(listaFumigaciones).map(p => <option key={p} value={p}>{p}</option>)}
+          </select>
+        </div>
+        <div className="barra-select-lg">
+          <select value={metodoFumigacion} onChange={(e) => setMetodoFumigacion(e.target.value)}>
+            <option value="todas">Método ▾</option>
+            <option value="tractor">Tractor</option>
+            <option value="mochila">Mochila</option>
           </select>
         </div>
       </div>
