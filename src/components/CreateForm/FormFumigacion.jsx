@@ -98,7 +98,7 @@ const FormFumigacion = () => {
 
   const regexDuracion = /^[0-9]{1,4}$/;
   const regexDescripcion = /^.{10,}$/;
-  const regexCantidad = /^[0-9]{1,3}$/;
+  const regexCantidad = /^\d+(\.\d{1,2})?$/; // mochilas y turbos: admite fracciones (0.5, 1.33...)
   const regexPrecio = /^\d+(\.\d{1,2})?$/;
 
   const toggleParcela = (id) => {
@@ -538,8 +538,9 @@ const FormFumigacion = () => {
                 name="mochilas"
                 value={formData.mochilas}
                 onChange={handleChange}
-                placeholder="Ej: 2"
-                min="1"
+                placeholder="Ej: 0.5"
+                step="0.01"
+                min="0.01"
                 className={errors.mochilas ? 'input-error' : ''}
               />
               {errors.mochilas && <span className="mensaje-error">{errors.mochilas}</span>}
@@ -555,8 +556,9 @@ const FormFumigacion = () => {
                 name="turbos"
                 value={formData.turbos}
                 onChange={handleChange}
-                placeholder="Ej: 2"
-                min="1"
+                placeholder="Ej: 0.5"
+                step="0.01"
+                min="0.01"
                 className={errors.turbos ? 'input-error' : ''}
               />
               {errors.turbos && <span className="mensaje-error">{errors.turbos}</span>}

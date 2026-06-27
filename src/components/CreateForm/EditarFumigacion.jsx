@@ -80,8 +80,13 @@ const EditarFumigacion = () => {
             mensaje = 'El operario es obligatorio'
             comprobar = false
         }
-        if ((name === 'duracion_minutos' || name === 'mochilas' || name === 'turbos') && !regexEntero.test(value)) {
+        if (name === 'duracion_minutos' && !regexEntero.test(value)) {
             mensaje = 'Debe ser un número (máx. 4 cifras)'
+            comprobar = false
+        }
+        // mochilas y turbos admiten fracciones (ej: 0.5 media mochila/turbo)
+        if ((name === 'mochilas' || name === 'turbos') && !/^\d+(\.\d{1,2})?$/.test(value)) {
+            mensaje = 'Debe ser un número (admite decimales, ej: 0.5)'
             comprobar = false
         }
 
@@ -178,7 +183,7 @@ const EditarFumigacion = () => {
                 {formData.metodo_aplicacion === 'mochila' && (
                     <div className="form-grupo">
                         <label>Mochilas</label>
-                        <input type="number" name="mochilas" value={formData.mochilas} onChange={handleChange} className={errors.mochilas ? 'input-error' : ''} />
+                        <input type="number" name="mochilas" value={formData.mochilas} onChange={handleChange} step="0.01" min="0.01" className={errors.mochilas ? 'input-error' : ''} />
                         {errors.mochilas && <span className="mensaje-error">{errors.mochilas}</span>}
                     </div>
                 )}
@@ -187,7 +192,7 @@ const EditarFumigacion = () => {
                 {formData.metodo_aplicacion === 'tractor' && (
                     <div className="form-grupo">
                         <label>Turbos</label>
-                        <input type="number" name="turbos" value={formData.turbos} onChange={handleChange} className={errors.turbos ? 'input-error' : ''} />
+                        <input type="number" name="turbos" value={formData.turbos} onChange={handleChange} step="0.01" min="0.01" className={errors.turbos ? 'input-error' : ''} />
                         {errors.turbos && <span className="mensaje-error">{errors.turbos}</span>}
                     </div>
                 )}
