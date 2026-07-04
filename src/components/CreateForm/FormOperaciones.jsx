@@ -86,6 +86,9 @@ const FormOperacion = () => {
   }, [formData.producto_id, formData.dosis, esAbonado])
 
   useEffect(() => {
+    // en abonado el precio lo calcula el otro efecto (producto x dosis);
+    // este efecto no debe tocar formData.precio para ese tipo, o lo pisa
+    if (esAbonado) return
     const hora = parseFloat(precioPorHora)
     const duracion = parseFloat(formData.duracion_minutos)
     const material = parseFloat(formData.precio_material) || 0
@@ -99,7 +102,7 @@ const FormOperacion = () => {
     } else {
       setFormData(prev => ({ ...prev, precio: '' }))
     }
-  }, [formData.duracion_minutos, precioPorHora, formData.precio_material])
+  }, [formData.duracion_minutos, precioPorHora, formData.precio_material, esAbonado])
 
   const regexDuracion = /^[0-9]{1,4}$/
   const regexDescripcion = /^.{10,}$/
@@ -129,6 +132,14 @@ const FormOperacion = () => {
       mensaje = 'Introduce un precio válido (ej: 12.50)'
       comprobar = false
     }
+    if (name === 'producto_id' && value === '') {
+      mensaje = 'Selecciona un producto'
+      comprobar = false
+    }
+    if (name === 'dosis' && (isNaN(parseFloat(value)) || parseFloat(value) <= 0)) {
+      mensaje = 'Introduce una dosis válida'
+      comprobar = false
+    }
 
     setErrors(prevErrors => ({ ...prevErrors, [name]: mensaje }))
     return comprobar
@@ -154,8 +165,10 @@ const FormOperacion = () => {
     const duracionOk    = validarCampos('duracion_minutos', formData.duracion_minutos)
     const precioOk      = validarCampos('precio', formData.precio)
     const descripcionOk = validarCampos('descripcion', formData.descripcion)
+    const productoOk    = esAbonado ? validarCampos('producto_id', formData.producto_id) : true
+    const dosisOk       = esAbonado ? validarCampos('dosis', formData.dosis) : true
 
-    if (parcelaOk && operarioOk && tipoOk && fechaOk && duracionOk && descripcionOk && precioOk) {
+    if (parcelaOk && operarioOk && tipoOk && fechaOk && duracionOk && descripcionOk && precioOk && productoOk && dosisOk) {
       setModalConfirm(true)
     }
   }
@@ -216,7 +229,7 @@ const FormOperacion = () => {
             <option value="">Selecciona una parcela</option>
             {parcelas.map(parcela => (
               <option key={parcela.id} value={parcela.id}>
-                {parcela.poligono} - {parcela.parcela} ({parcela.variedad} - {parcela.nombre})
+                {parcela.poligono} - {parcela.parcela} ({parcela.variedad})
               </option>
             ))}
           </select>

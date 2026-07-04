@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import productosService from '../services/productos.js';
+import comprasService from '../services/compras.js';
 import BtnCrear from './buttons/BtnCrear.jsx';
 import BtnSubmit from './buttons/BtnSubmit.jsx';
 import BtnEliminar from './buttons/btnEliminar.jsx';
@@ -15,6 +16,11 @@ const Almacen = () => {
   // modal de confirmacion para eliminar
   const [modalConfirm, setModalConfirm] = useState({ visible: false, id: null });
 
+  // vista de detalle de compras: 'productos' (por defecto) o 'compras'
+  const [vista, setVista] = useState('productos');
+  const [compras, setCompras] = useState([]);
+  const [errorCompras, setErrorCompras] = useState('');
+
   const rol = sessionStorage.getItem('rol');
 
   useEffect(() => {
@@ -22,6 +28,28 @@ const Almacen = () => {
       .then(data => setProductos(data))
       .catch(() => setErrorCarga('Error al cargar los productos'));
   }, []);
+
+  // la ruta /compras es solo de administrador, así que solo pedimos el detalle
+  // cuando el usuario lo abre (y solo si no es trabajador)
+  const abrirDetalleCompras = () => {
+    if (vista === 'compras') {
+      setVista('productos');
+      return;
+    }
+    setErrorCompras('');
+    comprasService.getCompras()
+      .then(data => {
+        setCompras(data);
+        setVista('compras');
+      })
+      .catch(() => setErrorCompras('Error al cargar el detalle de compras'));
+  };
+
+  const formatearFecha = (fecha) => {
+    if (!fecha) return '—';
+    const d = new Date(fecha);
+    return isNaN(d) ? fecha : d.toLocaleDateString('es-ES');
+  };
 
   const confirmarEliminar = (id) => {
     setModalConfirm({ visible: true, id });
@@ -60,19 +88,61 @@ const Almacen = () => {
             <BtnCrear to="/comprar-producto" titulo="Comprar Producto" iconIng="./plusNegro.png" />
           )}
           <div className="separador-btn"></div>
-          <button
-            className={`btn-vista ${mostrarTabla ? 'activo' : ''}`}
-            onClick={() => setMostrarTabla(!mostrarTabla)}
-          >
-            <img src={mostrarTabla ? './iconTable.png' : './cuadrado.png'} alt="vista" />
-            {mostrarTabla ? 'Tarjetas' : 'Tabla'}
-          </button>
+          {vista === 'productos' && (
+            <button
+              className={`btn-vista ${mostrarTabla ? 'activo' : ''}`}
+              onClick={() => setMostrarTabla(!mostrarTabla)}
+            >
+              <img src={mostrarTabla ? './iconTable.png' : './cuadrado.png'} alt="vista" />
+              {mostrarTabla ? 'Tarjetas' : 'Tabla'}
+            </button>
+          )}
+          {rol !== 'trabajador' && (
+            <button
+              className={`btn-vista ${vista === 'compras' ? 'activo' : ''}`}
+              onClick={abrirDetalleCompras}
+            >
+              {vista === 'compras' ? 'Volver al almacén' : 'Detalle'}
+            </button>
+          )}
         </div>
       </div>
 
       {errorCarga && <span className="mensaje-error">{errorCarga}</span>}
+      {errorCompras && <span className="mensaje-error">{errorCompras}</span>}
 
-      {mostrarTabla ? (
+      {vista === 'compras' ? (
+        <table className="tabla-operaciones">
+          <thead>
+            <tr>
+              <th>Material</th>
+              <th>Precio</th>
+              <th>Día</th>
+              <th>Cantidad</th>
+              <th>Proveedor</th>
+            </tr>
+          </thead>
+          <tbody>
+            {compras.length === 0 ? (
+              <tr>
+                <td colSpan={5} style={{ fontStyle: 'italic', color: 'var(--c-texto-apagado)' }}>
+                  Todavía no hay compras registradas
+                </td>
+              </tr>
+            ) : (
+              compras.map(compra => (
+                <tr key={compra.id}>
+                  <td>{compra.producto?.nombre ?? '—'}</td>
+                  <td>{Number(compra.precio).toFixed(2)} €</td>
+                  <td>{formatearFecha(compra.fecha_compra)}</td>
+                  <td>{compra.cantidad_compra} {compra.producto?.unidad ?? ''}</td>
+                  <td>{compra.proveedor?.nombre ?? '—'}</td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      ) : mostrarTabla ? (
         <table className="tabla-operaciones">
           <thead>
             <tr>
