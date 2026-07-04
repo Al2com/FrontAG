@@ -216,7 +216,7 @@ const FormOperacion = () => {
             <option value="">Selecciona una parcela</option>
             {parcelas.map(parcela => (
               <option key={parcela.id} value={parcela.id}>
-                {parcela.poligono} - {parcela.parcela} ({parcela.variedad})
+                {parcela.poligono} - {parcela.parcela} ({parcela.variedad} - {parcela.nombre})
               </option>
             ))}
           </select>
