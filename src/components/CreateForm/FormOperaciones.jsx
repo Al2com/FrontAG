@@ -73,22 +73,24 @@ const FormOperacion = () => {
       })
   }, [])
 
+  // en abonado el "material" sale de producto x dosis (en mantenimiento lo escribe
+  // el usuario a mano en el campo precio_material); ambos casos alimentan el mismo
+  // campo formData.precio_material, que el efecto de abajo suma a la mano de obra
   useEffect(() => {
     if (!esAbonado) return
     const producto = productos.find(p => p.id === parseInt(formData.producto_id))
     const dosis = parseFloat(formData.dosis)
     if (producto && !isNaN(dosis) && dosis > 0) {
-      const precioCalculado = (producto.precio * dosis).toFixed(2)
-      setFormData(prev => ({ ...prev, precio: precioCalculado }))
+      const materialCalculado = (producto.precio * dosis).toFixed(2)
+      setFormData(prev => ({ ...prev, precio_material: materialCalculado }))
     } else {
-      setFormData(prev => ({ ...prev, precio: '' }))
+      setFormData(prev => ({ ...prev, precio_material: '' }))
     }
   }, [formData.producto_id, formData.dosis, esAbonado])
 
+  // precio total = mano de obra (precio por hora x horas) + material (el que corresponda
+  // según el tipo). Se aplica igual a mantenimiento y a abonado.
   useEffect(() => {
-    // en abonado el precio lo calcula el otro efecto (producto x dosis);
-    // este efecto no debe tocar formData.precio para ese tipo, o lo pisa
-    if (esAbonado) return
     const hora = parseFloat(precioPorHora)
     const duracion = parseFloat(formData.duracion_minutos)
     const material = parseFloat(formData.precio_material) || 0
@@ -97,12 +99,12 @@ const FormOperacion = () => {
       const total = (hora * horas + material).toFixed(2)
       setFormData(prev => ({ ...prev, precio: total }))
     } else if (material > 0) {
-      // mantenimiento sin mano de obra: el gasto es solo el material
+      // sin mano de obra: el gasto es solo el material
       setFormData(prev => ({ ...prev, precio: material.toFixed(2) }))
     } else {
       setFormData(prev => ({ ...prev, precio: '' }))
     }
-  }, [formData.duracion_minutos, precioPorHora, formData.precio_material, esAbonado])
+  }, [formData.duracion_minutos, precioPorHora, formData.precio_material])
 
   const regexDuracion = /^[0-9]{1,4}$/
   const regexDescripcion = /^.{10,}$/
