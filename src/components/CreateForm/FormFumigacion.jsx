@@ -375,18 +375,30 @@ const FormFumigacion = () => {
                 {parcelasSeleccionadas.length} parcelas · {totalHanegadasSel.toFixed(2)} ha
               </div>
 
-              <div className="parcelas-checkboxes">
-                {parcelas.map(parcela => (
-                  <label key={parcela.id} className="parcela-checkbox">
-                    <input
-                      type="checkbox"
-                      checked={formData.parcela_ids.includes(parcela.id)}
-                      onChange={() => toggleParcela(parcela.id)}
-                    />
-                    {parcela.poligono} - {parcela.parcela} · {parcela.variedad}
-                    {parcela.explotacion?.nombre ? ` (${parcela.explotacion.nombre})` : ''} — {Number(parcela.dimension_hanegadas).toFixed(2)} ha
-                  </label>
-                ))}
+              {/* chips en vez de checkboxes en lista vertical: mismo estado de
+                  siempre (parcela_ids + toggleParcela), solo cambia cómo se pinta.
+                  El <label> envuelve el checkbox oculto, así que clicar en
+                  cualquier parte del chip (no solo el checkbox) ya selecciona --
+                  no hace falta un onClick manual aparte. */}
+              <div className="parcelas-chips">
+                {parcelas.map(parcela => {
+                  const seleccionada = formData.parcela_ids.includes(parcela.id)
+                  return (
+                    <label
+                      key={parcela.id}
+                      className={`parcela-chip${seleccionada ? ' seleccionada' : ''}`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={seleccionada}
+                        onChange={() => toggleParcela(parcela.id)}
+                      />
+                      <span className="parcela-chip-texto">
+                        {parcela.poligono} - {parcela.parcela} · {Number(parcela.dimension_hanegadas).toFixed(2)} ha
+                      </span>
+                    </label>
+                  )
+                })}
               </div>
               {errors.parcela_ids && <span className="mensaje-error">{errors.parcela_ids}</span>}
             </div>
