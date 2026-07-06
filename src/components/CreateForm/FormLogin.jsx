@@ -114,7 +114,7 @@ const cerrarModal = () => setModalError({ visible: false, mensaje: '' })
         <form onSubmit={enviarFormulario}>
             <div className="form-login">
                 <div className="header-login">
-                    <img src="./LAgroGestion.png" alt="Logo AgroGestión" />
+                    <img src="./logo_gestiocamp.png" alt="Logo AgroGestión" />
                 </div>
                 <div>
                     <label>Correo Electronico</label>

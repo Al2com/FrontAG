@@ -21,8 +21,8 @@ const MenuNav = ({ user, logout }) => {
       {/* Cabecera movil: logo a la izquierda, hamburguesa a la derecha */}
       <div className="mobile-header">
         <div className="mobile-header-logo">
-          <img src="./AgroControl.webp" alt="AgroGestión" className="logo-img" />
-          <h4>AgroGestión</h4>
+          <img src="./logo_gestiocamp.png" alt="GestioCamp" className="logo-img" />
+          <h4>GestióCamp</h4>
         </div>
         <button
           className={`hamburger-btn ${menuAbierto ? 'abierto' : ''}`}
@@ -43,10 +43,10 @@ const MenuNav = ({ user, logout }) => {
 
       <nav className={`navbar ${menuAbierto ? 'navbar-abierta' : ''}`}>
         <div className="navbar-logo">
-          <img src="./AgroControl.webp" alt="AgroGestión" className="logo-img" />
+          <img src="./logo_gestiocamp.png" alt="gestiocamp" className="logo-img" />
           <div className="logo-text">
-            <h4>AgroGestión</h4>
-            <span>Gestión de tierras</span>
+            <h4>GestióCamp</h4>
+            <span>Gestió de terres agricoles</span>
           </div>
         </div>
 
