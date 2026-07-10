@@ -83,12 +83,16 @@ const enviarFormulario = (e) => {
         
         })
       .catch(err => {
-         if (err.response?.status === 401) {
+        if (err.response?.status === 401) {
                 setModalError({ visible: true, mensaje: 'El email o el password son incorrectos' })
+            } else if (!err.response) {
+                // La petición no llegó al backend: host/URL incorrecta, backend caído,
+                // o bloqueada por red/CORS. No es un error del servidor, es de conexión.
+                setModalError({ visible: true, mensaje: 'No se pudo conectar con el servidor. Comprueba tu conexión o la URL del backend (VITE_API_URL).' })
             } else {
-                setModalError({ visible: true, mensaje: 'Error del servidor' })
+                setModalError({ visible: true, mensaje: `Error del servidor (${err.response.status})` })
             }
-    })
+      })
 
   } else {
         setErrors({
