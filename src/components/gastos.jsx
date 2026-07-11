@@ -137,33 +137,32 @@ const Gastos = () => {
                   </thead>
                   <tbody>
 
-                    {/* operaciones agrupadas por tipo y operario */}
-                    {parcela.operaciones.map(op => (
-                      <Fragment key={op.tipo}>
-                        {op.operarios.map((o, i) => (
-                          <tr key={`${op.tipo}-${o.operario}`}>
-                            <td style={{ textTransform: 'capitalize', fontWeight: i === 0 ? 600 : 400 }}>
-                              {i === 0 ? op.tipo : ''} — {o.operario}
-                            </td>
-                            <td className="detalle-fechas">{o.detalle}</td>
-                            <td>{o.horas.toFixed(1)} h</td>
-                            <td>—</td>
-                            <td>{i === 0 ? `${op.precioTipo.toFixed(2)} €` : ''}</td>
-                          </tr>
-                        ))}
-                        {/* abonado: material aplicado, una fila por producto/fecha con su coste */}
-                        {op.materiales?.map((mat, j) => (
-                          <tr key={`${op.tipo}-mat-${j}`} className="tabla-fila-material">
-                            <td>{mat.nombre}</td>
-                            <td>{mat.dosis} {mat.unidad} · {mat.fecha}</td>
-                            <td>—</td>
-                            <td>—</td>
-                            <td>{mat.coste.toFixed(2)} €</td>
-                          </tr>
-                        ))}
-                      </Fragment>
-                    ))}
-
+                    {/* operaciones: una fila por cada operación individual (fecha, operario, horas, precio) */}
+{parcela.operaciones.map(op => (
+  <Fragment key={op.tipo}>
+    {op.filas.map((f, i) => (
+      <tr key={`${op.tipo}-${i}`}>
+        <td style={{ textTransform: 'capitalize', fontWeight: i === 0 ? 600 : 400 }}>
+          {i === 0 ? op.tipo : ''}
+        </td>
+        <td className="detalle-fechas">{f.fecha} · {f.operario}</td>
+        <td>{f.horas.toFixed(1)} h</td>
+        <td>—</td>
+        <td>{f.precio.toFixed(2)} €</td>
+      </tr>
+    ))}
+    {/* abonado: material aplicado, una fila por producto/fecha con su coste */}
+    {op.materiales?.map((mat, j) => (
+      <tr key={`${op.tipo}-mat-${j}`} className="tabla-fila-material">
+        <td>{mat.nombre}</td>
+        <td>{mat.dosis} {mat.unidad} · {mat.fecha}</td>
+        <td>—</td>
+        <td>—</td>
+        <td>{mat.coste.toFixed(2)} €</td>
+      </tr>
+    ))}
+  </Fragment>
+))}
                     <tr className="tabla-separador"><td colSpan={5}></td></tr>
 
                     {/* fumigaciones tractor con material debajo */}
