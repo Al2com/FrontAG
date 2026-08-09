@@ -1,0 +1,41 @@
+.seccion-colapsable {
+  margin-bottom: var(--esp-lg);
+}
+
+.seccion-colapsable-cabecera {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-sm);
+  width: 100%;
+  padding: var(--esp-sm) 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+.seccion-colapsable-cabecera:focus-visible {
+  outline: 2px solid var(--c-primario-medio);
+  outline-offset: 2px;
+  border-radius: var(--rad-sm);
+}
+
+.seccion-colapsable-cabecera h2 {
+  margin: 0;
+}
+
+.seccion-colapsable-chevron {
+  display: inline-block;
+  font-size: 18px;
+  color: var(--c-primario);
+  transition: transform 0.25s ease;
+}
+
+.seccion-colapsable-chevron.abierta {
+  transform: rotate(180deg);
+}
+
+.seccion-colapsable-contenido {
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
