@@ -4,9 +4,26 @@ import BtnCrear from './buttons/BtnCrear.jsx';
 import BtnSubmit from './buttons/BtnSubmit.jsx'
 import BtnEliminar from './buttons/btnEliminar.jsx'
 import Modal from './Modal/Modal.jsx'
+import SeccionColapsable from './SeccionColapsable.jsx'
 import './Style/cards.css';
 import './Style/forms.css'
 import './Style/search.css'
+
+// claves de localStorage: estado de las secciones (cerradas la primera vez)
+// y preferencia de vista tabla/cards (sin preferencia -> se decide por dispositivo)
+const CLAVE_SECCION_OPERACIONES = 'operaciones_seccion_operaciones_abierta'
+const CLAVE_SECCION_FUMIGACIONES = 'operaciones_seccion_fumigaciones_abierta'
+const CLAVE_VISTA_TABLA = 'operaciones_vista_tabla'
+
+const leerSeccionAbierta = (clave) => localStorage.getItem(clave) === 'true'
+
+// primera visita (nada guardado): tabla en escritorio, cards en móvil.
+// Si ya hay preferencia guardada, esa manda siempre, sin importar el dispositivo.
+const vistaTablaInicial = () => {
+  const guardada = localStorage.getItem(CLAVE_VISTA_TABLA)
+  if (guardada !== null) return guardada === 'true'
+  return !window.matchMedia('(max-width: 768px)').matches
+}
 
 const Operaciones = () => {
 
@@ -21,7 +38,11 @@ const Operaciones = () => {
   const [tipoSeleccionado, setTipoSeleccionado] = useState('todos')
   const [campañaFumigacion, setCampañaFumigacion] = useState('todas')
   const [mesFumigacion, setMesFumigacion] = useState('todos')
-  const [mostrarTabla, setMostrarTabla] = useState(false)
+  const [mostrarTabla, setMostrarTabla] = useState(vistaTablaInicial)
+
+  // acordeón: cerradas por defecto la primera vez, luego recuerdan su estado
+  const [seccionOperacionesAbierta, setSeccionOperacionesAbierta] = useState(() => leerSeccionAbierta(CLAVE_SECCION_OPERACIONES))
+  const [seccionFumigacionesAbierta, setSeccionFumigacionesAbierta] = useState(() => leerSeccionAbierta(CLAVE_SECCION_FUMIGACIONES))
 
   // filtros nuevos: parcela en operaciones; variedad y parcela en fumigaciones
   const [parcelaOperacion, setParcelaOperacion] = useState('todas')
@@ -129,6 +150,26 @@ const Operaciones = () => {
     }
   }
 
+  // el toggle de vista es una elección explícita del usuario: a partir de aquí
+  // manda siempre sobre la detección automática por dispositivo
+  const alternarVista = () => {
+    const nuevoValor = !mostrarTabla
+    setMostrarTabla(nuevoValor)
+    localStorage.setItem(CLAVE_VISTA_TABLA, String(nuevoValor))
+  }
+
+  const alternarSeccionOperaciones = () => {
+    const nuevoValor = !seccionOperacionesAbierta
+    setSeccionOperacionesAbierta(nuevoValor)
+    localStorage.setItem(CLAVE_SECCION_OPERACIONES, String(nuevoValor))
+  }
+
+  const alternarSeccionFumigaciones = () => {
+    const nuevoValor = !seccionFumigacionesAbierta
+    setSeccionFumigacionesAbierta(nuevoValor)
+    localStorage.setItem(CLAVE_SECCION_FUMIGACIONES, String(nuevoValor))
+  }
+
   return (
     <div>
 
@@ -152,7 +193,7 @@ const Operaciones = () => {
           <div className="separador-btn"></div>
           <button
             className={`btn-vista ${mostrarTabla ? 'activo' : ''}`}
-            onClick={() => setMostrarTabla(!mostrarTabla)}
+            onClick={alternarVista}
           >
             <img src={mostrarTabla ? './iconTable.png' : './cuadrado.png'} alt="vista" />
             {mostrarTabla ? 'Tarjetas' : 'Tabla'}
@@ -162,6 +203,12 @@ const Operaciones = () => {
 
       {errorCarga && <span className="mensaje-error">{errorCarga}</span>}
 
+      <SeccionColapsable
+        titulo="Operaciones"
+        cantidad={operacionesFiltradas.length}
+        abierta={seccionOperacionesAbierta}
+        onToggle={alternarSeccionOperaciones}
+      >
       {/* filtros de operaciones */}
       <div className="filtro-explo">
         <div className="barra-select">
@@ -195,8 +242,6 @@ const Operaciones = () => {
           </select>
         </div>
       </div>
-
-      <h2>Operaciones</h2>
 
       {mostrarTabla ? (
         <table className="tabla-operaciones">
@@ -258,7 +303,14 @@ const Operaciones = () => {
           </div>
         ))
       )}
+      </SeccionColapsable>
 
+      <SeccionColapsable
+        titulo="Fumigaciones"
+        cantidad={fumigacionesFiltradas.length}
+        abierta={seccionFumigacionesAbierta}
+        onToggle={alternarSeccionFumigaciones}
+      >
       {/* filtros propios de fumigaciones, no afectan a operaciones */}
       <div className="filtro-explo">
         <div className="barra-select">
@@ -296,8 +348,6 @@ const Operaciones = () => {
           </select>
         </div>
       </div>
-
-      <h2>Fumigaciones</h2>
 
       {mostrarTabla ? (
         <table className="tabla-operaciones">
@@ -358,6 +408,7 @@ const Operaciones = () => {
           </div>
         ))
       )}
+      </SeccionColapsable>
     </div>
   )
 }
