@@ -316,6 +316,30 @@
     display: none !important;
   }
 
+  /* El layout general (App.css) reserva 260px para el menú lateral en un
+     grid, limita el contenido a max-width:1600px centrado y mete el
+     contenido en un contenedor con scroll (overflow-y:auto). Nada de eso
+     se resetea solo porque el menú se oculte: el hueco de 260px se queda
+     reservado y el ancho útil de la hoja se reduce, así que al guardar
+     como PDF todo sale apiñado en una franja estrecha en vez de ocupar el
+     ancho completo de la página A4 apaisada. */
+  .app-container {
+    display: block !important;
+    height: auto !important;
+  }
+
+  .main-content {
+    display: block !important;
+    overflow: visible !important;
+  }
+
+  .content {
+    max-width: none !important;
+    width: auto !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
   .cuaderno-contenedor {
     padding: 0;
   }
