@@ -15,4 +15,15 @@ const postCrearCompra = (formData) => {
     }).then(res => res.data);
 };
 
-export default { getCompras, postCrearCompra };
+// filtros: { desde, hasta, proveedor_id } — todos opcionales
+const getHistorialProducto = (productoId, filtros = {}) => {
+    return axios.get(`/api/productos/${productoId}/compras`, { params: filtros })
+        .then(res => res.data);
+};
+
+const getResumenProducto = (productoId, filtros = {}) => {
+    return axios.get(`/api/productos/${productoId}/compras/resumen`, { params: filtros })
+        .then(res => res.data);
+};
+
+export default { getCompras, postCrearCompra, getHistorialProducto, getResumenProducto };

@@ -16,6 +16,11 @@ const getStockBajo = () => {
     return request.then(response => response.data)
 }
 
-export default { createProducto, getStockBajo };
+// filtros: { anio } opcional
+const getResumenGeneral = (filtros = {}) => {
+    return axios.get(`${baseUrl1}/resumen`, { params: filtros }).then(response => response.data)
+}
+
+export default { createProducto, getStockBajo, getResumenGeneral };
 
 

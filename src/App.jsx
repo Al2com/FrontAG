@@ -25,6 +25,7 @@ import EditarFumigacion from './components/CreateForm/EditarFumigacion.jsx'
 import Gastos from './components/gastos.jsx'
 import Analisis from './components/analisis.jsx'
 import Cuaderno from './components/cuaderno.jsx'
+import DetalleProducto from './components/DetalleProducto.jsx'
 import FormRecoleccion from './components/CreateForm/FormRecoleccion.jsx'
 import EditarRecoleccion from './components/CreateForm/EditarRecoleccion.jsx'
 import FormForgotPassword from './components/CreateForm/FormForgotPassword.jsx'
@@ -106,6 +107,7 @@ function App() {
               <Route path="/explotacion/:id" element={<SoloAdmin><EditarExplotacion /></SoloAdmin>} />
               <Route path="/parcela/:id" element={<SoloAdmin><EditarParcela/></SoloAdmin>} />
               <Route path="/producto/:id" element={<SoloAdmin><EditarProducto/></SoloAdmin>} />
+              <Route path="/producto/:id/detalle" element={<SoloAdmin><DetalleProducto/></SoloAdmin>} />
               <Route path="/operacion/:id" element={<SoloAdmin><EditarOperacion/></SoloAdmin>} />
               <Route path="/editar-fumigacion/:id" element={<SoloAdmin><EditarFumigacion /></SoloAdmin>} />
               <Route path="/gastos" element={<SoloAdmin><Gastos/></SoloAdmin>} />

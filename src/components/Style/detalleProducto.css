@@ -1,0 +1,23 @@
+.detalle-producto-cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--esp-md);
+  margin-bottom: var(--esp-xs);
+}
+
+.detalle-producto-cabecera h1 {
+  margin-bottom: 0;
+}
+
+.detalle-producto-graficos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: var(--esp-xl);
+  padding: 0 var(--esp-xl) var(--esp-xl);
+}
+
+.detalle-producto-grafico h4 {
+  color: var(--c-primario);
+  margin-bottom: var(--esp-sm);
+}
