@@ -3,8 +3,11 @@ import authService from '../../services/auth'
 import '../Style/forms.css'
 import { useState } from "react"
 import { Link } from "react-router-dom"
+import { useTheme } from "../../hooks/useTheme.js"
 
 const FormLogin = ({setUser}) =>{
+
+const { sincronizarConUsuario } = useTheme()
 
 const [credencials,setCredencials] = useState({
     email:'',
@@ -78,6 +81,7 @@ const enviarFormulario = (e) => {
             sessionStorage.setItem('rol', response.rol)
             //se actualiza el usuario que se pasa por prop
             setUser(response.usuario)
+            sincronizarConUsuario(response.usuario)
               window.location.href = '/dashboard' // siempre empieza en dashboard
             
         

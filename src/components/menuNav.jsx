@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import MenuBar from './BarraBusqueda/MenuBar'
+import AvatarPerfil from './AvatarPerfil'
 import './Style/cards.css'
 import './Style/navbar.css'
 
@@ -52,7 +53,7 @@ const MenuNav = ({ user, logout }) => {
 
         {/* Perfil: nombre y rol del usuario */}
         <div className="navbar-perfil">
-          <img className="navbar-perfil-avatar" src="/usuario.png" alt="Usuario" />
+          <AvatarPerfil usuario={user} className="navbar-perfil-avatar" />
           <div className="navbar-perfil-info">
             <span className="navbar-perfil-nombre">{user?.name}</span>
             <span className="navbar-perfil-rol">{user?.rol}</span>
@@ -143,12 +144,22 @@ const MenuNav = ({ user, logout }) => {
           )}
           {rol !== 'trabajador' && (
             <MenuBar
+              to="/analisis"
               iconImg="./analisis.svg"
               altText="Análisis"
               texto="Análisis"
-              disabled
+              isSeleccionado={botonActivo === 'Analisis'}
+              onClick={() => seleccionar('Analisis')}
             />
           )}
+          <MenuBar
+            to="/configuracion"
+            iconImg="./iconConfiguracion.svg"
+            altText="Configuracion"
+            texto="Configuración"
+            isSeleccionado={botonActivo === 'Configuracion'}
+            onClick={() => seleccionar('Configuracion')}
+          />
         </div>
 
         {/* Cerrar sesion al final del menu */}

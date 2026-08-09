@@ -1,0 +1,114 @@
+.configuracion {
+  max-width: 640px;
+}
+
+.config-seccion {
+  background-color: var(--c-blanco);
+  border: 1px solid var(--c-borde);
+  border-radius: var(--rad-md);
+  padding: var(--esp-lg) var(--esp-xl);
+  margin-bottom: var(--esp-xl);
+}
+
+.config-seccion h2 {
+  color: var(--c-primario);
+  margin-bottom: var(--esp-md);
+  font-size: 1.1rem;
+}
+
+.config-fila {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--esp-md);
+  padding: var(--esp-sm) 0;
+}
+
+.config-fila--columna {
+  border-top: 1px solid var(--c-borde);
+  padding-top: var(--esp-md);
+  margin-top: var(--esp-md);
+}
+
+.config-fila--columna:first-of-type {
+  border-top: none;
+  margin-top: 0;
+  padding-top: 0;
+}
+
+.config-ayuda {
+  color: var(--c-texto-apagado);
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.mensaje-exito {
+  color: var(--c-primario-medio);
+  font-size: 13px;
+  display: block;
+  margin-top: var(--esp-sm);
+}
+
+/* -- Foto de perfil ------------------------------------------ */
+.config-foto {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-lg);
+}
+
+.config-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--c-borde);
+}
+
+.config-foto-acciones {
+  display: flex;
+  gap: var(--esp-sm);
+}
+
+/* -- Interruptor modo oscuro ----------------------------------- */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.switch-slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background-color: var(--c-borde-oscuro);
+  border-radius: 999px;
+  transition: background-color 0.2s ease;
+}
+
+.switch-slider::before {
+  content: "";
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: var(--c-blanco);
+  border-radius: 50%;
+  transition: transform 0.2s ease;
+}
+
+.switch input:checked + .switch-slider {
+  background-color: var(--c-primario-medio);
+}
+
+.switch input:checked + .switch-slider::before {
+  transform: translateX(20px);
+}

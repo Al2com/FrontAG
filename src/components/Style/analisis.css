@@ -1,0 +1,20 @@
+/* ANALISIS: grafico comparativo de gasto por hanegada */
+
+.grafico-comparativo {
+  display: block;
+  width: 100%;
+  max-width: 320px;
+  height: auto;
+  margin: var(--esp-sm) auto 0;
+}
+
+.grafico-valor {
+  font-size: 12px;
+  font-weight: 600;
+  fill: var(--c-texto);
+}
+
+.grafico-etiqueta {
+  font-size: 11px;
+  fill: var(--c-texto-apagado);
+}

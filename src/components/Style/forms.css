@@ -276,3 +276,27 @@
     flex-grow: 1;
   }
 }
+
+/* -- Desglose de costes (EditarFumigacion) -------------------- */
+.desglose-fumigacion-lista {
+  background-color: var(--c-fondo);
+  border: 1px solid var(--c-borde);
+  border-radius: var(--rad-md);
+  padding: var(--esp-sm) var(--esp-md);
+}
+
+.desglose-fumigacion-fila {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--esp-md);
+  padding: 4px 0;
+  color: var(--c-texto);
+}
+
+.desglose-fumigacion-total {
+  border-top: 1px solid var(--c-borde);
+  margin-top: var(--esp-xs);
+  padding-top: var(--esp-sm);
+  font-weight: 700;
+  color: var(--c-primario);
+}

@@ -48,6 +48,34 @@ const EditarFumigacion = () => {
     const regexPrecio = /^\d+(\.\d{1,2})?$/
     const regexDescripcion = /^[\s\S]{10,}$/ // [\s\S] para admitir saltos de línea en la descripción
 
+    // Espejo en JS de los accessors de App\Models\Fumigacion (coste_operacion /
+    // desglose_productos / total): el back es la fuente de verdad para lo ya
+    // guardado, pero mientras se edita el formulario aún no se ha guardado nada,
+    // así que el desglose en pantalla se recalcula aquí a partir del propio
+    // formData en cada render (misma fórmula, sin llamar al servidor por tecla).
+    const calcularDesglose = (datos) => {
+        const costeOperacion = datos.metodo_aplicacion === 'tractor'
+            ? (parseFloat(datos.turbos) || 0) * (parseFloat(datos.precio_turbo) || 0)
+            : (parseFloat(datos.precio) || 0)
+
+        const productos = (datos.productos || []).map((p) => {
+            const cantidad = parseFloat(p.pivot?.cantidad) || 0
+            const precioUnitario = parseFloat(p.pivot?.precio ?? p.precio) || 0
+            return {
+                producto_id: p.id,
+                nombre: p.nombre,
+                unidad: p.unidad,
+                cantidad,
+                precioUnitario,
+                subtotal: cantidad * precioUnitario,
+            }
+        })
+
+        const totalProductos = productos.reduce((acc, p) => acc + p.subtotal, 0)
+
+        return { costeOperacion, productos, total: costeOperacion + totalProductos }
+    }
+
     // Cargamos los datos de la fumigacion al entrar
     useEffect(() => {
         fumigacionesService.getFumigacion(id)
@@ -131,6 +159,8 @@ const EditarFumigacion = () => {
                 }
             })
     }
+
+    const desglose = calcularDesglose(formData)
 
     return (
         <div className="form-container">
@@ -240,6 +270,34 @@ const EditarFumigacion = () => {
                     <label>Descripción</label>
                     <textarea name="descripcion" value={formData.descripcion} onChange={handleChange} rows="4" className={errors.descripcion ? 'input-error' : ''} />
                     {errors.descripcion && <span className="mensaje-error">{errors.descripcion}</span>}
+                </div>
+
+                {/* desglose de costes: se recalcula solo, en cada render, a partir
+                    de los campos de arriba (turbos/precio_turbo/precio) */}
+                <div className="form-grupo full-width desglose-fumigacion">
+                    <label>Desglose de costes</label>
+                    <div className="desglose-fumigacion-lista">
+                        <div className="desglose-fumigacion-fila">
+                            <span>Coste de operación {formData.metodo_aplicacion === 'tractor' ? '(turbo)' : ''}</span>
+                            <span>{desglose.costeOperacion.toFixed(2)} €</span>
+                        </div>
+
+                        {desglose.productos.length === 0 ? (
+                            <p className="texto-ayuda">Esta fumigación no tiene productos asociados.</p>
+                        ) : (
+                            desglose.productos.map((p) => (
+                                <div className="desglose-fumigacion-fila" key={p.producto_id}>
+                                    <span>{p.nombre} ({p.cantidad} {p.unidad} × {p.precioUnitario.toFixed(2)} €)</span>
+                                    <span>{p.subtotal.toFixed(2)} €</span>
+                                </div>
+                            ))
+                        )}
+
+                        <div className="desglose-fumigacion-fila desglose-fumigacion-total">
+                            <span>Total fumigación</span>
+                            <span>{desglose.total.toFixed(2)} €</span>
+                        </div>
+                    </div>
                 </div>
 
                 <div className="form-actions full-width">

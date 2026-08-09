@@ -190,6 +190,19 @@
   filter: brightness(0) invert(1);
 }
 
+.aviso-app-vacia {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--esp-md);
+  background-color: var(--c-fondo-verde);
+  border: 1px solid var(--c-primario-claro);
+  border-radius: var(--rad-md);
+  padding: var(--esp-md) var(--esp-lg);
+  margin-bottom: var(--esp-lg);
+  color: var(--c-texto);
+}
+
 /* TABLA */
 .tabla-operaciones {
   width: calc(100% - var(--esp-xl) * 2);
@@ -238,6 +251,15 @@
   color: var(--c-blanco);
   background-color: var(--c-primario);
   padding: 10px 14px;
+}
+
+/* subtotal de una operación/fumigación concreta (coste + sus productos):
+   destacado en negrita pero más discreto que el TOTAL general de la tabla */
+.tabla-fila-subtotal td {
+  font-weight: 700;
+  color: var(--c-texto);
+  background-color: var(--c-fondo-verde);
+  border-top: 1px solid var(--c-primario-claro);
 }
 
 .detalle-fechas {

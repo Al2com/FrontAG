@@ -23,11 +23,14 @@ import EditarOperacion from './components/CreateForm/EditarOperacion.jsx'
 import FormComprarProducto from './components/CreateForm/FormComprarProducto.jsx'
 import EditarFumigacion from './components/CreateForm/EditarFumigacion.jsx'
 import Gastos from './components/gastos.jsx'
+import Analisis from './components/analisis.jsx'
 import Cuaderno from './components/cuaderno.jsx'
 import FormRecoleccion from './components/CreateForm/FormRecoleccion.jsx'
 import EditarRecoleccion from './components/CreateForm/EditarRecoleccion.jsx'
 import FormForgotPassword from './components/CreateForm/FormForgotPassword.jsx'
 import FormResetPassword from './components/CreateForm/FormResetPassword.jsx'
+import Configuracion from './components/configuracion.jsx'
+import { useTheme } from './hooks/useTheme.js'
 
 // Bloquea rutas para el rol trabajador: si lo es, lo manda al dashboard.
 // El trabajador solo puede acceder a Dashboard y Operaciones.
@@ -38,18 +41,21 @@ const SoloAdmin = ({ children }) => {
 
 function App() {
 
-  const [user , setUser]= useState(null);
-
+  // si el usuario esta en sesion storage todavia lo recupera, es decir si hay token lo recupera.
+  // lectura inicial en el propio useState (no en un efecto) para no disparar un
+  // segundo render de arranque solo para pintar el usuario ya guardado
+  const [user, setUser] = useState(() => {
+    const token = sessionStorage.getItem('token')
+    return token ? JSON.parse(sessionStorage.getItem('usuario')) : null
+  });
+  const { sincronizarConUsuario } = useTheme()
 
   useEffect(() => {
-    const token= sessionStorage.getItem('token')
-
-    if (token) {
-        // si el usuario esta en sesion storage todavia lo recupera, es decir si hay token lo recupera
-        const usuarioGuardado = JSON.parse(sessionStorage.getItem('usuario'))
-        setUser(usuarioGuardado)//lo re-renderiza setUser
+    if (user) {
+        sincronizarConUsuario(user)
     }
-
+    // solo al montar: aplica el tema guardado en BD a la sesión recuperada
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
 
@@ -82,6 +88,7 @@ function App() {
               <Route path="/" element={<Dashboard />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/operaciones" element={<Operaciones />} />
+              <Route path="/configuracion" element={<Configuracion user={user} setUser={setUser} />} />
 
               {/* solo administrador: el trabajador es redirigido al dashboard */}
               <Route path="/explotaciones" element={<SoloAdmin><Explotaciones /></SoloAdmin>} />
@@ -103,6 +110,7 @@ function App() {
               <Route path="/editar-fumigacion/:id" element={<SoloAdmin><EditarFumigacion /></SoloAdmin>} />
               <Route path="/gastos" element={<SoloAdmin><Gastos/></SoloAdmin>} />
               <Route path="/cuaderno" element={<SoloAdmin><Cuaderno/></SoloAdmin>} />
+              <Route path="/analisis" element={<SoloAdmin><Analisis/></SoloAdmin>} />
 
               {/* ruta comodin: cualquier direccion no definida cae aqui */}
               <Route path="*" element={
