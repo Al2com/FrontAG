@@ -42,6 +42,11 @@ const Gastos = () => {
     parcelasPorExplotacion[p.explotacion].push(p)
   })
 
+  // total agregado de todas las explotaciones: no hace falta pedir nada más al
+  // back, resumen.porExplotacion ya trae el coste de cada explotación (incluye
+  // materiales, horas, riego e impuestos) filtrado por el propietario logueado
+  const totalGastosExplotaciones = resumen.porExplotacion.reduce((acc, e) => acc + e.coste, 0)
+
   return (
     <div className="rentabilidad-contenedor">
       <div className="menuExplo">
@@ -92,6 +97,17 @@ const Gastos = () => {
           </div>
         )
       })}
+
+      {/* total agregado: suma de todas las explotaciones. El desglose por
+          explotación ya está arriba, aquí solo el importe conjunto */}
+      <h3 className="rentabilidad-titulo-seccion">Detalle total gastos explotaciones</h3>
+
+      <div className="rentabilidad-card">
+        <div className="rentabilidad-total">
+          <span>Total todas las explotaciones</span>
+          <span>{totalGastosExplotaciones.toFixed(2)} €</span>
+        </div>
+      </div>
 
       {/* desglose completo por parcela */}
       <h3 className="rentabilidad-titulo-seccion">Por Parcela</h3>
@@ -151,11 +167,12 @@ const Gastos = () => {
                             <td>{f.precio.toFixed(2)} €</td>
                           </tr>
                         ))}
-                        {/* abonado: material aplicado, una fila por producto/fecha con su coste */}
+                        {/* material aplicado: en abonado sale del producto/dosis, en mantenimiento
+                            (u otro tipo sin producto de almacén) es solo el coste escrito a mano */}
                         {op.materiales?.map((mat, j) => (
                           <tr key={`${op.tipo}-mat-${j}`} className="tabla-fila-material">
                             <td>{mat.nombre}</td>
-                            <td>{mat.dosis} {mat.unidad} · {mat.fecha}</td>
+                            <td>{mat.dosis != null ? `${mat.dosis} ${mat.unidad} · ` : ''}{mat.fecha}</td>
                             <td>—</td>
                             <td>—</td>
                             <td>{mat.coste.toFixed(2)} €</td>
@@ -196,6 +213,11 @@ const Gastos = () => {
                               <td>{prod.coste.toFixed(2)} €</td>
                             </tr>
                           ))}
+                          {/* coste de operación + todos sus productos, calculado en el back (fum.total) */}
+                          <tr className="tabla-fila-subtotal">
+                            <td colSpan={4}>Total</td>
+                            <td>{fum.total.toFixed(2)} €</td>
+                          </tr>
                         </Fragment>
                       ))
                     }
@@ -231,6 +253,11 @@ const Gastos = () => {
                               <td>{prod.coste.toFixed(2)} €</td>
                             </tr>
                           ))}
+                          {/* coste de operación + todos sus productos, calculado en el back (fum.total) */}
+                          <tr className="tabla-fila-subtotal">
+                            <td colSpan={4}>Total</td>
+                            <td>{fum.total.toFixed(2)} €</td>
+                          </tr>
                         </Fragment>
                       ))
                     }

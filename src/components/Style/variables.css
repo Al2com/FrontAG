@@ -41,3 +41,33 @@
   --som-lg: 0 4px 8px rgba(0, 0, 0, 0.15);
   --som-xl: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
+
+/* ============================================================
+   Modo oscuro: mismos nombres de variable, otros valores. Como
+   todos los componentes ya pintan con var(--c-...), aplicar
+   data-tema="oscuro" en <html> repinta toda la app sin tocar
+   cada componente uno a uno.
+   ============================================================ */
+:root[data-tema="oscuro"] {
+  --c-primario: #52B788;
+  --c-primario-medio: #40916C;
+  --c-primario-claro: #74C69D;
+  --c-fondo: #1B1F1C;
+  --c-fondo-verde: #17201A;
+  --c-blanco: #242926;
+  --c-borde: #3A403C;
+  --c-borde-oscuro: #4C534E;
+  --c-texto: #E8EAE8;
+  --c-texto-apagado: #A8ADA9;
+  --c-texto-etiqueta: #B8BDB9;
+  --c-peligro: #E5606D;
+  --c-peligro-hover: #C94A56;
+  --estado-pendiente: #E9A800;
+  --estado-realizado: #52B788;
+  --estado-revisado: #6BA8E5;
+
+  --som-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
+  --som-md: 0 2px 4px rgba(0, 0, 0, 0.35);
+  --som-lg: 0 4px 8px rgba(0, 0, 0, 0.4);
+  --som-xl: 0 4px 20px rgba(0, 0, 0, 0.45);
+}

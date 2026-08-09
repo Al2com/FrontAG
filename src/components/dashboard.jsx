@@ -9,6 +9,8 @@ import fumigacionesService from '../services/fumigaciones.js';
 import tareasService from '../services/tareas.js';
 import almacenService from '../services/almacen.js';
 import productosService from '../services/productos.js';
+import backupService from '../services/backup.js';
+import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 
 const Dashboard = () => {
@@ -20,6 +22,17 @@ const Dashboard = () => {
   const [actividadReciente, setActividadReciente] = useState({ operaciones: [], fumigaciones: [] });
   const [productosStockBajo, setProductosStockBajo] = useState([]);
   const [errorCarga, setErrorCarga] = useState('');
+  const [appVacia, setAppVacia] = useState(false);
+
+  useEffect(() => {
+    // el aviso de "importar copia de seguridad" solo aplica a quien puede
+    // restaurarla (admin); un trabajador nunca ve datos vacíos como "suyos"
+    if (sessionStorage.getItem('rol') === 'admin') {
+      backupService.tieneDatos()
+        .then(tieneDatos => setAppVacia(!tieneDatos))
+        .catch(() => {});
+    }
+  }, []);
 
   useEffect(() => {
     const avisarError = () => setErrorCarga('No se pudieron cargar todos los datos del panel');
@@ -69,6 +82,13 @@ const Dashboard = () => {
 
   return (
     <div>
+
+      {appVacia && (
+        <div className="aviso-app-vacia">
+          <span>No tienes datos guardados. ¿Quieres importar una copia de seguridad?</span>
+          <Link to="/configuracion" className="btn-vista">Ir a Configuración</Link>
+        </div>
+      )}
 
       {errorCarga && <span className="mensaje-error">{errorCarga}</span>}
 
