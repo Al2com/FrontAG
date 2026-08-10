@@ -18,3 +18,75 @@
   font-size: 11px;
   fill: var(--c-texto-apagado);
 }
+
+/* ANALISIS: mapa de color de rentabilidad por parcela (tabla y cards) */
+
+/* colores fijos (no varían con el tema): son información, no decoración */
+.margen-perdidas       { background-color: #E24B4A; color: #501313; }
+.margen-equilibrio     { background-color: #EF9F27; color: #412402; }
+.margen-ganancia-baja  { background-color: #C0DD97; color: #173404; }
+.margen-ganancia-media { background-color: #639922; color: #EAF3DE; }
+.margen-ganancia-alta  { background-color: #173404; color: #C0DD97; }
+.margen-sin-datos      { background-color: #9AA0A6; color: #1F1F1F; }
+
+.tabla-margen tr td { transition: background-color .15s ease; }
+
+/* .tabla-operaciones td fija su propio color (var(--c-texto)) en cada celda,
+   así que el color heredado de la clase margen-* en el <tr> nunca llega a
+   aplicarse (un color explícito en el propio elemento siempre gana sobre el
+   heredado, sin importar la especificidad del ancestro) — sin esto, el texto
+   sobre fondos oscuros como el verde fuerte queda casi invisible */
+.tabla-margen tr.margen-perdidas td       { color: #501313; }
+.tabla-margen tr.margen-equilibrio td     { color: #412402; }
+.tabla-margen tr.margen-ganancia-baja td  { color: #173404; }
+.tabla-margen tr.margen-ganancia-media td { color: #EAF3DE; }
+.tabla-margen tr.margen-ganancia-alta td  { color: #C0DD97; }
+.tabla-margen tr.margen-sin-datos td      { color: #1F1F1F; }
+
+.margen-valor {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.margen-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--esp-sm) var(--esp-md);
+  border-radius: var(--rad-md);
+  margin-bottom: var(--esp-xs);
+}
+
+.margen-card-nombre {
+  font-weight: 600;
+}
+
+.margen-card-datos {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-size: 13px;
+}
+
+.leyenda-margen {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-sm);
+  margin: var(--esp-sm) 0;
+}
+
+.leyenda-margen-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--c-texto-apagado);
+}
+
+.leyenda-margen-swatch {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}

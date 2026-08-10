@@ -1,10 +1,20 @@
 import { useEffect, useState } from 'react'
+import {
+  ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
+} from 'recharts'
 import analisisService from '../services/analisis'
 import parcelasService from '../services/parcelas'
+import GraficoRentabilidad from './GraficoRentabilidad'
+import { tramoMargen, LEYENDA_MARGEN } from '../utils/margenColor'
 import './Style/cards.css'
 import './Style/search.css'
 import './Style/forms.css'
 import './Style/analisis.css'
+
+// formatea en € con dos decimales; "-" si el valor no existe (division por
+// cero evitada en el backend, que devuelve null en vez de 0/0)
+const formatoEuro = (valor) => (valor === null || valor === undefined ? '-' : `${valor.toFixed(2)} €`)
+const formatoNumero = (valor, unidad = '') => (valor === null || valor === undefined ? '-' : `${valor}${unidad}`)
 
 const TIPOS = [
   { valor: 'todas', etiqueta: 'Todas' },
@@ -72,6 +82,10 @@ const Analisis = () => {
   const [anio, setAnio] = useState(anioActual.toString())
   const [tipo, setTipo] = useState('todas')
   const [resumen, setResumen] = useState(null)
+  const [costesMetodo, setCostesMetodo] = useState(null)
+  const [rentabilidad, setRentabilidad] = useState([])
+  const [historico, setHistorico] = useState([])
+  const [mostrarTablaMargen, setMostrarTablaMargen] = useState(false)
   const [error, setError] = useState('')
 
   // cargo las parcelas del admin una vez, y selecciono la primera por defecto
@@ -92,6 +106,28 @@ const Analisis = () => {
       .then(data => setResumen(data))
       .catch(() => setError('Error al cargar el análisis'))
   }, [parcelaId, anio, tipo])
+
+  // gasto/hanegada y litros/dosis por metodo de la parcela seleccionada
+  useEffect(() => {
+    if (!parcelaId) return
+    analisisService.getCostesMetodo(parcelaId, anio)
+      .then(data => setCostesMetodo(data))
+      .catch(() => setError('Error al cargar los costes por método'))
+  }, [parcelaId, anio])
+
+  // rentabilidad de TODAS las parcelas del admin, para poder compararlas
+  useEffect(() => {
+    analisisService.getRentabilidad(anio)
+      .then(data => setRentabilidad(data.parcelas))
+      .catch(() => setError('Error al cargar la rentabilidad'))
+  }, [anio])
+
+  // histórico (todos los años con datos): no depende del año seleccionado, se pide una vez
+  useEffect(() => {
+    analisisService.getRentabilidadHistorico()
+      .then(data => setHistorico(data.anios))
+      .catch(() => setError('Error al cargar el histórico de rentabilidad'))
+  }, [])
 
   return (
     <div className="rentabilidad-contenedor">
@@ -178,6 +214,154 @@ const Analisis = () => {
             />
           </div>
         </>
+      )}
+
+      {costesMetodo && (
+        <>
+          <div className="rentabilidad-card">
+            <div className="rentabilidad-cabecera-izq"><h4>Gasto por hanegada: tractor vs. mochila</h4></div>
+            <div style={{ width: '100%', height: 220 }}>
+              <ResponsiveContainer>
+                <BarChart data={[
+                  { metodo: 'Tractor', gastoPorHanegada: costesMetodo.metodos.tractor.gastoPorHanegada },
+                  { metodo: 'Mochila', gastoPorHanegada: costesMetodo.metodos.mochila.gastoPorHanegada },
+                ]}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--c-borde)" />
+                  <XAxis dataKey="metodo" stroke="var(--c-texto-apagado)" />
+                  <YAxis stroke="var(--c-texto-apagado)" />
+                  <Tooltip formatter={(v) => formatoEuro(v)} />
+                  <Bar dataKey="gastoPorHanegada" name="€/hanegada" fill="var(--c-primario)" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="rentabilidad-desplegable">
+              <div className="rentabilidad-fila-parcela">
+                <span>Tractor: coste total</span>
+                <span>{formatoEuro(costesMetodo.metodos.tractor.costeTotal)}</span>
+              </div>
+              <div className="rentabilidad-fila-parcela">
+                <span>Mochila: coste total</span>
+                <span>{formatoEuro(costesMetodo.metodos.mochila.costeTotal)}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="rentabilidad-card">
+            <div className="rentabilidad-cabecera-izq"><h4>Litros aplicados por método</h4></div>
+            <div style={{ width: '100%', height: 220 }}>
+              <ResponsiveContainer>
+                <BarChart data={[
+                  { metodo: 'Tractor', litros: costesMetodo.metodos.tractor.litros },
+                  { metodo: 'Mochila', litros: costesMetodo.metodos.mochila.litros },
+                ]}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--c-borde)" />
+                  <XAxis dataKey="metodo" stroke="var(--c-texto-apagado)" />
+                  <YAxis stroke="var(--c-texto-apagado)" />
+                  <Tooltip formatter={(v) => formatoNumero(v, ' L')} />
+                  <Bar dataKey="litros" name="Litros" fill="var(--c-primario-claro)" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+
+            {(costesMetodo.metodos.tractor.productos.length > 0 || costesMetodo.metodos.mochila.productos.length > 0) && (
+              <div className="rentabilidad-desplegable">
+                {['tractor', 'mochila'].map(metodo => (
+                  costesMetodo.metodos[metodo].productos.length > 0 && (
+                    <div key={metodo}>
+                      <div className="rentabilidad-fila-parcela"><strong>{metodo === 'tractor' ? 'Tractor' : 'Mochila'}: dosis por producto</strong></div>
+                      {costesMetodo.metodos[metodo].productos.map(p => (
+                        <div className="rentabilidad-fila-parcela" key={p.producto_id}>
+                          <span>{p.nombre} ({formatoNumero(p.dosisMedia, ` ${p.unidad}/aplicación`)})</span>
+                          <span>{formatoNumero(p.cantidadTotal, ` ${p.unidad}`)} · {formatoEuro(p.costeTotal)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )
+                ))}
+              </div>
+            )}
+          </div>
+        </>
+      )}
+
+      {/* Ganancia neta histórica: mismo componente y misma escala de color
+          que el resto de gráficos de rentabilidad de la pestaña */}
+      <div className="rentabilidad-card">
+        <div className="rentabilidad-cabecera-izq"><h4>Ganancia neta histórica (todas las parcelas)</h4></div>
+        <GraficoRentabilidad
+          datos={historico.map(a => ({ categoria: String(a.anio), valor: a.gananciaNeta, margen: a.margen }))}
+          nombreValor="Ganancia neta (€)"
+        />
+      </div>
+
+      {rentabilidad.length > 0 && (
+        <div className="rentabilidad-card">
+          <div className="rentabilidad-cabecera">
+            <div className="rentabilidad-cabecera-izq"><h4>Mapa de ganancia neta por parcela</h4></div>
+            <button
+              type="button"
+              className={`btn-vista ${mostrarTablaMargen ? 'activo' : ''}`}
+              onClick={() => setMostrarTablaMargen(v => !v)}
+            >
+              <img src={mostrarTablaMargen ? './iconTable.png' : './cuadrado.png'} alt="vista" />
+              {mostrarTablaMargen ? 'Tarjetas' : 'Tabla'}
+            </button>
+          </div>
+
+          <div className="leyenda-margen">
+            {LEYENDA_MARGEN.map(t => (
+              <div className="leyenda-margen-item" key={t.clase}>
+                <span className={`leyenda-margen-swatch ${t.clase}`}></span>
+                <span>{t.etiqueta} ({t.rango})</span>
+              </div>
+            ))}
+          </div>
+
+          {mostrarTablaMargen ? (
+            <table className="tabla-operaciones tabla-margen">
+              <thead>
+                <tr>
+                  <th>Parcela</th>
+                  <th>Ingresos (brutos)</th>
+                  <th>Gastos</th>
+                  <th>Ganancia neta</th>
+                  <th>Margen</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rentabilidad.map(p => {
+                  const tramo = tramoMargen(p.margen)
+                  return (
+                    <tr key={p.parcela_id} className={tramo.clase}>
+                      <td>{p.nombre}</td>
+                      <td>{formatoEuro(p.ingresos)}</td>
+                      <td>{formatoEuro(p.costes)}</td>
+                      <td>{formatoEuro(p.gananciaNeta)}</td>
+                      <td className="margen-valor">
+                        {p.margen !== null ? `${p.margen.toFixed(2)}% · ${tramo.etiqueta}` : tramo.etiqueta}
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          ) : (
+            rentabilidad.map(p => {
+              const tramo = tramoMargen(p.margen)
+              return (
+                <div className={`margen-card ${tramo.clase}`} key={p.parcela_id}>
+                  <span className="margen-card-nombre">{p.nombre}</span>
+                  <div className="margen-card-datos">
+                    <span className="margen-valor">
+                      {p.margen !== null ? `${p.margen.toFixed(2)}%` : tramo.etiqueta}
+                    </span>
+                    <span>Ganancia neta {formatoEuro(p.gananciaNeta)}</span>
+                  </div>
+                </div>
+              )
+            })
+          )}
+        </div>
       )}
     </div>
   )
