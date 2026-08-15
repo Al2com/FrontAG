@@ -1,0 +1,142 @@
+/* RIEGO: leyenda de parcelas a manta */
+
+.riego-leyenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-sm);
+  margin: 0 0 var(--esp-md);
+}
+
+.riego-leyenda-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--c-texto-apagado);
+}
+
+.riego-leyenda-swatch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  font-size: 9px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.riego-leyenda-vacio {
+  font-size: 13px;
+  color: var(--c-texto-apagado);
+}
+
+/* calendario: cabecera con navegación de la ventana de 3 meses */
+
+.riego-calendario-cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--esp-md);
+  margin-bottom: var(--esp-sm);
+}
+
+.riego-calendario-cabecera h4 {
+  margin: 0;
+  text-align: center;
+  font-size: 14px;
+}
+
+.riego-calendario-cabecera button {
+  background: none;
+  border: 1px solid var(--c-borde);
+  border-radius: var(--rad-sm);
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  font-size: 16px;
+  color: var(--c-texto);
+  flex-shrink: 0;
+}
+
+/* 3 meses en fila (se apilan en pantallas estrechas) */
+.riego-calendario-ventana {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--esp-md);
+}
+
+.riego-calendario-mes {
+  min-width: 0;
+}
+
+.riego-calendario-titulo {
+  margin: 0 0 6px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--c-texto-apagado);
+  text-transform: capitalize;
+}
+
+.riego-calendario-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.riego-calendario-diasemana {
+  text-align: center;
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--c-texto-apagado);
+  padding-bottom: 2px;
+}
+
+.riego-calendario-dia {
+  min-height: 30px;
+  border: 1px solid var(--c-borde);
+  border-radius: 3px;
+  padding: 2px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.riego-calendario-dia-vacia {
+  border: none;
+  background: none;
+}
+
+.riego-calendario-numero {
+  font-size: 9px;
+  color: var(--c-texto-apagado);
+  line-height: 1;
+}
+
+.riego-calendario-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1px;
+}
+
+.riego-calendario-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 12px;
+  height: 12px;
+  font-size: 8px;
+  font-weight: 700;
+  color: #fff;
+  border-radius: 2px;
+  line-height: 1;
+}
+
+@media (max-width: 700px) {
+  .riego-calendario-ventana {
+    grid-template-columns: 1fr;
+  }
+}

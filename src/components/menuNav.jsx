@@ -102,6 +102,16 @@ const MenuNav = ({ user, logout }) => {
           />
           {rol !== 'trabajador' && (
             <MenuBar
+              to="/riego"
+              iconImg="./riego.svg"
+              altText="Riego"
+              texto="Riego"
+              isSeleccionado={botonActivo === 'Riego'}
+              onClick={() => seleccionar('Riego')}
+            />
+          )}
+          {rol !== 'trabajador' && (
+            <MenuBar
               to="/recoleccion"
               iconImg="./iconRecoleccion.svg"
               altText="Recoleccion"
