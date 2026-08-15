@@ -1,6 +1,5 @@
 import { useEffect, useState, Fragment } from 'react'
 import gastosService from '../services/gastos'
-import GestionRiego from './GestionRiego'
 import './Style/cards.css'
 
 const Gastos = () => {
@@ -10,7 +9,6 @@ const Gastos = () => {
   const [campaña, setCampaña] = useState(anioActual.toString())
   const [parcelaAbierta, setParcelaAbierta] = useState(null)
   const [explotacionAbierta, setExplotacionAbierta] = useState(null)
-  const [vista, setVista] = useState('resumen') // 'resumen' | 'gestion'
   const [error, setError] = useState('')
 
   // pido al back el resumen ya calculado cada vez que cambia la campaña
@@ -29,11 +27,6 @@ const Gastos = () => {
     setParcelaAbierta(parcelaAbierta === id ? null : id)
   const toggleExplotacion = (nombre) =>
     setExplotacionAbierta(explotacionAbierta === nombre ? null : nombre)
-
-  // vista de gestion de riego (cards con editar/borrar/añadir)
-  if (vista === 'gestion') {
-    return <GestionRiego onVolver={() => { setVista('resumen'); cargar() }} />
-  }
 
   // agrupo las parcelas por explotacion para el desplegable de arriba
   const parcelasPorExplotacion = {}
@@ -59,7 +52,6 @@ const Gastos = () => {
               </select>
             </div>
           </div>
-          <button type="button" onClick={() => setVista('gestion')}>Gestión de riego</button>
         </div>
       </div>
 

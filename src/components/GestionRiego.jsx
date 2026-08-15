@@ -9,7 +9,7 @@ const meses = [
   'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
 ]
 
-const GestionRiego = ({ onVolver }) => {
+const GestionRiego = ({ onVolver = null }) => {
   const [gastos, setGastos] = useState([])
   const [error, setError] = useState('')
   const [filtroParcela, setFiltroParcela] = useState('todas')
@@ -95,7 +95,7 @@ const GestionRiego = ({ onVolver }) => {
     <div className="rentabilidad-contenedor">
       <div className="menuExplo">
         <div className="menu-button" style={{ gap: '10px' }}>
-          <button type="button" onClick={onVolver}>Atrás</button>
+          {onVolver && <button type="button" onClick={onVolver}>Atrás</button>}
           <button type="button" onClick={() => setModal('nuevo')}>+ Añadir riego</button>
           <div className="separador-btn"></div>
           <button
@@ -108,7 +108,7 @@ const GestionRiego = ({ onVolver }) => {
         </div>
       </div>
 
-      <h3 className="rentabilidad-titulo-seccion">Gestión de riego</h3>
+      <h3 className="rentabilidad-titulo-seccion">Goteo y mantenimiento</h3>
 
       <div className="menu-button" style={{ gap: '10px', marginBottom: '12px' }}>
         <select value={filtroParcela} onChange={e => setFiltroParcela(e.target.value)}>

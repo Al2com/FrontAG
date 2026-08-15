@@ -33,8 +33,12 @@ const FormGastoRiego = ({ onClose, onGuardado, inicial = null }) => {
   }, [])
 
   const parcelaSel = parcelas.find(p => p.id === Number(form.parcela_id))
+  const rolSel = esEdicion ? inicial?.rol : parcelaSel?.rol
   // el abono solo en parcelas de goteo (en edicion uso el rol que llega en inicial)
-  const mostrarAbono = esEdicion ? inicial?.rol === 'goteo' : parcelaSel?.rol === 'goteo'
+  const mostrarAbono = rolSel === 'goteo'
+  // el agua es el recibo mensual de goteo; una parcela a manta ya registra su
+  // gasto de agua como riego por día (€/hanegada) desde el componente Riego
+  const mostrarAgua = rolSel !== 'manta'
 
   const handle = (e) => {
     const { name, value } = e.target
@@ -64,7 +68,7 @@ const FormGastoRiego = ({ onClose, onGuardado, inicial = null }) => {
       parcela_id: Number(form.parcela_id),
       anio: Number(form.anio),
       mes: Number(form.mes),
-      agua: form.agua === '' ? null : Number(form.agua),
+      agua: mostrarAgua && form.agua !== '' ? Number(form.agua) : null,
       abono: mostrarAbono && form.abono !== '' ? Number(form.abono) : null,
       mantenimiento: form.mantenimiento === '' ? null : Number(form.mantenimiento),
     }
@@ -118,8 +122,12 @@ const FormGastoRiego = ({ onClose, onGuardado, inicial = null }) => {
           </>
         )}
 
-        <label>Agua (€)</label>
-        <input type="number" name="agua" value={form.agua} onChange={handle} step="0.01" min="0" style={input} placeholder="Ej: 30.00" />
+        {mostrarAgua && (
+          <>
+            <label>Agua (€)</label>
+            <input type="number" name="agua" value={form.agua} onChange={handle} step="0.01" min="0" style={input} placeholder="Ej: 30.00" />
+          </>
+        )}
 
         {mostrarAbono && (
           <>

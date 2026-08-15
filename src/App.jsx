@@ -23,6 +23,7 @@ import EditarOperacion from './components/CreateForm/EditarOperacion.jsx'
 import FormComprarProducto from './components/CreateForm/FormComprarProducto.jsx'
 import EditarFumigacion from './components/CreateForm/EditarFumigacion.jsx'
 import Gastos from './components/gastos.jsx'
+import Riego from './components/riego.jsx'
 import Analisis from './components/analisis.jsx'
 import Cuaderno from './components/cuaderno.jsx'
 import DetalleProducto from './components/DetalleProducto.jsx'
@@ -94,6 +95,7 @@ function App() {
               {/* solo administrador: el trabajador es redirigido al dashboard */}
               <Route path="/explotaciones" element={<SoloAdmin><Explotaciones /></SoloAdmin>} />
               <Route path="/parcelas" element={<SoloAdmin><Parcelas /></SoloAdmin>} />
+              <Route path="/riego" element={<SoloAdmin><Riego /></SoloAdmin>} />
               <Route path="/recoleccion" element={<SoloAdmin><Recoleccion /></SoloAdmin>} />
               <Route path="/nueva-recoleccion" element={<SoloAdmin><FormRecoleccion /></SoloAdmin>} />
               <Route path="/recoleccion/:id" element={<SoloAdmin><EditarRecoleccion /></SoloAdmin>} />
