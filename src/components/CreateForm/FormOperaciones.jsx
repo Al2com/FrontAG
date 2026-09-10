@@ -229,12 +229,15 @@ const FormOperacion = () => {
             className={errors.parcela_id ? 'input-error' : ''}
           >
             <option value="">Selecciona una parcela</option>
+
             {parcelas.map(parcela => (
               <option key={parcela.id} value={parcela.id}>
-                {parcela.poligono} - {parcela.parcela} ({parcela.variedad})
+                {parcela.poligono} - {parcela.parcela}  ({parcela.variedad}) - {parcela.dimension_hanegadas} hg
               </option>
+
             ))}
           </select>
+          
           {errors.parcela_id && <span className="mensaje-error">{errors.parcela_id}</span>}
         </div>
 

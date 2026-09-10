@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
-import {
-  ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
-} from 'recharts'
 import analisisService from '../services/analisis'
 import parcelasService from '../services/parcelas'
 import GraficoRentabilidad from './GraficoRentabilidad'
+import BurbujasMetodos from './BurbujasMetodos'
+import BurbujasGanancia from './BurbujasGanancia'
+import BurbujasFlotantes from './BurbujasFlotantes'
 import { tramoMargen, LEYENDA_MARGEN } from '../utils/margenColor'
 import './Style/cards.css'
 import './Style/search.css'
@@ -173,33 +173,47 @@ const Analisis = () => {
             <div className="rentabilidad-resumen">
               <span>{resumen.parcela.hanegadas} hanegadas</span>
             </div>
-            <div className="rentabilidad-desplegable">
-              <div className="rentabilidad-fila-parcela">
-                <span>Gasto total ({resumen.anio})</span>
-                <span>{resumen.gastoTotal.toFixed(2)} €</span>
-              </div>
-              <div className="rentabilidad-fila-parcela">
-                <span>Gasto por hanegada</span>
-                <span>{resumen.gastoPorHanegada.toFixed(2)} €</span>
-              </div>
-            </div>
+            <BurbujasFlotantes
+              datos={[
+                { id: 'total', etiqueta: `Gasto total (${resumen.anio})`, valor: resumen.gastoTotal },
+                { id: 'hanegada', etiqueta: 'Gasto por hanegada', valor: resumen.gastoPorHanegada },
+              ]}
+              formatoValor={(v) => formatoEuro(v)}
+              proporcional={false}
+            />
           </div>
 
           {resumen.fumigacion && (
             <div className="rentabilidad-card">
-              <div className="rentabilidad-cabecera-izq"><h4>Fumigación</h4></div>
+              <div className="rentabilidad-cabecera-izq"><h4>Fumigación: tractor vs. mochila</h4></div>
+              <BurbujasMetodos
+                tractor={{
+                  costeTotal: resumen.fumigacion.tractor.costeTotal,
+                  productos: [
+                    { producto_id: 'producto', nombre: 'Producto', valor: resumen.fumigacion.tractor.costeProducto },
+                    { producto_id: 'manoObra', nombre: 'Mano de obra', valor: resumen.fumigacion.tractor.costeManoObra },
+                  ],
+                }}
+                mochila={{
+                  costeTotal: resumen.fumigacion.mochila.costeTotal,
+                  productos: [
+                    { producto_id: 'producto', nombre: 'Producto', valor: resumen.fumigacion.mochila.costeProducto },
+                    { producto_id: 'manoObra', nombre: 'Mano de obra', valor: resumen.fumigacion.mochila.costeManoObra },
+                  ],
+                }}
+                valorPrincipal={(m) => m.costeTotal}
+                etiquetaPrincipal={(m) => formatoEuro(m.costeTotal)}
+                valorProducto={(p) => p.valor}
+                etiquetaProducto={(p) => formatoEuro(p.valor)}
+              />
               <div className="rentabilidad-desplegable">
                 <div className="rentabilidad-fila-parcela">
-                  <span>Producto</span>
-                  <span>{resumen.fumigacion.costeProducto.toFixed(2)} €</span>
+                  <span>Tractor: litros aplicados</span>
+                  <span>{resumen.fumigacion.tractor.litros} L</span>
                 </div>
                 <div className="rentabilidad-fila-parcela">
-                  <span>Mano de obra</span>
-                  <span>{resumen.fumigacion.costeManoObra.toFixed(2)} €</span>
-                </div>
-                <div className="rentabilidad-fila-parcela">
-                  <span>Litros aplicados</span>
-                  <span>{resumen.fumigacion.litros} L</span>
+                  <span>Mochila: litros aplicados</span>
+                  <span>{resumen.fumigacion.mochila.litros} L</span>
                 </div>
               </div>
             </div>
@@ -220,20 +234,14 @@ const Analisis = () => {
         <>
           <div className="rentabilidad-card">
             <div className="rentabilidad-cabecera-izq"><h4>Gasto por hanegada: tractor vs. mochila</h4></div>
-            <div style={{ width: '100%', height: 220 }}>
-              <ResponsiveContainer>
-                <BarChart data={[
-                  { metodo: 'Tractor', gastoPorHanegada: costesMetodo.metodos.tractor.gastoPorHanegada },
-                  { metodo: 'Mochila', gastoPorHanegada: costesMetodo.metodos.mochila.gastoPorHanegada },
-                ]}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--c-borde)" />
-                  <XAxis dataKey="metodo" stroke="var(--c-texto-apagado)" />
-                  <YAxis stroke="var(--c-texto-apagado)" />
-                  <Tooltip formatter={(v) => formatoEuro(v)} />
-                  <Bar dataKey="gastoPorHanegada" name="€/hanegada" fill="var(--c-primario)" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+            <BurbujasMetodos
+              tractor={costesMetodo.metodos.tractor}
+              mochila={costesMetodo.metodos.mochila}
+              valorPrincipal={(m) => m.gastoPorHanegada}
+              etiquetaPrincipal={(m) => formatoEuro(m.gastoPorHanegada)}
+              valorProducto={(p) => p.costeTotal}
+              etiquetaProducto={(p) => formatoEuro(p.costeTotal)}
+            />
             <div className="rentabilidad-desplegable">
               <div className="rentabilidad-fila-parcela">
                 <span>Tractor: coste total</span>
@@ -248,20 +256,14 @@ const Analisis = () => {
 
           <div className="rentabilidad-card">
             <div className="rentabilidad-cabecera-izq"><h4>Litros aplicados por método</h4></div>
-            <div style={{ width: '100%', height: 220 }}>
-              <ResponsiveContainer>
-                <BarChart data={[
-                  { metodo: 'Tractor', litros: costesMetodo.metodos.tractor.litros },
-                  { metodo: 'Mochila', litros: costesMetodo.metodos.mochila.litros },
-                ]}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--c-borde)" />
-                  <XAxis dataKey="metodo" stroke="var(--c-texto-apagado)" />
-                  <YAxis stroke="var(--c-texto-apagado)" />
-                  <Tooltip formatter={(v) => formatoNumero(v, ' L')} />
-                  <Bar dataKey="litros" name="Litros" fill="var(--c-primario-claro)" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+            <BurbujasMetodos
+              tractor={costesMetodo.metodos.tractor}
+              mochila={costesMetodo.metodos.mochila}
+              valorPrincipal={(m) => m.litros}
+              etiquetaPrincipal={(m) => `${formatoNumero(m.litros)} L`}
+              valorProducto={(p) => p.cantidadTotal}
+              etiquetaProducto={(p) => formatoNumero(p.cantidadTotal, ` ${p.unidad}`)}
+            />
 
             {(costesMetodo.metodos.tractor.productos.length > 0 || costesMetodo.metodos.mochila.productos.length > 0) && (
               <div className="rentabilidad-desplegable">
@@ -304,18 +306,26 @@ const Analisis = () => {
               onClick={() => setMostrarTablaMargen(v => !v)}
             >
               <img src={mostrarTablaMargen ? './iconTable.png' : './cuadrado.png'} alt="vista" />
-              {mostrarTablaMargen ? 'Tarjetas' : 'Tabla'}
+              {mostrarTablaMargen ? 'Burbujas' : 'Tabla'}
             </button>
           </div>
 
-          <div className="leyenda-margen">
-            {LEYENDA_MARGEN.map(t => (
-              <div className="leyenda-margen-item" key={t.clase}>
-                <span className={`leyenda-margen-swatch ${t.clase}`}></span>
-                <span>{t.etiqueta} ({t.rango})</span>
-              </div>
-            ))}
-          </div>
+          {mostrarTablaMargen ? (
+            <div className="leyenda-margen">
+              {LEYENDA_MARGEN.map(t => (
+                <div className="leyenda-margen-item" key={t.clase}>
+                  <span className={`leyenda-margen-swatch ${t.clase}`}></span>
+                  <span>{t.etiqueta} ({t.rango})</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="leyenda-ganancia">
+              <span><span className="leyenda-ganancia-swatch leyenda-ganancia-swatch--perdida"></span> Pérdida</span>
+              <span><span className="leyenda-ganancia-swatch leyenda-ganancia-swatch--ganancia"></span> Ganancia (más oscuro = más ganancia)</span>
+              <span><span className="leyenda-ganancia-swatch leyenda-ganancia-swatch--sin-datos"></span> Sin datos</span>
+            </div>
+          )}
 
           {mostrarTablaMargen ? (
             <table className="tabla-operaciones tabla-margen">
@@ -346,20 +356,7 @@ const Analisis = () => {
               </tbody>
             </table>
           ) : (
-            rentabilidad.map(p => {
-              const tramo = tramoMargen(p.margen)
-              return (
-                <div className={`margen-card ${tramo.clase}`} key={p.parcela_id}>
-                  <span className="margen-card-nombre">{p.nombre}</span>
-                  <div className="margen-card-datos">
-                    <span className="margen-valor">
-                      {p.margen !== null ? `${p.margen.toFixed(2)}%` : tramo.etiqueta}
-                    </span>
-                    <span>Ganancia neta {formatoEuro(p.gananciaNeta)}</span>
-                  </div>
-                </div>
-              )
-            })
+            <BurbujasGanancia datos={rentabilidad} formatoEuro={formatoEuro} />
           )}
         </div>
       )}

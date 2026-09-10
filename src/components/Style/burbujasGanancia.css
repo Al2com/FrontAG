@@ -1,0 +1,84 @@
+/* burbujas de ganancia neta por parcela: color continuo rojo (perdida) /
+   azul (ganancia) segun magnitud, en vez de la escala de tramos verde de
+   la tabla */
+
+.burbujas-ganancia {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--esp-xl);
+  padding: var(--esp-md) 0;
+  margin: 0;
+  list-style: none;
+  min-height: 160px;
+}
+
+.burbuja-ganancia {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  color: var(--c-blanco);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, .25);
+  box-shadow: var(--som-lg);
+  text-align: center;
+  padding: 4px;
+  box-sizing: border-box;
+  transition: width .4s ease, height .4s ease, background .4s ease, box-shadow .2s ease;
+}
+
+.burbuja-ganancia:hover {
+  box-shadow: var(--som-xl);
+}
+
+.burbuja-ganancia-valor {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.burbuja-ganancia-nombre {
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+/* leyenda especifica de esta escala (rojo/gris/azul), distinta de la
+   leyenda de tramos verdes que usa la tabla */
+.leyenda-ganancia {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-sm);
+  margin: var(--esp-sm) 0;
+  font-size: 12px;
+  color: var(--c-texto-apagado);
+  align-items: center;
+}
+
+.leyenda-ganancia-swatch {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.leyenda-ganancia-swatch--perdida { background: var(--c-peligro); }
+.leyenda-ganancia-swatch--ganancia { background: var(--estado-revisado); }
+.leyenda-ganancia-swatch--sin-datos { background: var(--c-texto-apagado); }
+
+/* RESPONSIVE 768px */
+@media (max-width: 768px) {
+  .burbujas-ganancia { gap: var(--esp-md); }
+  .burbuja-ganancia-valor { font-size: 12px; }
+}
+
+/* RESPONSIVE 480px: apiladas en vertical para no desbordar la card */
+@media (max-width: 480px) {
+  .burbujas-ganancia {
+    flex-direction: column;
+    min-height: auto;
+  }
+}

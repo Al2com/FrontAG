@@ -8,6 +8,7 @@ import productosService from '../services/productos.js'
 import comprasService from '../services/compras.js'
 import proveedoresService from '../services/proveedores.js'
 import InfoPanel from './InfoPanel/InfoPanel.jsx'
+import BurbujasFlotantes from './BurbujasFlotantes.jsx'
 import './Style/cards.css'
 import './Style/forms.css'
 import './Style/search.css'
@@ -163,19 +164,11 @@ const DetalleProducto = () => {
 
                         <div className="rentabilidad-card detalle-producto-grafico">
                             <h4>Precio medio por proveedor</h4>
-                            {resumen.precio_por_proveedor.length === 0 ? (
-                                <p className="texto-ayuda">Sin compras registradas.</p>
-                            ) : (
-                                <ResponsiveContainer width="100%" height={220}>
-                                    <BarChart data={resumen.precio_por_proveedor} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
-                                        <CartesianGrid strokeDasharray="3 3" stroke="var(--c-borde)" vertical={false} />
-                                        <XAxis dataKey="proveedor" stroke="var(--c-texto-apagado)" fontSize={12} />
-                                        <YAxis stroke="var(--c-texto-apagado)" fontSize={12} tickFormatter={(v) => `${v} €`} width={55} />
-                                        <Tooltip formatter={(v) => euro(v)} />
-                                        <Bar dataKey="precio_medio" name="Precio medio" fill="var(--c-primario)" radius={[4, 4, 0, 0]} maxBarSize={48} />
-                                    </BarChart>
-                                </ResponsiveContainer>
-                            )}
+                            <BurbujasFlotantes
+                                datos={resumen.precio_por_proveedor.map(p => ({ id: p.proveedor, etiqueta: p.proveedor, valor: p.precio_medio }))}
+                                formatoValor={euro}
+                                vacio="Sin compras registradas."
+                            />
                         </div>
                     </div>
                 </>

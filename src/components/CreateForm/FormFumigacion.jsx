@@ -27,6 +27,8 @@ const FormFumigacion = () => {
 
   const [precioPorHora, setPrecioPorHora] = useState('')
   const [precioPorTanque, setPrecioPorTanque] = useState('') // CAMBIO: precio por turbo (tractor)
+  // litros que lleva el depósito de cada turbo (solo informativo, no se envía al backend)
+  const [litrosTurbo, setLitrosTurbo] = useState('')
   // tipo de mochila: estandar (16 L), pilas (5 L) u otra (litros a mano)
   const [tipoMochila, setTipoMochila] = useState('estandar')
 
@@ -286,6 +288,22 @@ const FormFumigacion = () => {
   const variedadesUnicas = [...new Set(parcelas.map(p => p.variedad).filter(Boolean))]
   const parcelasSeleccionadas = parcelas.filter(p => formData.parcela_ids.includes(p.id))
   const totalHanegadasSel = parcelasSeleccionadas.reduce((a, p) => a + Number(p.dimension_hanegadas || 0), 0)
+
+  // litros por hanegada (solo informativo): litros totales de caldo (litrosTurbo * turbos) / hanegadas.
+  // Si hanegadas es 0/vacío/no numérico, o litrosTurbo/turbos no son válidos, no se calcula (evita división por cero).
+  const calcularLitrosPorHanegada = () => {
+    const litros = parseFloat(litrosTurbo)
+    const turbos = parseFloat(formData.turbos)
+    const hanegadas = totalHanegadasSel
+
+    if (isNaN(litros) || litros <= 0 || isNaN(turbos) || turbos <= 0 || !hanegadas || hanegadas <= 0) {
+      return null
+    }
+
+    return Number(((litros * turbos) / hanegadas).toFixed(2))
+  }
+
+  const litrosPorHanegada = calcularLitrosPorHanegada()
 
   return (
     <div className="form-container">
@@ -574,6 +592,26 @@ const FormFumigacion = () => {
                 className={errors.turbos ? 'input-error' : ''}
               />
               {errors.turbos && <span className="mensaje-error">{errors.turbos}</span>}
+            </div>
+          )}
+
+          {formData.metodo_aplicacion === 'tractor' && (
+            <div className="form-grupo">
+              <label htmlFor="litrosTurbo">Litros por turbo/tanque</label>
+              <input
+                type="number"
+                id="litrosTurbo"
+                value={litrosTurbo}
+                onChange={(e) => setLitrosTurbo(e.target.value)}
+                placeholder="Ej: 600"
+                step="0.01"
+                min="0"
+              />
+              <span style={{ color: 'var(--c-texto-apagado)', fontSize: '13px' }}>
+                {litrosPorHanegada !== null
+                  ? `≈ ${litrosPorHanegada.toFixed(2).replace('.', ',')} L/hanegada`
+                  : '—'}
+              </span>
             </div>
           )}
 
