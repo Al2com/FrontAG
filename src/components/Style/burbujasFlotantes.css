@@ -1,0 +1,59 @@
+/* nube de burbujas flotantes sin desglose (proveedores, top productos...) */
+
+.burbujas-flotantes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--esp-xl);
+  padding: var(--esp-md) 0;
+  margin: 0;
+  list-style: none;
+  min-height: 160px;
+}
+
+.burbuja-flotante {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 28%, var(--c-primario-claro), var(--c-primario));
+  color: var(--c-blanco);
+  box-shadow: var(--som-lg);
+  text-align: center;
+  padding: 4px;
+  box-sizing: border-box;
+  transition: width .4s ease, height .4s ease, box-shadow .2s ease;
+}
+
+.burbuja-flotante:hover {
+  box-shadow: var(--som-xl);
+}
+
+.burbuja-flotante-valor {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.burbuja-flotante-etiqueta {
+  font-size: 11px;
+  line-height: 1.2;
+  opacity: .9;
+}
+
+/* RESPONSIVE 768px */
+@media (max-width: 768px) {
+  .burbujas-flotantes { gap: var(--esp-md); }
+  .burbuja-flotante-valor { font-size: 12px; }
+}
+
+/* RESPONSIVE 480px: apiladas en vertical para no desbordar la card */
+@media (max-width: 480px) {
+  .burbujas-flotantes {
+    flex-direction: column;
+    min-height: auto;
+  }
+}

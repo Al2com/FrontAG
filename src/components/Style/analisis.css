@@ -48,26 +48,6 @@
   white-space: nowrap;
 }
 
-.margen-card {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: var(--esp-sm) var(--esp-md);
-  border-radius: var(--rad-md);
-  margin-bottom: var(--esp-xs);
-}
-
-.margen-card-nombre {
-  font-weight: 600;
-}
-
-.margen-card-datos {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  font-size: 13px;
-}
-
 .leyenda-margen {
   display: flex;
   flex-wrap: wrap;

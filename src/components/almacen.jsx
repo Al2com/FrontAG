@@ -5,6 +5,7 @@ import {
 import productosService from '../services/productos.js';
 import comprasService from '../services/compras.js';
 import almacenService from '../services/almacen.js';
+import BurbujasFlotantes from './BurbujasFlotantes.jsx';
 import BtnCrear from './buttons/BtnCrear.jsx';
 import BtnSubmit from './buttons/BtnSubmit.jsx';
 import BtnEliminar from './buttons/btnEliminar.jsx';
@@ -164,19 +165,11 @@ const Almacen = () => {
 
           <div className="rentabilidad-card detalle-producto-grafico">
             <h4>Productos con más gasto</h4>
-            {resumenGeneral.top_productos.length === 0 ? (
-              <p className="texto-ayuda">Todavía no hay compras registradas.</p>
-            ) : (
-              <ResponsiveContainer width="100%" height={260}>
-                <BarChart data={resumenGeneral.top_productos} layout="vertical" margin={{ top: 8, right: 16, left: 16, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--c-borde)" horizontal={false} />
-                  <XAxis type="number" stroke="var(--c-texto-apagado)" fontSize={12} tickFormatter={(v) => `${v} €`} />
-                  <YAxis type="category" dataKey="nombre" stroke="var(--c-texto-apagado)" fontSize={12} width={140} />
-                  <Tooltip formatter={(v) => euro(v)} />
-                  <Bar dataKey="gasto" name="Gasto" fill="var(--c-primario)" radius={[0, 4, 4, 0]} maxBarSize={22} />
-                </BarChart>
-              </ResponsiveContainer>
-            )}
+            <BurbujasFlotantes
+              datos={resumenGeneral.top_productos.map(p => ({ id: p.nombre, etiqueta: p.nombre, valor: p.gasto }))}
+              formatoValor={euro}
+              vacio="Todavía no hay compras registradas."
+            />
           </div>
         </div>
       ) : vista === 'compras' ? (

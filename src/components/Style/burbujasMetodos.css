@@ -1,0 +1,111 @@
+/* ANALISIS: burbujas de dos niveles (metodo -> productos) */
+
+.burbujas-metodos-lienzo {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: var(--esp-xl);
+  padding: var(--esp-md) 0;
+  min-height: 160px;
+}
+
+.burbujas-productos-vacio {
+  font-size: 13px;
+  color: var(--c-texto-apagado);
+  font-style: italic;
+}
+
+/* burbuja principal: su tamano reacciona con transicion suave a los
+   cambios de datos (p.ej. al cambiar de año) en vez de saltar de golpe */
+.burbuja-metodo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: 50%;
+  color: var(--c-blanco);
+  box-shadow: var(--som-lg);
+  cursor: pointer;
+  transition: width .4s ease, height .4s ease, box-shadow .2s ease;
+}
+
+.burbuja-metodo:hover {
+  box-shadow: var(--som-xl);
+}
+
+.burbuja-metodo--tractor {
+  background: radial-gradient(circle at 30% 28%, var(--c-primario-claro), var(--c-primario));
+}
+
+.burbuja-metodo--mochila {
+  background: radial-gradient(circle at 30% 28%, var(--c-primario-medio), var(--c-primario));
+}
+
+/* burbuja principal activa (con el detalle abierto): borde para que se
+   entienda que sigue siendo pulsable, esta vez para cerrar */
+.burbuja-metodo--activa {
+  box-shadow: var(--som-xl), 0 0 0 3px var(--c-fondo-verde);
+}
+
+.burbuja-metodo-valor {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.burbuja-metodo-etiqueta {
+  font-size: 12px;
+  opacity: .9;
+}
+
+/* burbuja de producto: mismo criterio de tamano proporcional, dentro del
+   metodo activo */
+.burbuja-producto {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 28%, var(--c-fondo-verde), var(--c-primario-claro));
+  color: var(--c-primario);
+  box-shadow: var(--som-md);
+  text-align: center;
+  padding: 4px;
+  box-sizing: border-box;
+  cursor: default;
+  transition: width .4s ease, height .4s ease;
+}
+
+.burbuja-producto-cantidad {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.burbuja-producto-nombre {
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+/* RESPONSIVE 768px: burbujas mas pequeñas de texto, menos separacion */
+@media (max-width: 768px) {
+  .burbujas-metodos-lienzo { gap: var(--esp-md); }
+
+  .burbuja-metodo-valor { font-size: 13px; }
+  .burbuja-metodo-etiqueta { font-size: 11px; }
+}
+
+/* RESPONSIVE 480px: en vez del lienzo libre, se apilan en vertical para
+   no desbordar ni solaparse dentro de la card */
+@media (max-width: 480px) {
+  .burbujas-metodos-lienzo {
+    flex-direction: column;
+    min-height: auto;
+    gap: var(--esp-sm);
+  }
+}
