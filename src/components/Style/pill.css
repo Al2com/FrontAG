@@ -1,0 +1,50 @@
+/* insignia de estado/nivel compartida por toda la app: mismo componente,
+   el "tono" decide el color semantico (nunca un hex nuevo, siempre las
+   variables de estado ya definidas en variables.css) */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .03em;
+  padding: 3px 9px;
+  border-radius: 999px;
+  white-space: nowrap;
+  font-family: var(--font-ui);
+}
+
+.pill::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+.pill--bueno {
+  color: var(--estado-realizado);
+  background: color-mix(in srgb, var(--estado-realizado) 16%, transparent);
+}
+
+.pill--aviso {
+  color: var(--estado-pendiente);
+  background: color-mix(in srgb, var(--estado-pendiente) 16%, transparent);
+}
+
+.pill--alerta {
+  color: var(--c-peligro);
+  background: color-mix(in srgb, var(--c-peligro) 14%, transparent);
+}
+
+.pill--info {
+  color: var(--estado-revisado);
+  background: color-mix(in srgb, var(--estado-revisado) 16%, transparent);
+}
+
+.pill--neutro {
+  color: var(--c-texto-apagado);
+  background: color-mix(in srgb, var(--c-texto-apagado) 14%, transparent);
+}

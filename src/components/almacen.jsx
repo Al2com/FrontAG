@@ -10,17 +10,23 @@ import BtnCrear from './buttons/BtnCrear.jsx';
 import BtnSubmit from './buttons/BtnSubmit.jsx';
 import BtnEliminar from './buttons/btnEliminar.jsx';
 import Modal from './Modal/Modal.jsx';
+import Pill from './Pill.jsx';
+import CabeceraOrden from './CabeceraOrden.jsx';
+import { useOrdenTabla } from '../hooks/useOrdenTabla.js';
 import './Style/cards.css';
 import './Style/forms.css';
 import './Style/search.css';
 import './Style/detalleProducto.css';
 
 const euro = (valor) => `${(Number(valor) || 0).toFixed(2)} €`;
+// mismo umbral que el backend (AlmacenController::stockBajo): stock_actual <= stock_minimo
+const stockBajo = (p) => p.stock_minimo != null && p.stock_actual <= p.stock_minimo;
 
 const Almacen = () => {
   const [productos, setProductos] = useState([]);
   const [errorCarga, setErrorCarga] = useState('');
   const [mostrarTabla, setMostrarTabla] = useState(false);
+  const ordenProductos = useOrdenTabla();
   // modal de confirmacion para eliminar
   const [modalConfirm, setModalConfirm] = useState({ visible: false, id: null });
 
@@ -75,6 +81,8 @@ const Almacen = () => {
     return isNaN(d) ? fecha : d.toLocaleDateString('es-ES');
   };
 
+  const productosOrdenados = ordenProductos.ordenar(productos, (p, clave) => p[clave]);
+
   const confirmarEliminar = (id) => {
     setModalConfirm({ visible: true, id });
   };
@@ -118,7 +126,7 @@ const Almacen = () => {
               onClick={() => setMostrarTabla(!mostrarTabla)}
             >
               <img src={mostrarTabla ? './iconTable.png' : './cuadrado.png'} alt="vista" />
-              {mostrarTabla ? 'Tarjetas' : 'Tabla'}
+              {mostrarTabla ? 'Bloques' : 'Tabla'}
             </button>
           )}
           {rol !== 'trabajador' && (
@@ -207,24 +215,25 @@ const Almacen = () => {
         <table className="tabla-operaciones">
           <thead>
             <tr>
-              <th>Nombre</th>
-              <th>Materia activa</th>
-              <th>Ubicación</th>
-              <th>Stock</th>
-              <th>Unidad</th>
-              <th>Precio</th>
+              <CabeceraOrden orden={ordenProductos} clave="nombre">Nombre</CabeceraOrden>
+              <CabeceraOrden orden={ordenProductos} clave="materia_activa">Materia activa</CabeceraOrden>
+              <CabeceraOrden orden={ordenProductos} clave="ubicacion">Ubicación</CabeceraOrden>
+              <CabeceraOrden orden={ordenProductos} clave="stock_actual">Stock</CabeceraOrden>
+              <CabeceraOrden orden={ordenProductos} clave="precio">Precio</CabeceraOrden>
               {rol !== 'trabajador' && <th>Acciones</th>}
             </tr>
           </thead>
           <tbody>
-            {productos.map(producto => (
+            {productosOrdenados.map(producto => (
               <tr key={producto.id}>
                 <td>{producto.nombre}</td>
                 <td>{producto.materia_activa}</td>
                 <td>{producto.ubicacion}</td>
-                <td>{producto.stock_actual}</td>
-                <td>{producto.unidad}</td>
-                <td>{producto.precio} €</td>
+                <td className="num">
+                  {producto.stock_actual} {producto.unidad}{' '}
+                  {stockBajo(producto) && <Pill texto="Stock bajo" tono="alerta" />}
+                </td>
+                <td className="num">{producto.precio} €</td>
                 {rol !== 'trabajador' && (
                   <td>
                     <div className="tabla-botones">
@@ -239,14 +248,19 @@ const Almacen = () => {
           </tbody>
         </table>
       ) : (
-        productos.map(producto => (
+        <div className="grid-bloques">
+        {productosOrdenados.map(producto => (
           <div key={producto.id} className="explotacionCard">
-            <h4><strong>Producto</strong></h4>
-            <p><strong>Nombre:</strong> {producto.nombre}</p>
-            <p><strong>Materia activa:</strong> {producto.materia_activa}</p>
-            <p><strong>Ubicación:</strong> {producto.ubicacion}</p>
-            <p><strong>Stock:</strong> {producto.stock_actual} {producto.unidad}</p>
-            <p><strong>Precio:</strong> {producto.precio} €</p>
+            <div className="cabecera-cardExplo">
+              <span style={{ fontWeight: 600, color: 'var(--c-texto)' }}>{producto.nombre}</span>
+              {stockBajo(producto) && <Pill texto="Stock bajo" tono="alerta" />}
+            </div>
+            <div className="datos-cardExplo">
+              <p><strong>Materia activa:</strong> {producto.materia_activa}</p>
+              <p><strong>Ubicación:</strong> {producto.ubicacion}</p>
+              <p><strong>Stock:</strong> <span className="num">{producto.stock_actual} {producto.unidad}</span></p>
+              <p><strong>Precio:</strong> <span className="num">{producto.precio} €</span></p>
+            </div>
             <div className="card-botones">
               {rol !== 'trabajador' && (
                 <BtnSubmit texto="Detalle" to={`/producto/${producto.id}/detalle`} />
@@ -259,7 +273,8 @@ const Almacen = () => {
               )}
             </div>
           </div>
-        ))
+        ))}
+        </div>
       )}
     </div>
   );

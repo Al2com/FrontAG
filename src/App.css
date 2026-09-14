@@ -8,7 +8,7 @@
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: var(--font-ui);
   background-color: var(--c-fondo);
   overflow-x: hidden;
 }

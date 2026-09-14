@@ -7,6 +7,8 @@ import BtnEliminar from './buttons/btnEliminar.jsx';
 import ExplotacionCard from './InfoPanel/ExplotacionCard .jsx';
 import BtnSubmit from './buttons/BtnSubmit.jsx';
 import Modal from './Modal/Modal.jsx';
+import { useOrdenTabla } from '../hooks/useOrdenTabla.js';
+import CabeceraOrden from './CabeceraOrden.jsx';
 import './Style/cards.css';
 import './Style/forms.css';
 import './Style/search.css';
@@ -29,8 +31,15 @@ const Explotaciones = () => {
   const [filtroTamaño, setFiltroTamaño] = useState('todos');
   const [filtroParcelas, setFiltroParcelas] = useState('todos');
 
-  // controla si se ve tabla o tarjetas
+  // controla si se ve tabla o bloques
   const [mostrarTabla, setMostrarTabla] = useState(false);
+
+  const ordenExplotaciones = useOrdenTabla();
+  const valorOrdenExplotacion = (e, clave) => (
+    clave === 'hanegadas' ? e.parcelas_sum_dimension_hanegadas
+      : clave === 'parcelas' ? e.parcelas_count
+      : e[clave]
+  );
 
   // modal de confirmacion
   const [modalConfirm, setModalConfirm] = useState({ visible: false, id: null });
@@ -91,6 +100,8 @@ const Explotaciones = () => {
       if (filtroParcelas === 'menosParcelas') return a.parcelas_count - b.parcelas_count;
       return 0;
     });
+  // si se pulsa una cabecera de columna, ese orden manda sobre los selects de arriba
+  const explotacionesOrdenadas = ordenExplotaciones.ordenar(explotacionesFiltradas, valorOrdenExplotacion);
 
   return (
     <div>
@@ -114,7 +125,7 @@ const Explotaciones = () => {
             onClick={() => setMostrarTabla(!mostrarTabla)}
           >
             <img src={mostrarTabla ? './iconTable.png' : './cuadrado.png'} alt="vista" />
-            {mostrarTabla ? 'Tarjetas' : 'Tabla'}
+            {mostrarTabla ? 'Bloques' : 'Tabla'}
           </button>
         </div>
       </div>
@@ -154,20 +165,20 @@ const Explotaciones = () => {
         <table className="tabla-operaciones">
           <thead>
             <tr>
-              <th>Nombre</th>
-              <th>Ubicacion</th>
-              <th>Hanegadas</th>
-              <th>Parcelas</th>
+              <CabeceraOrden orden={ordenExplotaciones} clave="nombre">Nombre</CabeceraOrden>
+              <CabeceraOrden orden={ordenExplotaciones} clave="ubicacion">Ubicación</CabeceraOrden>
+              <CabeceraOrden orden={ordenExplotaciones} clave="hanegadas">Hanegadas</CabeceraOrden>
+              <CabeceraOrden orden={ordenExplotaciones} clave="parcelas">Parcelas</CabeceraOrden>
               {rol !== 'trabajador' && <th>Acciones</th>}
             </tr>
           </thead>
           <tbody>
-            {explotacionesFiltradas.map(explotacion => (
+            {explotacionesOrdenadas.map(explotacion => (
               <tr key={explotacion.id}>
                 <td>{explotacion.nombre}</td>
                 <td>{explotacion.ubicacion}</td>
-                <td>{explotacion.parcelas_sum_dimension_hanegadas}</td>
-                <td>{explotacion.parcelas_count}</td>
+                <td className="num">{explotacion.parcelas_sum_dimension_hanegadas}</td>
+                <td className="num">{explotacion.parcelas_count}</td>
                 {rol !== 'trabajador' && (
                   <td>
                     <div className="tabla-botones">
@@ -181,27 +192,28 @@ const Explotaciones = () => {
           </tbody>
         </table>
       ) : (
-        explotacionesFiltradas.map((explotacion, index) => (
-          <div className="seccion-explo-part" key={index}>
-            <ExplotacionCard
-              nombre={explotacion.nombre}
-              iconImg="./explotaciones.svg"
-              altText="Ubicacion"
-              ubicacion={explotacion.ubicacion}
-              TotalHngExplo={explotacion.parcelas_sum_dimension_hanegadas}
-              numParcelas={explotacion.parcelas_count}
-            >
-              <div className="card-botones">
-                {rol !== 'trabajador' && (
-                  <BtnSubmit texto="Editar" to={`/explotacion/${explotacion.id}`} />
-                )}
-                {rol !== 'trabajador' && (
-                  <BtnEliminar texto="Eliminar" onClick={() => confirmarEliminar(explotacion.id)} />
-                )}
-              </div>
-            </ExplotacionCard>
-          </div>
-        ))
+        <div className="grid-bloques">
+        {explotacionesOrdenadas.map(explotacion => (
+          <ExplotacionCard
+            key={explotacion.id}
+            nombre={explotacion.nombre}
+            iconImg="./explotaciones.svg"
+            altText="Ubicacion"
+            ubicacion={explotacion.ubicacion}
+            TotalHngExplo={explotacion.parcelas_sum_dimension_hanegadas}
+            numParcelas={explotacion.parcelas_count}
+          >
+            <div className="card-botones">
+              {rol !== 'trabajador' && (
+                <BtnSubmit texto="Editar" to={`/explotacion/${explotacion.id}`} />
+              )}
+              {rol !== 'trabajador' && (
+                <BtnEliminar texto="Eliminar" onClick={() => confirmarEliminar(explotacion.id)} />
+              )}
+            </div>
+          </ExplotacionCard>
+        ))}
+        </div>
       )}
     </div>
   );

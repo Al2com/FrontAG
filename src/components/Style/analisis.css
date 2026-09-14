@@ -70,3 +70,66 @@
   border-radius: 4px;
   flex-shrink: 0;
 }
+
+/* ANALISIS: barra semaforo generica (rentabilidad card 1, consumo card 3) */
+
+.rentabilidad-barra-bloque {
+  margin: var(--esp-sm) 0 var(--esp-md);
+}
+
+.rentabilidad-barra-titulo {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--c-texto-etiqueta);
+  margin-bottom: 6px;
+}
+
+.rentabilidad-barra {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-md);
+  flex-wrap: wrap;
+}
+
+.rentabilidad-barra-pista-wrap {
+  position: relative;
+  flex: 1 1 160px;
+  min-width: 120px;
+  padding-top: 12px;
+}
+
+.rentabilidad-barra-pista {
+  height: 10px;
+  border-radius: var(--rad-sm);
+  background: linear-gradient(
+    to right,
+    var(--rentab-baja) 0%,
+    var(--rentab-media-baja) 33%,
+    var(--rentab-media-alta) 66%,
+    var(--rentab-alta) 100%
+  );
+  box-shadow: var(--som-sm);
+}
+
+.rentabilidad-barra-marcador {
+  position: absolute;
+  top: 0;
+  width: 0;
+  height: 0;
+  transform: translateX(-50%);
+  border-left: 7px solid transparent;
+  border-right: 7px solid transparent;
+  border-top: 10px solid var(--c-texto);
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.25));
+}
+
+.rentabilidad-barra-etiqueta {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.rentabilidad-barra-etiqueta--positiva { color: var(--rentab-alta); }
+.rentabilidad-barra-etiqueta--neutra { color: var(--rentab-media-baja); }
+.rentabilidad-barra-etiqueta--negativa { color: var(--rentab-baja); }
+.rentabilidad-barra-etiqueta--sin-datos { color: var(--c-texto-apagado); font-weight: 400; }
