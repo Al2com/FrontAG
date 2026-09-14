@@ -5,9 +5,19 @@ import BtnSubmit from './buttons/BtnSubmit.jsx'
 import BtnEliminar from './buttons/btnEliminar.jsx'
 import Modal from './Modal/Modal.jsx'
 import SeccionColapsable from './SeccionColapsable.jsx'
+import Pill from './Pill.jsx'
+import CabeceraOrden from './CabeceraOrden.jsx'
+import { useOrdenTabla } from '../hooks/useOrdenTabla.js'
 import './Style/cards.css';
 import './Style/forms.css'
 import './Style/search.css'
+
+// tono de la pill segun el estado de operacion/fumigacion, mismo criterio
+// en toda la pagina
+const tonoEstado = (estado) => (
+  estado === 'realizada' ? 'bueno' : estado === 'revisada' ? 'info' : 'aviso'
+)
+const etiquetaEstado = (estado) => estado.charAt(0).toUpperCase() + estado.slice(1)
 
 // claves de localStorage: estado de las secciones (cerradas la primera vez)
 // y preferencia de vista tabla/cards (sin preferencia -> se decide por dispositivo)
@@ -51,6 +61,10 @@ const Operaciones = () => {
   // filtro por método de aplicación: tractor o mochila (campo metodo_aplicacion)
   const [metodoFumigacion, setMetodoFumigacion] = useState('todas')
 
+  // orden de columna de cada tabla, independiente entre operaciones y fumigaciones
+  const ordenOperaciones = useOrdenTabla()
+  const ordenFumigaciones = useOrdenTabla()
+
   const rol = sessionStorage.getItem('rol')
 
   // cargo los datos cuando se monta el compoenente
@@ -74,6 +88,16 @@ const Operaciones = () => {
   // formato de parcela tal como ya se muestra en pantalla: "polígono - parcela"
   const formatoParcela = (p) => p ? `${p.poligono} - ${p.parcela}` : ''
 
+  // valor por el que ordenar cada columna: mismas claves que usan los <th>
+  const valorOrdenOperacion = (op, clave) => (
+    clave === 'parcela' ? formatoParcela(op.parcela) : op[clave]
+  )
+  const valorOrdenFumigacion = (fum, clave) => (
+    clave === 'parcela' ? formatoParcela(fum.parcela)
+      : clave === 'hanegadas' ? fum.parcela?.dimension_hanegadas
+      : fum[clave]
+  )
+
   // valores distintos para los nuevos selectores, a partir de los datos ya cargados
   // (mismo patrón que obtenerAñosDisponibles)
   const obtenerParcelas = (lista) =>
@@ -92,6 +116,7 @@ const Operaciones = () => {
     const coincideParcela = parcelaOperacion === 'todas' || formatoParcela(operacion.parcela) === parcelaOperacion
     return coincideAño && coincideMes && coincideTipo && coincideParcela
   })
+  const operacionesOrdenadas = ordenOperaciones.ordenar(operacionesFiltradas, valorOrdenOperacion)
 
   // filtro fumigaciones con sus propios filtros, no afectan a las operaciones
   const fumigacionesFiltradas = listaFumigaciones.filter(fumigacion => {
@@ -104,6 +129,7 @@ const Operaciones = () => {
     const coincideMetodo = metodoFumigacion === 'todas' || fumigacion.metodo_aplicacion === metodoFumigacion
     return coincideAño && coincideMes && coincideVariedad && coincideParcela && coincideMetodo
   })
+  const fumigacionesOrdenadas = ordenFumigaciones.ordenar(fumigacionesFiltradas, valorOrdenFumigacion)
 
   // marco la operacion o fumigacion como realizada y recargo la lista
   const marcarRealizada = (tipo, id) => {
@@ -196,7 +222,7 @@ const Operaciones = () => {
             onClick={alternarVista}
           >
             <img src={mostrarTabla ? './iconTable.png' : './cuadrado.png'} alt="vista" />
-            {mostrarTabla ? 'Tarjetas' : 'Tabla'}
+            {mostrarTabla ? 'Bloques' : 'Tabla'}
           </button>
         </div>
       </div>
@@ -247,20 +273,26 @@ const Operaciones = () => {
         <table className="tabla-operaciones">
           <thead>
             <tr>
-              <th>Tipo</th><th>Parcela</th><th>Operario</th><th>Fecha</th>
-              <th>Duración</th><th>Precio</th><th>Estado</th><th>Acciones</th>
+              <CabeceraOrden orden={ordenOperaciones} clave="tipo_operacion">Tipo</CabeceraOrden>
+              <CabeceraOrden orden={ordenOperaciones} clave="parcela">Parcela</CabeceraOrden>
+              <CabeceraOrden orden={ordenOperaciones} clave="operario">Operario</CabeceraOrden>
+              <CabeceraOrden orden={ordenOperaciones} clave="hora_inicio">Fecha</CabeceraOrden>
+              <CabeceraOrden orden={ordenOperaciones} clave="duracion_minutos">Duración</CabeceraOrden>
+              <CabeceraOrden orden={ordenOperaciones} clave="precio">Precio</CabeceraOrden>
+              <CabeceraOrden orden={ordenOperaciones} clave="estado">Estado</CabeceraOrden>
+              <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
-            {operacionesFiltradas.map(operacion => (
+            {operacionesOrdenadas.map(operacion => (
               <tr key={operacion.id}>
-                <td>{operacion.tipo_operacion}</td>
+                <td style={{ textTransform: 'capitalize' }}>{operacion.tipo_operacion}</td>
                 <td>{operacion.parcela?.poligono} - {operacion.parcela?.parcela}</td>
                 <td>{operacion.operario}</td>
-                <td>{operacion.hora_inicio}</td>
-                <td>{operacion.duracion_minutos} min</td>
-                <td>{operacion.precio} €</td>
-                <td>{operacion.estado}</td>
+                <td className="num">{operacion.hora_inicio}</td>
+                <td className="num">{operacion.duracion_minutos} min</td>
+                <td className="num">{operacion.precio} €</td>
+                <td><Pill texto={etiquetaEstado(operacion.estado)} tono={tonoEstado(operacion.estado)} /></td>
                 <td>
                   <div className="tabla-botones">
                     {operacion.estado === 'pendiente' && (
@@ -279,16 +311,21 @@ const Operaciones = () => {
           </tbody>
         </table>
       ) : (
-        operacionesFiltradas.map(operacion => (
+        <div className="grid-bloques">
+        {operacionesOrdenadas.map(operacion => (
           <div key={operacion.id} className="explotacionCard">
-            <h4><strong>Operación</strong></h4>
-            <p><strong>Tipo:</strong> {operacion.tipo_operacion}</p>
-            <p><strong>Parcela:</strong> {operacion.parcela?.poligono} - {operacion.parcela?.parcela}</p>
-            <p><strong>Operario:</strong> {operacion.operario}</p>
-            <p><strong>Inicio:</strong> {operacion.hora_inicio}</p>
-            <p><strong>Duración:</strong> {operacion.duracion_minutos} min</p>
-            <p><strong>Descripción:</strong> {operacion.descripcion}</p>
-            <p><strong>Estado:</strong> {operacion.estado}</p>
+            <div className="cabecera-cardExplo">
+              <span style={{ textTransform: 'capitalize', fontWeight: 600, color: 'var(--c-texto)' }}>{operacion.tipo_operacion}</span>
+              <Pill texto={etiquetaEstado(operacion.estado)} tono={tonoEstado(operacion.estado)} />
+            </div>
+            <div className="datos-cardExplo">
+              <p><strong>Parcela:</strong> {operacion.parcela?.poligono} - {operacion.parcela?.parcela}</p>
+              <p><strong>Operario:</strong> {operacion.operario}</p>
+              <p><strong>Inicio:</strong> <span className="num">{operacion.hora_inicio}</span></p>
+              <p><strong>Duración:</strong> <span className="num">{operacion.duracion_minutos} min</span></p>
+              <p><strong>Precio:</strong> <span className="num">{operacion.precio} €</span></p>
+              <p><strong>Descripción:</strong> {operacion.descripcion}</p>
+            </div>
             <div className="card-botones">
               {operacion.estado === 'pendiente' && (
                 <button onClick={() => marcarRealizada('operacion', operacion.id)}>Realizada</button>
@@ -301,7 +338,8 @@ const Operaciones = () => {
               {rol !== 'trabajador' && <BtnEliminar texto="Eliminar" onClick={() => pedirConfirmacion('operacion', operacion.id)} />}
             </div>
           </div>
-        ))
+        ))}
+        </div>
       )}
       </SeccionColapsable>
 
@@ -353,19 +391,24 @@ const Operaciones = () => {
         <table className="tabla-operaciones">
           <thead>
             <tr>
-              <th>Método</th><th>Parcela</th><th>Descripción</th><th>Fecha</th>
-              <th>Hanegadas</th><th>Estado</th><th>Acciones</th>
+              <CabeceraOrden orden={ordenFumigaciones} clave="metodo_aplicacion">Método</CabeceraOrden>
+              <CabeceraOrden orden={ordenFumigaciones} clave="parcela">Parcela</CabeceraOrden>
+              <CabeceraOrden orden={ordenFumigaciones} clave="descripcion">Descripción</CabeceraOrden>
+              <CabeceraOrden orden={ordenFumigaciones} clave="hora_inicio">Fecha</CabeceraOrden>
+              <CabeceraOrden orden={ordenFumigaciones} clave="hanegadas">Hanegadas</CabeceraOrden>
+              <CabeceraOrden orden={ordenFumigaciones} clave="estado">Estado</CabeceraOrden>
+              <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
-            {fumigacionesFiltradas.map(fumigacion => (
+            {fumigacionesOrdenadas.map(fumigacion => (
               <tr key={fumigacion.id}>
-                <td>{fumigacion.metodo_aplicacion}</td>
+                <td style={{ textTransform: 'capitalize' }}>{fumigacion.metodo_aplicacion}</td>
                 <td>{fumigacion.parcela?.poligono} - {fumigacion.parcela?.parcela}</td>
                 <td>{fumigacion.descripcion}</td>
-                <td>{fumigacion.hora_inicio}</td>
-                <td>{fumigacion.parcela?.dimension_hanegadas}</td>
-                <td>{fumigacion.estado}</td>
+                <td className="num">{fumigacion.hora_inicio}</td>
+                <td className="num">{fumigacion.parcela?.dimension_hanegadas}</td>
+                <td><Pill texto={etiquetaEstado(fumigacion.estado)} tono={tonoEstado(fumigacion.estado)} /></td>
                 <td>
                   <div className="tabla-botones">
                     {fumigacion.estado === 'pendiente' && (
@@ -384,16 +427,20 @@ const Operaciones = () => {
           </tbody>
         </table>
       ) : (
-        fumigacionesFiltradas.map(fumigacion => (
+        <div className="grid-bloques">
+        {fumigacionesOrdenadas.map(fumigacion => (
           <div key={fumigacion.id} className="explotacionCard">
-            <h4><strong>Fumigación</strong></h4>
-            <p><strong>Método:</strong> {fumigacion.metodo_aplicacion}</p>
-            <p><strong>Parcela:</strong> {fumigacion.parcela?.poligono} - {fumigacion.parcela?.parcela}</p>
-            <p><strong>Operario:</strong> {fumigacion.operario}</p>
-            <p><strong>Inicio:</strong> {fumigacion.hora_inicio}</p>
-            <p><strong>Duración:</strong> {fumigacion.duracion_minutos} min</p>
-            <p><strong>Descripción:</strong> {fumigacion.descripcion}</p>
-            <p><strong>Estado:</strong> {fumigacion.estado}</p>
+            <div className="cabecera-cardExplo">
+              <span style={{ textTransform: 'capitalize', fontWeight: 600, color: 'var(--c-texto)' }}>{fumigacion.metodo_aplicacion}</span>
+              <Pill texto={etiquetaEstado(fumigacion.estado)} tono={tonoEstado(fumigacion.estado)} />
+            </div>
+            <div className="datos-cardExplo">
+              <p><strong>Parcela:</strong> {fumigacion.parcela?.poligono} - {fumigacion.parcela?.parcela}</p>
+              <p><strong>Operario:</strong> {fumigacion.operario}</p>
+              <p><strong>Inicio:</strong> <span className="num">{fumigacion.hora_inicio}</span></p>
+              <p><strong>Duración:</strong> <span className="num">{fumigacion.duracion_minutos} min</span></p>
+              <p><strong>Descripción:</strong> {fumigacion.descripcion}</p>
+            </div>
             <div className="card-botones">
               {fumigacion.estado === 'pendiente' && (
                 <button onClick={() => marcarRealizada('fumigacion', fumigacion.id)}>Realizada</button>
@@ -406,7 +453,8 @@ const Operaciones = () => {
               {rol !== 'trabajador' && <BtnEliminar texto="Eliminar" onClick={() => pedirConfirmacion('fumigacion', fumigacion.id)} />}
             </div>
           </div>
-        ))
+        ))}
+        </div>
       )}
       </SeccionColapsable>
     </div>

@@ -6,6 +6,9 @@ import ParcelaCard from './InfoPanel/ParcelaCard.jsx';
 import BtnSubmit from './buttons/BtnSubmit.jsx';
 import BtnEliminar from './buttons/btnEliminar.jsx';
 import Modal from './Modal/Modal.jsx';
+import Pill from './Pill.jsx';
+import CabeceraOrden from './CabeceraOrden.jsx';
+import { useOrdenTabla } from '../hooks/useOrdenTabla.js';
 import './Style/cards.css';
 import './Style/forms.css';
 import './Style/search.css';
@@ -27,8 +30,15 @@ const Parcela = () => {
   const [filtroRiego, setFiltroRiego] = useState('todos');
   const [filtroDimension, setFiltroDimension] = useState('todos');
 
-  // controla si se ve tabla o tarjetas
+  // controla si se ve tabla o bloques
   const [mostrarTabla, setMostrarTabla] = useState(false);
+
+  const ordenParcelas = useOrdenTabla();
+  const valorOrdenParcela = (p, clave) => (
+    clave === 'explotacion' ? p.explotacion.nombre : p[clave]
+  );
+  // tono de la pill de riego: solo distingue visualmente goteo/manta, no es un estado
+  const tonoRiego = (rol) => (rol === 'goteo' ? 'info' : 'aviso');
 
   // modal de confirmacion para eliminar
   const [modalConfirm, setModalConfirm] = useState({ visible: false, id: null });
@@ -60,6 +70,7 @@ const Parcela = () => {
       if (filtroDimension === 'minimo') return a.dimension_hanegadas - b.dimension_hanegadas;
       return 0;
     });
+  const parcelasOrdenadas = ordenParcelas.ordenar(parcelasFiltradas, valorOrdenParcela);
 
   const confirmarEliminar = (id) => {
     setModalConfirm({ visible: true, id });
@@ -101,7 +112,7 @@ const Parcela = () => {
             onClick={() => setMostrarTabla(!mostrarTabla)}
           >
             <img src={mostrarTabla ? './iconTable.png' : './cuadrado.png'} alt="vista" />
-            {mostrarTabla ? 'Tarjetas' : 'Tabla'}
+            {mostrarTabla ? 'Bloques' : 'Tabla'}
           </button>
         </div>
       </div>
@@ -142,28 +153,28 @@ const Parcela = () => {
         <table className="tabla-operaciones">
           <thead>
             <tr>
-              <th>Nombre</th>
-              <th>Poligono</th>
-              <th>Parcela</th>
-              <th>Explotacion</th>
-              <th>Variedad</th>
-              <th>Hanegadas</th>
-              <th>Riego</th>
-              <th>Arboles</th>
+              <CabeceraOrden orden={ordenParcelas} clave="nombre">Nombre</CabeceraOrden>
+              <CabeceraOrden orden={ordenParcelas} clave="poligono">Poligono</CabeceraOrden>
+              <CabeceraOrden orden={ordenParcelas} clave="parcela">Parcela</CabeceraOrden>
+              <CabeceraOrden orden={ordenParcelas} clave="explotacion">Explotacion</CabeceraOrden>
+              <CabeceraOrden orden={ordenParcelas} clave="variedad">Variedad</CabeceraOrden>
+              <CabeceraOrden orden={ordenParcelas} clave="dimension_hanegadas">Hanegadas</CabeceraOrden>
+              <CabeceraOrden orden={ordenParcelas} clave="rol">Riego</CabeceraOrden>
+              <CabeceraOrden orden={ordenParcelas} clave="num_arboles">Arboles</CabeceraOrden>
               {rol !== 'trabajador' && <th>Acciones</th>}
             </tr>
           </thead>
           <tbody>
-            {parcelasFiltradas.map(parcela => (
+            {parcelasOrdenadas.map(parcela => (
               <tr key={parcela.id}>
                 <td>{parcela.nombre}</td>
                 <td>{parcela.poligono}</td>
                 <td>{parcela.parcela}</td>
                 <td>{parcela.explotacion.nombre}</td>
                 <td>{parcela.variedad}</td>
-                <td>{parcela.dimension_hanegadas}</td>
-                <td>{parcela.rol}</td>
-                <td>{parcela.num_arboles}</td>
+                <td className="num">{parcela.dimension_hanegadas}</td>
+                <td><Pill texto={parcela.rol === 'goteo' ? 'Goteo' : 'Manta'} tono={tonoRiego(parcela.rol)} /></td>
+                <td className="num">{parcela.num_arboles}</td>
                 {rol !== 'trabajador' && (
                   <td>
                     <div className="tabla-botones">
@@ -177,32 +188,33 @@ const Parcela = () => {
           </tbody>
         </table>
       ) : (
-        parcelasFiltradas.map((parcela, index) => (
-          <div className="seccion-explo-part" key={index}>
-            <ParcelaCard
-              poligono={parcela.poligono}
-              parcela={parcela.parcela}
-              iconImg="./parcela.svg"
-              altText="pick"
-              explotacion={parcela.explotacion.nombre}
-              dimension_hanegadas={parcela.dimension_hanegadas}
-              rol={parcela.rol}
-              variedad={parcela.variedad}
-              num_arboles={parcela.num_arboles}
-              fecha_plantacion={parcela.fecha_plantacion}
-              nombre={parcela.nombre}
-            >
-              <div className="card-botones">
-                {rol !== 'trabajador' && (
-                  <BtnSubmit texto="Editar" to={`/parcela/${parcela.id}`} />
-                )}
-                {rol !== 'trabajador' && (
-                  <BtnEliminar texto="Eliminar" onClick={() => confirmarEliminar(parcela.id)} />
-                )}
-              </div>
-            </ParcelaCard>
-          </div>
-        ))
+        <div className="grid-bloques">
+        {parcelasOrdenadas.map(parcela => (
+          <ParcelaCard
+            key={parcela.id}
+            poligono={parcela.poligono}
+            parcela={parcela.parcela}
+            iconImg="./parcela.svg"
+            altText="pick"
+            explotacion={parcela.explotacion.nombre}
+            dimension_hanegadas={parcela.dimension_hanegadas}
+            rol={parcela.rol}
+            variedad={parcela.variedad}
+            num_arboles={parcela.num_arboles}
+            fecha_plantacion={parcela.fecha_plantacion}
+            nombre={parcela.nombre}
+          >
+            <div className="card-botones">
+              {rol !== 'trabajador' && (
+                <BtnSubmit texto="Editar" to={`/parcela/${parcela.id}`} />
+              )}
+              {rol !== 'trabajador' && (
+                <BtnEliminar texto="Eliminar" onClick={() => confirmarEliminar(parcela.id)} />
+              )}
+            </div>
+          </ParcelaCard>
+        ))}
+        </div>
       )}
     </div>
   );

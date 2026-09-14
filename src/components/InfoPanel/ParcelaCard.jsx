@@ -1,18 +1,21 @@
+import Pill from '../Pill.jsx'
+
 const ParcelaCard = ({ poligono, parcela, iconImg, altText, variedad, num_arboles, explotacion, dimension_hanegadas, fecha_plantacion, rol, nombre, children }) => {
   return (
     <div className="explotacionCard">
-      <h3>Poligono-parcela: {poligono}/{parcela}</h3>
-      <div className="cabecera-cardExplo">
-        <img className="explo-icon" src={iconImg} alt={altText} />
-        <span>{explotacion}</span>
+      <div className="cabecera-cardExplo" style={{ justifyContent: 'space-between' }}>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 'var(--esp-xs)' }}>
+          <img className="explo-icon" src={iconImg} alt={altText} />
+          {explotacion}
+        </span>
+        <Pill texto={rol === 'goteo' ? 'Goteo' : 'Manta'} tono={rol === 'goteo' ? 'info' : 'aviso'} />
       </div>
+      <h3>Pol. {poligono} - Par. {parcela}{nombre ? ` · ${nombre}` : ''}</h3>
       <div className="datos-cardExplo">
-        <p>Dimension Parcela: <span>{dimension_hanegadas}</span></p>
-        <p>Tipo riego: {rol}</p>
-        <p>Variedad: {variedad}</p>
-        <p>Cantidad Arboles: {num_arboles}</p>
-        <p>Año plantacion: {fecha_plantacion}</p>
-        <p>Nombre parcela: {nombre}</p>
+        <p><strong>Hanegadas:</strong> <span className="num">{dimension_hanegadas}</span></p>
+        <p><strong>Variedad:</strong> {variedad}</p>
+        <p><strong>Árboles:</strong> <span className="num">{num_arboles}</span></p>
+        <p><strong>Año plantación:</strong> <span className="num">{fecha_plantacion}</span></p>
         {children}
       </div>
     </div>

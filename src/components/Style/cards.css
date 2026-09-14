@@ -62,11 +62,23 @@
   box-shadow: var(--som-md);
 }
 
+/* grid de bloques: contenedor de la vista "Bloques" en cualquier listado
+   (Operaciones, Explotaciones, Parcelas, Almacén, Recolección) */
+.grid-bloques {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--esp-md);
+  padding: 0 var(--esp-xl) var(--esp-xl);
+}
+
 .explotacionCard {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   background-color: var(--c-blanco);
   border: 1px solid var(--c-borde);
   border-radius: var(--rad-md);
-  padding: var(--esp-xl);
+  padding: var(--esp-lg);
   box-shadow: var(--som-md);
   transition: transform 0.2s, box-shadow 0.2s;
 }
@@ -75,6 +87,35 @@
   transform: translateY(-4px);
   box-shadow: var(--som-lg);
 }
+
+.explotacionCard h3,
+.explotacionCard h4 {
+  font-size: 15px;
+  color: var(--c-primario);
+}
+
+.cabecera-cardExplo {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-xs);
+  color: var(--c-texto-apagado);
+  font-size: 13px;
+}
+
+.cabecera-cardExplo .explo-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.datos-cardExplo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--c-texto-etiqueta);
+}
+
+.datos-cardExplo p strong { color: var(--c-texto); }
 
 .card-botones {
   display: flex;
@@ -96,6 +137,15 @@
   font-weight: 600;
   color: var(--c-primario);
   margin-top: var(--esp-xs);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* utilidad para cualquier cifra en columna (tabla o bloque): mismo
+   tratamiento tipografico que .value, para que los datos se lean alineados */
+.num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
 }
 
 .tituloCard2 {
@@ -222,6 +272,23 @@
   font-size: 13px;
   font-weight: 600;
 }
+
+/* cabecera de columna ordenable: mismo patron en cualquier tabla de listado */
+.tabla-operaciones th.ordenable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.tabla-operaciones th.ordenable:hover { background-color: var(--c-primario-medio); }
+
+.tabla-operaciones th.ordenable .indicador-orden {
+  display: inline-block;
+  margin-left: 5px;
+  opacity: .55;
+  font-size: 10px;
+}
+
+.tabla-operaciones th.ordenable.ordenable--activa .indicador-orden { opacity: 1; }
 
 .tabla-operaciones td {
   padding: 10px 14px;
@@ -447,6 +514,11 @@
     grid-template-columns: 1fr;
     padding: 0 var(--esp-md) var(--esp-md);
     gap: var(--esp-md);
+  }
+
+  .grid-bloques {
+    padding: 0 var(--esp-md) var(--esp-md);
+    gap: var(--esp-sm);
   }
 
   .filtro-explo {

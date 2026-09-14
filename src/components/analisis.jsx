@@ -5,6 +5,8 @@ import GraficoRentabilidad from './GraficoRentabilidad'
 import BurbujasMetodos from './BurbujasMetodos'
 import BurbujasGanancia from './BurbujasGanancia'
 import BurbujasFlotantes from './BurbujasFlotantes'
+import RentabilidadBarra from './RentabilidadBarra'
+import ConsumoAguaBarra from './ConsumoAguaBarra'
 import { tramoMargen, LEYENDA_MARGEN } from '../utils/margenColor'
 import './Style/cards.css'
 import './Style/search.css'
@@ -129,6 +131,15 @@ const Analisis = () => {
       .catch(() => setError('Error al cargar el histórico de rentabilidad'))
   }, [])
 
+  // litros de caldo del tractor por hanegada y por aplicacion individual (no
+  // acumulado anual): litros_totales_tractor_anio / hanegadas / nº_aplicaciones.
+  // numFumigaciones ya cuenta los registros de Fumigacion de tractor de la
+  // parcela/año (ver AnalisisController::costesPorMetodo)
+  const tractorMetodo = costesMetodo?.metodos?.tractor
+  const litrosPorHanegadaPorAplicacion = tractorMetodo && costesMetodo.hanegadas > 0 && tractorMetodo.numFumigaciones > 0
+    ? tractorMetodo.litros / costesMetodo.hanegadas / tractorMetodo.numFumigaciones
+    : null
+
   return (
     <div className="rentabilidad-contenedor">
       <div className="menuExplo">
@@ -173,6 +184,10 @@ const Analisis = () => {
             <div className="rentabilidad-resumen">
               <span>{resumen.parcela.hanegadas} hanegadas</span>
             </div>
+            <RentabilidadBarra
+              categoria={resumen.rentabilidad?.categoria}
+              percentil={resumen.rentabilidad?.percentil}
+            />
             <BurbujasFlotantes
               datos={[
                 { id: 'total', etiqueta: `Gasto total (${resumen.anio})`, valor: resumen.gastoTotal },
@@ -233,7 +248,8 @@ const Analisis = () => {
       {costesMetodo && (
         <>
           <div className="rentabilidad-card">
-            <div className="rentabilidad-cabecera-izq"><h4>Gasto por hanegada: tractor vs. mochila</h4></div>
+            <div className="rentabilidad-cabecera-izq"><h4>Gasto de productos químicos por hanegada: tractor vs. mochila</h4></div>
+            <ConsumoAguaBarra litrosPorHanegadaPorAplicacion={litrosPorHanegadaPorAplicacion} />
             <BurbujasMetodos
               tractor={costesMetodo.metodos.tractor}
               mochila={costesMetodo.metodos.mochila}
@@ -251,37 +267,15 @@ const Analisis = () => {
                 <span>Mochila: coste total</span>
                 <span>{formatoEuro(costesMetodo.metodos.mochila.costeTotal)}</span>
               </div>
-            </div>
-          </div>
-
-          <div className="rentabilidad-card">
-            <div className="rentabilidad-cabecera-izq"><h4>Litros aplicados por método</h4></div>
-            <BurbujasMetodos
-              tractor={costesMetodo.metodos.tractor}
-              mochila={costesMetodo.metodos.mochila}
-              valorPrincipal={(m) => m.litros}
-              etiquetaPrincipal={(m) => `${formatoNumero(m.litros)} L`}
-              valorProducto={(p) => p.cantidadTotal}
-              etiquetaProducto={(p) => formatoNumero(p.cantidadTotal, ` ${p.unidad}`)}
-            />
-
-            {(costesMetodo.metodos.tractor.productos.length > 0 || costesMetodo.metodos.mochila.productos.length > 0) && (
-              <div className="rentabilidad-desplegable">
-                {['tractor', 'mochila'].map(metodo => (
-                  costesMetodo.metodos[metodo].productos.length > 0 && (
-                    <div key={metodo}>
-                      <div className="rentabilidad-fila-parcela"><strong>{metodo === 'tractor' ? 'Tractor' : 'Mochila'}: dosis por producto</strong></div>
-                      {costesMetodo.metodos[metodo].productos.map(p => (
-                        <div className="rentabilidad-fila-parcela" key={p.producto_id}>
-                          <span>{p.nombre} ({formatoNumero(p.dosisMedia, ` ${p.unidad}/aplicación`)})</span>
-                          <span>{formatoNumero(p.cantidadTotal, ` ${p.unidad}`)} · {formatoEuro(p.costeTotal)}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )
-                ))}
+              <div className="rentabilidad-fila-parcela">
+                <span>Tractor: litros totales</span>
+                <span>{formatoNumero(costesMetodo.metodos.tractor.litros)} L</span>
               </div>
-            )}
+              <div className="rentabilidad-fila-parcela">
+                <span>Mochila: litros totales</span>
+                <span>{formatoNumero(costesMetodo.metodos.mochila.litros)} L</span>
+              </div>
+            </div>
           </div>
         </>
       )}

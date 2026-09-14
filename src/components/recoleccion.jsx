@@ -5,6 +5,8 @@ import BtnSubmit from './buttons/BtnSubmit.jsx';
 import BtnEliminar from './buttons/btnEliminar.jsx';
 import InfoPanel from './InfoPanel/InfoPanel.jsx';
 import Modal from './Modal/Modal.jsx';
+import CabeceraOrden from './CabeceraOrden.jsx';
+import { useOrdenTabla } from '../hooks/useOrdenTabla.js';
 import './Style/cards.css';
 import './Style/forms.css';
 import './Style/search.css';
@@ -29,6 +31,13 @@ const Recoleccion = () => {
   const nombreParcela = (r) =>
     r.parcela?.nombre || `Pol. ${r.parcela?.poligono} - Par. ${r.parcela?.parcela}`;
 
+  const ordenRecoleccion = useOrdenTabla();
+  const valorOrdenRecoleccion = (r, clave) => (
+    clave === 'parcela' ? nombreParcela(r)
+      : clave === 'ingreso' ? Number(r.kilos) * Number(r.precio_medio_kg)
+      : r[clave]
+  );
+
   // años (campañas) disponibles, sacados de la fecha
   const añosDisponibles = [...new Set(
     recolecciones.map(r => r.fecha?.substring(0, 4)).filter(Boolean)
@@ -37,6 +46,7 @@ const Recoleccion = () => {
   const recoleccionesFiltradas = recolecciones.filter(r =>
     campaña === 'todas' || r.fecha?.substring(0, 4) === String(campaña)
   );
+  const recoleccionesOrdenadas = ordenRecoleccion.ordenar(recoleccionesFiltradas, valorOrdenRecoleccion);
 
   // totales de lo filtrado
   const totalKilos = recoleccionesFiltradas.reduce((a, r) => a + Number(r.kilos || 0), 0);
@@ -80,7 +90,7 @@ const Recoleccion = () => {
             onClick={() => setMostrarTabla(!mostrarTabla)}
           >
             <img src={mostrarTabla ? './iconTable.png' : './cuadrado.png'} alt="vista" />
-            {mostrarTabla ? 'Tarjetas' : 'Tabla'}
+            {mostrarTabla ? 'Bloques' : 'Tabla'}
           </button>
         </div>
       </div>
@@ -109,26 +119,26 @@ const Recoleccion = () => {
         <table className="tabla-operaciones">
           <thead>
             <tr>
-              <th>Parcela</th>
-              <th>Fruta</th>
-              <th>Fecha</th>
-              <th>Tipo</th>
-              <th>Kilos</th>
-              <th>Precio medio</th>
-              <th>Ingreso</th>
+              <CabeceraOrden orden={ordenRecoleccion} clave="parcela">Parcela</CabeceraOrden>
+              <CabeceraOrden orden={ordenRecoleccion} clave="variedad">Fruta</CabeceraOrden>
+              <CabeceraOrden orden={ordenRecoleccion} clave="fecha">Fecha</CabeceraOrden>
+              <CabeceraOrden orden={ordenRecoleccion} clave="tipo">Tipo</CabeceraOrden>
+              <CabeceraOrden orden={ordenRecoleccion} clave="kilos">Kilos</CabeceraOrden>
+              <CabeceraOrden orden={ordenRecoleccion} clave="precio_medio_kg">Precio medio</CabeceraOrden>
+              <CabeceraOrden orden={ordenRecoleccion} clave="ingreso">Ingreso</CabeceraOrden>
               {rol !== 'trabajador' && <th>Acciones</th>}
             </tr>
           </thead>
           <tbody>
-            {recoleccionesFiltradas.map(r => (
+            {recoleccionesOrdenadas.map(r => (
               <tr key={r.id}>
                 <td>{nombreParcela(r)}</td>
                 <td>{r.variedad}</td>
-                <td>{r.fecha}</td>
+                <td className="num">{r.fecha}</td>
                 <td style={{ textTransform: 'capitalize' }}>{r.tipo}</td>
-                <td>{Number(r.kilos).toFixed(2)} kg</td>
-                <td>{Number(r.precio_medio_kg).toFixed(2)} €/kg</td>
-                <td>{(Number(r.kilos) * Number(r.precio_medio_kg)).toFixed(2)} €</td>
+                <td className="num">{Number(r.kilos).toFixed(2)} kg</td>
+                <td className="num">{Number(r.precio_medio_kg).toFixed(2)} €/kg</td>
+                <td className="num">{(Number(r.kilos) * Number(r.precio_medio_kg)).toFixed(2)} €</td>
                 {rol !== 'trabajador' && (
                   <td>
                     <div className="tabla-botones">
@@ -142,16 +152,20 @@ const Recoleccion = () => {
           </tbody>
         </table>
       ) : (
-        recoleccionesFiltradas.map(r => (
+        <div className="grid-bloques">
+        {recoleccionesOrdenadas.map(r => (
           <div key={r.id} className="explotacionCard">
-            <h4><strong>Recolección</strong></h4>
-            <p><strong>Parcela:</strong> {nombreParcela(r)}</p>
-            <p><strong>Fruta:</strong> {r.variedad}</p>
-            <p><strong>Fecha:</strong> {r.fecha}</p>
-            <p><strong>Tipo:</strong> <span style={{ textTransform: 'capitalize' }}>{r.tipo}</span></p>
-            <p><strong>Kilos:</strong> {Number(r.kilos).toFixed(2)} kg</p>
-            <p><strong>Precio medio:</strong> {Number(r.precio_medio_kg).toFixed(2)} €/kg</p>
-            <p><strong>Ingreso estimado:</strong> {(Number(r.kilos) * Number(r.precio_medio_kg)).toFixed(2)} €</p>
+            <div className="cabecera-cardExplo">
+              <span style={{ fontWeight: 600, color: 'var(--c-texto)' }}>{nombreParcela(r)}</span>
+              <span style={{ textTransform: 'capitalize' }}>{r.tipo}</span>
+            </div>
+            <div className="datos-cardExplo">
+              <p><strong>Fruta:</strong> {r.variedad}</p>
+              <p><strong>Fecha:</strong> <span className="num">{r.fecha}</span></p>
+              <p><strong>Kilos:</strong> <span className="num">{Number(r.kilos).toFixed(2)} kg</span></p>
+              <p><strong>Precio medio:</strong> <span className="num">{Number(r.precio_medio_kg).toFixed(2)} €/kg</span></p>
+              <p><strong>Ingreso estimado:</strong> <span className="num">{(Number(r.kilos) * Number(r.precio_medio_kg)).toFixed(2)} €</span></p>
+            </div>
             <div className="card-botones">
               {rol !== 'trabajador' && (
                 <BtnSubmit texto="Editar" to={`/recoleccion/${r.id}`} />
@@ -161,7 +175,8 @@ const Recoleccion = () => {
               )}
             </div>
           </div>
-        ))
+        ))}
+        </div>
       )}
     </div>
   );

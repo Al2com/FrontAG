@@ -7,8 +7,8 @@ const ExplotacionCard = ({ nombre, iconImg, altText, ubicacion, TotalHngExplo, n
         <p>{ubicacion}</p>
       </div>
       <div className="datos-cardExplo">
-        <p>Hanegadas: {TotalHngExplo} hng</p>
-        <p>Parcelas: {numParcelas}</p>
+        <p><strong>Hanegadas:</strong> <span className="num">{TotalHngExplo} hng</span></p>
+        <p><strong>Parcelas:</strong> <span className="num">{numParcelas}</span></p>
         {children}
       </div>
     </div>
