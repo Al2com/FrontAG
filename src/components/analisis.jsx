@@ -7,6 +7,7 @@ import BurbujasMetodos from './BurbujasMetodos'
 import BurbujasGanancia from './BurbujasGanancia'
 import BurbujasFlotantes from './BurbujasFlotantes'
 import RentabilidadBarra from './RentabilidadBarra'
+import ComparativaMediaResto from './ComparativaMediaResto'
 import BarraIngresosGastos from './BarraIngresosGastos'
 import ConsumoAguaBarra from './ConsumoAguaBarra'
 import { tramoMargen, LEYENDA_MARGEN } from '../utils/margenColor'
@@ -45,53 +46,6 @@ const burbujasDeOperaciones = (filas, prefijo) => filas.map((fila, indice) => ({
     ? `${fila.operario} · material ${formatoEuro(fila.precioMaterial)}`
     : fila.operario,
 }))
-
-// dos barras: la parcela seleccionada (color solido) frente a la media del
-// resto de parcelas (barra con borde, sin rellenar), para que se distingan
-// aunque no se perciban bien los colores
-const GraficoComparativo = ({ parcela, media, nombreParcela }) => {
-  const alturaMax = 120
-  const anchoBarra = 64
-  const gap = 48
-  const margen = 20
-  const anchoSvg = margen * 2 + anchoBarra * 2 + gap
-  const baseY = alturaMax + 20
-  const altoSvg = baseY + 24
-
-  const maxValor = Math.max(parcela, media, 0.01)
-  const alturaParcela = Math.max((parcela / maxValor) * alturaMax, 2)
-  const alturaMedia = Math.max((media / maxValor) * alturaMax, 2)
-
-  const xParcela = margen
-  const xMedia = margen + anchoBarra + gap
-
-  return (
-    <svg
-      viewBox={`0 0 ${anchoSvg} ${altoSvg}`}
-      className="grafico-comparativo"
-      role="img"
-      aria-label={`${nombreParcela}: ${parcela.toFixed(2)} euros por hanegada. Media del resto de parcelas: ${media.toFixed(2)} euros por hanegada.`}
-    >
-      <line x1={margen - 10} y1={baseY} x2={anchoSvg - margen + 10} y2={baseY} stroke="var(--c-borde)" strokeWidth="1" />
-
-      <rect x={xParcela} y={baseY - alturaParcela} width={anchoBarra} height={alturaParcela} rx="4" fill="var(--c-primario)" />
-      <text x={xParcela + anchoBarra / 2} y={baseY - alturaParcela - 8} textAnchor="middle" className="grafico-valor">
-        {parcela.toFixed(2)} €
-      </text>
-      <text x={xParcela + anchoBarra / 2} y={baseY + 16} textAnchor="middle" className="grafico-etiqueta">
-        {nombreParcela}
-      </text>
-
-      <rect x={xMedia} y={baseY - alturaMedia} width={anchoBarra} height={alturaMedia} rx="4" fill="var(--c-fondo-verde)" stroke="var(--c-primario-medio)" strokeWidth="2" />
-      <text x={xMedia + anchoBarra / 2} y={baseY - alturaMedia - 8} textAnchor="middle" className="grafico-valor">
-        {media.toFixed(2)} €
-      </text>
-      <text x={xMedia + anchoBarra / 2} y={baseY + 16} textAnchor="middle" className="grafico-etiqueta">
-        Media resto
-      </text>
-    </svg>
-  )
-}
 
 // Desglose de fumigacion (tractor vs. mochila): mano de obra, producto y
 // litros aplicados. Se reutiliza tal cual en el tipo "todas" y en "fumigacion".
@@ -238,6 +192,13 @@ const Analisis = () => {
   const [resumenTipo, setResumenTipo] = useState(null)
   const [gastosParcela, setGastosParcela] = useState(null)
   const [costesMetodo, setCostesMetodo] = useState(null)
+  // parcela concreta con la que comparar en el Card 2, en vez de la media del
+  // resto ('' = media del resto, el comportamiento de siempre)
+  const [parcelaComparacionId, setParcelaComparacionId] = useState('')
+  const [resumenComparacion, setResumenComparacion] = useState(null)
+  const [costesMetodoComparacion, setCostesMetodoComparacion] = useState(null)
+  // submetodo del desglose de fumigacion (solo relevante si tipo === 'fumigacion')
+  const [metodoFumigacion, setMetodoFumigacion] = useState('todas')
   const [rentabilidad, setRentabilidad] = useState([])
   const [historico, setHistorico] = useState([])
   const [mostrarTablaMargen, setMostrarTablaMargen] = useState(false)
@@ -306,6 +267,41 @@ const Analisis = () => {
       .catch(() => setError('Error al cargar los costes por método'))
   }, [parcelaId, anio])
 
+  // Si la parcela de comparacion elegida coincide con la parcela principal
+  // (p.ej. porque se acaba de cambiar la principal a esa), se trata como "sin
+  // elegir" (Media del resto): no tiene sentido comparar una parcela consigo
+  // misma. Nota: si despues la principal vuelve a cambiar a una tercera
+  // parcela, la eleccion anterior "revive" en vez de olvidarse del todo; es
+  // un caso raro (exige encadenar dos cambios de parcela principal) y
+  // evitarlo del todo requeriria leer/escribir un ref durante el render, que
+  // el linter del proyecto no permite, asi que se acepta esta version simple.
+  const parcelaComparacionEfectiva = parcelaComparacionId === parcelaId ? '' : parcelaComparacionId
+
+  // resumen (mismo tipo/año que el Card 2) de la parcela elegida para
+  // comparar, en vez de la media del resto; 'Media del resto' no pide nada
+  // nuevo, ya viene en desglose.comparativa
+  useEffect(() => {
+    if (!parcelaComparacionEfectiva) return
+    analisisService.getResumenParcela(parcelaComparacionEfectiva, anio, tipo)
+      .then(data => setResumenComparacion({ clave: `${parcelaComparacionEfectiva}-${anio}-${tipo}`, datos: data }))
+      .catch(() => setError('Error al cargar la comparativa con la parcela elegida'))
+  }, [parcelaComparacionEfectiva, anio, tipo])
+
+  // el filtro tractor/mochila de fumigacion solo tiene sentido si tipo es
+  // exactamente 'fumigacion' (no 'todas'); fuera de ahi se ignora el select
+  // sin necesidad de resetearlo, asi conserva su valor si el usuario vuelve
+  const metodoFumigacionEfectivo = tipo === 'fumigacion' ? metodoFumigacion : 'todas'
+
+  // costes por metodo de la parcela de comparacion elegida: solo hace falta
+  // si se compara con OTRA parcela (no la media) Y el filtro tractor/mochila
+  // esta activo, para que la barra comparativa tambien respete el metodo
+  useEffect(() => {
+    if (!parcelaComparacionEfectiva || metodoFumigacionEfectivo === 'todas') return
+    analisisService.getCostesMetodo(parcelaComparacionEfectiva, anio)
+      .then(data => setCostesMetodoComparacion({ clave: `${parcelaComparacionEfectiva}-${anio}`, datos: data }))
+      .catch(() => setError('Error al cargar el método de la parcela de comparación'))
+  }, [parcelaComparacionEfectiva, metodoFumigacionEfectivo, anio])
+
   // rentabilidad de TODAS las parcelas del admin, para poder compararlas
   useEffect(() => {
     analisisService.getRentabilidad(anio)
@@ -345,6 +341,50 @@ const Analisis = () => {
   const filasTipo = gastosVigentes?.datos?.operaciones?.find(o => o.tipo === tipo)?.filas ?? []
   const burbujasTipo = burbujasDeOperaciones(filasTipo, tipo)
   const etiquetaTipo = TIPOS.find(t => t.valor === tipo)?.etiqueta ?? tipo
+  const usaMetodoFumigacion = metodoFumigacionEfectivo !== 'todas'
+  const etiquetaMetodoFumigacion = { tractor: 'Tractor', mochila: 'Mochila' }[metodoFumigacionEfectivo]
+
+  // solo se usan si corresponden a los filtros vigentes (parcela/año/tipo o
+  // metodo), igual criterio que el resto de "vigente" de este componente
+  const comparacionVigente = resumenComparacion?.clave === `${parcelaComparacionEfectiva}-${anio}-${tipo}`
+    ? resumenComparacion.datos
+    : null
+  const costesMetodoComparacionVigente = costesMetodoComparacion?.clave === `${parcelaComparacionEfectiva}-${anio}`
+    ? costesMetodoComparacion.datos
+    : null
+
+  // gasto/hanegada de la parcela PRINCIPAL para el filtro actual (tipo, y si
+  // aplica, metodo de fumigacion): la fuente cambia, pero el resto del Card 2
+  // (barra comparativa) no necesita saber de donde viene el numero
+  const gastoPorHanegadaPrincipal = usaMetodoFumigacion
+    ? (costesMetodo ? costesMetodo.metodos[metodoFumigacionEfectivo].gastoPorHanegada : null)
+    : (desglose ? desglose.comparativa.gastoPorHanegadaParcela : null)
+
+  // destino de la comparativa: la media del resto, o la parcela elegida en el
+  // select de comparacion, ambos respetando el mismo filtro de metodo
+  const comparacion = !parcelaComparacionEfectiva
+    ? (usaMetodoFumigacion
+        ? (costesMetodo ? {
+            etiqueta: 'Media resto',
+            gastoTotal: costesMetodo.metodos[metodoFumigacionEfectivo].comparativa.gastoTotalMediaResto,
+            gastoPorHanegada: costesMetodo.metodos[metodoFumigacionEfectivo].comparativa.gastoPorHanegadaMediaResto,
+          } : null)
+        : (desglose ? {
+            etiqueta: 'Media resto',
+            gastoTotal: desglose.comparativa.gastoTotalMediaResto,
+            gastoPorHanegada: desglose.comparativa.gastoPorHanegadaMediaResto,
+          } : null))
+    : (usaMetodoFumigacion
+        ? (costesMetodoComparacionVigente ? {
+            etiqueta: costesMetodoComparacionVigente.parcela.nombre,
+            gastoTotal: costesMetodoComparacionVigente.metodos[metodoFumigacionEfectivo].costeTotal,
+            gastoPorHanegada: costesMetodoComparacionVigente.metodos[metodoFumigacionEfectivo].gastoPorHanegada,
+          } : null)
+        : (comparacionVigente ? {
+            etiqueta: comparacionVigente.parcela.nombre,
+            gastoTotal: comparacionVigente.gastoTotal,
+            gastoPorHanegada: comparacionVigente.gastoPorHanegada,
+          } : null))
 
   // ingresos, gastos y ganancia neta de la parcela seleccionada, de la misma
   // fuente que el resto de la pestaña (/api/analisis/rentabilidad)
@@ -439,7 +479,7 @@ const Analisis = () => {
                 />
               ) : !desglose ? (
                 <p className="rentabilidad-vacio">Cargando desglose…</p>
-              ) : tipo === 'fumigacion' || tipo === 'todas' ? (
+              ) : tipo === 'todas' ? (
                 desglose.fumigacion ? (
                   <DesgloseFumigacion fumigacion={desglose.fumigacion} />
                 ) : (
@@ -450,6 +490,55 @@ const Analisis = () => {
                     </div>
                   </div>
                 )
+              ) : tipo === 'fumigacion' ? (
+                <>
+                  <div className="filtro-explo">
+                    <div className="barra-select">
+                      <select value={metodoFumigacion} onChange={(e) => setMetodoFumigacion(e.target.value)}>
+                        <option value="todas">Todas</option>
+                        <option value="tractor">Tractor</option>
+                        <option value="mochila">Mochila</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {metodoFumigacion === 'todas' ? (
+                    desglose.fumigacion ? (
+                      <DesgloseFumigacion fumigacion={desglose.fumigacion} />
+                    ) : (
+                      <div className="rentabilidad-desplegable">
+                        <div className="rentabilidad-total">
+                          <span>Total fumigación</span>
+                          <span>{formatoEuro(desglose.gastoTotal)}</span>
+                        </div>
+                      </div>
+                    )
+                  ) : !costesMetodo ? (
+                    <p className="rentabilidad-vacio">Cargando datos de {etiquetaMetodoFumigacion.toLowerCase()}…</p>
+                  ) : (
+                    <>
+                      <BurbujasFlotantes
+                        datos={costesMetodo.metodos[metodoFumigacion].productos.map(prod => ({
+                          id: prod.producto_id,
+                          etiqueta: prod.nombre,
+                          valor: prod.costeTotal,
+                        }))}
+                        formatoValor={(v) => formatoEuro(v)}
+                        vacio={`Sin productos aplicados con ${metodoFumigacion} en ${anio}.`}
+                      />
+                      <div className="rentabilidad-desplegable">
+                        <div className="rentabilidad-fila-parcela">
+                          <span>Gasto por hanegada</span>
+                          <span>{formatoEuro(costesMetodo.metodos[metodoFumigacion].gastoPorHanegada)}</span>
+                        </div>
+                        <div className="rentabilidad-total">
+                          <span>Total {metodoFumigacion}</span>
+                          <span>{formatoEuro(costesMetodo.metodos[metodoFumigacion].costeTotal)}</span>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </>
               ) : (
                 <>
                   <BurbujasFlotantes
@@ -469,16 +558,50 @@ const Analisis = () => {
                   </div>
                 </>
               )}
-            </div>
 
-            {/* Card 3: comparativa con la media del resto de parcelas */}
-            <div className="rentabilidad-card">
-              <div className="rentabilidad-cabecera-izq"><h4>Gasto/hanegada vs. media del resto de parcelas</h4></div>
-              <GraficoComparativo
-                parcela={resumen.comparativa.gastoPorHanegadaParcela}
-                media={resumen.comparativa.gastoPorHanegadaMediaResto}
-                nombreParcela={resumen.parcela.nombre}
-              />
+              {/* comparativa con la media del resto de parcelas (o con una
+                  parcela concreta elegida abajo), para ESE mismo tipo/metodo
+                  y año: AnalisisController ya filtra por tipo y por metodo,
+                  no hay que recalcular nada aqui */}
+              {desglose && (
+                <>
+                  <h5 className="analisis-subtitulo-burbujas">Comparativa con el resto de parcelas</h5>
+
+                  <div className="filtro-explo">
+                    <div className="barra-select">
+                      <select value={parcelaComparacionEfectiva} onChange={(e) => setParcelaComparacionId(e.target.value)}>
+                        <option value="">Media del resto</option>
+                        {parcelas
+                          .filter(p => String(p.id) !== String(parcelaId))
+                          .map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
+                      </select>
+                    </div>
+                  </div>
+
+                  {gastoPorHanegadaPrincipal === null || !comparacion ? (
+                    <p className="rentabilidad-vacio">Cargando comparativa…</p>
+                  ) : (
+                    <>
+                      <div className="rentabilidad-desplegable">
+                        <div className="rentabilidad-fila-parcela">
+                          <span>{comparacion.etiqueta} ({(usaMetodoFumigacion ? etiquetaMetodoFumigacion : etiquetaTipo).toLowerCase()})</span>
+                          <span>{formatoEuro(comparacion.gastoTotal)}</span>
+                        </div>
+                        <div className="rentabilidad-fila-parcela">
+                          <span>{comparacion.etiqueta} por hanegada</span>
+                          <span>{formatoEuro(comparacion.gastoPorHanegada)}</span>
+                        </div>
+                      </div>
+                      <ComparativaMediaResto
+                        nombreParcela={desglose.parcela.nombre}
+                        etiquetaComparacion={comparacion.etiqueta}
+                        parcelaPorHanegada={gastoPorHanegadaPrincipal}
+                        comparacionPorHanegada={comparacion.gastoPorHanegada}
+                      />
+                    </>
+                  )}
+                </>
+              )}
             </div>
           </>
         )}
