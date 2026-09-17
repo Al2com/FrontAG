@@ -13,6 +13,25 @@ import backupService from '../services/backup.js';
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 
+// pendientes primero; entre iguales se respeta el orden que ya trae el back
+// (mas recientes primero). El peso numerico mantiene el orden estable: el
+// comparador anterior devolvia 1 tambien para elementos iguales
+const ordenarPorEstado = (items) =>
+  [...items].sort((a, b) => (a.estado === 'pendiente' ? 0 : 1) - (b.estado === 'pendiente' ? 0 : 1));
+
+// operaciones y fumigaciones se pintan igual: solo cambia el campo que titula
+// la ficha (el tipo de operacion o el metodo de aplicacion)
+const ListaActividad = ({ items, campoTitulo }) =>
+  ordenarPorEstado(items).map((item) => (
+    <div key={item.id} className={`actividad-item estado-borde--${item.estado}`}>
+      <div className="actividad-item-header">
+        <strong>{item[campoTitulo]}</strong>
+        <span className={`actividad-estado estado-badge--${item.estado}`}>{item.estado}</span>
+      </div>
+      <p className="actividad-item-sub">{item.operario}</p>
+    </div>
+  ));
+
 const Dashboard = () => {
   const [numExplo, setNumExplo] = useState(0);
   const [numParcelas, setNumParcelas] = useState(0);
@@ -45,12 +64,12 @@ const Dashboard = () => {
       .then(data => setNumParcelas(data.total))
       .catch(avisarError);
 
-    operacionesService.getLista()
-      .then(data => setTotalOperaciones(data.total))
+    operacionesService.getTotal()
+      .then(total => setTotalOperaciones(total))
       .catch(avisarError);
 
-    fumigacionesService.getLista()
-      .then(data => setTotalFumigaciones(data.length))
+    fumigacionesService.getTotal()
+      .then(total => setTotalFumigaciones(total))
       .catch(avisarError);
 
     productosService.getProductos()
@@ -65,12 +84,6 @@ const Dashboard = () => {
       .then(datos => setProductosStockBajo(datos))
       .catch(avisarError);
   }, []);
-
-  // pendientes primero
-  const ordenarPorEstado = (items) =>
-    [...items].sort((a, b) =>
-      a.estado === 'pendiente' && b.estado !== 'pendiente' ? -1 : 1
-    );
 
   const paneles = [
     { iconImg: './explotaciones.svg', texto: 'Explotaciones', valor: numExplo,          comentario: 'Total de Fincas'    },
@@ -127,26 +140,10 @@ const Dashboard = () => {
         {/* últimas operaciones y fumigaciones, pendientes primero */}
         <InfoPanel2 iconImg="./operaciones.svg" titulo="Actividad Reciente">
           <h3>Operaciones</h3>
-          {ordenarPorEstado(actividadReciente.operaciones).map((op, i) => (
-            <div key={i} className={`actividad-item estado-borde--${op.estado}`}>
-              <div className="actividad-item-header">
-                <strong>{op.tipo_operacion}</strong>
-                <span className={`actividad-estado estado-badge--${op.estado}`}>{op.estado}</span>
-              </div>
-              <p className="actividad-item-sub">{op.operario}</p>
-            </div>
-          ))}
+          <ListaActividad items={actividadReciente.operaciones} campoTitulo="tipo_operacion" />
 
           <h3>Fumigaciones</h3>
-          {ordenarPorEstado(actividadReciente.fumigaciones).map((fum, i) => (
-            <div key={i} className={`actividad-item estado-borde--${fum.estado}`}>
-              <div className="actividad-item-header">
-                <strong>{fum.metodo_aplicacion}</strong>
-                <span className={`actividad-estado estado-badge--${fum.estado}`}>{fum.estado}</span>
-              </div>
-              <p className="actividad-item-sub">{fum.metodo_aplicacion} — {fum.operario}</p>
-            </div>
-          ))}
+          <ListaActividad items={actividadReciente.fumigaciones} campoTitulo="metodo_aplicacion" />
         </InfoPanel2>
 
       </div>
