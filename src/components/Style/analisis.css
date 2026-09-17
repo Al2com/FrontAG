@@ -133,3 +133,112 @@
 .rentabilidad-barra-etiqueta--neutra { color: var(--rentab-media-baja); }
 .rentabilidad-barra-etiqueta--negativa { color: var(--rentab-baja); }
 .rentabilidad-barra-etiqueta--sin-datos { color: var(--c-texto-apagado); font-weight: 400; }
+
+/* SECCION DE ANALISIS DE UNA PARCELA
+   Agrupa el titulo, los filtros de parcela/año, la barra de rentabilidad y los
+   cards que dependen de la parcela seleccionada, para separarlos visualmente
+   de los cards globales (histórico y mapa de ganancia de todas las parcelas). */
+.analisis-parcela {
+  border: 1px solid var(--c-borde);
+  border-radius: var(--rad-md);
+  background-color: var(--c-fondo);
+  padding: var(--esp-md) 0;
+  margin: 0 var(--esp-sm) var(--esp-md);
+}
+
+.analisis-parcela-cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--esp-sm);
+  padding: 0 var(--esp-xl) var(--esp-sm);
+}
+
+.analisis-parcela-titulo {
+  margin: 0;
+  font-size: 20px;
+  color: var(--c-primario);
+}
+
+/* los cards ya traen su propio margen lateral; dentro de la seccion se reduce
+   para que no queden demasiado estrechos */
+.analisis-parcela .rentabilidad-card { margin: 0 var(--esp-md) var(--esp-md); }
+
+/* BARRA DE RENTABILIDAD (ingresos vs. gastos) */
+.barra-ingresos-gastos {
+  padding: var(--esp-sm) var(--esp-xl) var(--esp-md);
+}
+
+.barra-ingresos-gastos-fila {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-sm);
+  margin-bottom: 6px;
+}
+
+.barra-ingresos-gastos-etiqueta {
+  flex: 0 0 70px;
+  font-size: 13px;
+  color: var(--c-texto-apagado);
+}
+
+.barra-ingresos-gastos-pista {
+  flex: 1 1 auto;
+  height: 14px;
+  border-radius: 7px;
+  background-color: var(--c-borde);
+  overflow: hidden;
+}
+
+.barra-ingresos-gastos-relleno {
+  height: 100%;
+  border-radius: 7px;
+  transition: width .25s ease;
+}
+
+.barra-ingresos-gastos-relleno--ingresos { background-color: var(--c-primario-medio); }
+.barra-ingresos-gastos-relleno--gastos   { background-color: var(--rentab-media-baja); }
+
+.barra-ingresos-gastos-valor {
+  flex: 0 0 auto;
+  min-width: 90px;
+  text-align: right;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--c-texto);
+}
+
+.barra-ingresos-gastos-neto {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 700;
+  font-size: 15px;
+  border-top: 2px solid var(--c-borde);
+  padding-top: var(--esp-xs);
+  margin-top: var(--esp-xs);
+}
+
+.barra-ingresos-gastos-neto.es-positivo { color: var(--c-primario); }
+.barra-ingresos-gastos-neto.es-negativo { color: var(--rentab-baja); }
+
+/* separador de los grupos de burbujas dentro de un mismo card (goteo/manta) */
+.analisis-subtitulo-burbujas {
+  margin: var(--esp-sm) 0 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--c-texto-apagado);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+@media (max-width: 768px) {
+  .analisis-parcela { margin: 0 0 var(--esp-md); }
+  .analisis-parcela-cabecera { padding: 0 var(--esp-sm) var(--esp-sm); }
+  .analisis-parcela-titulo { font-size: 17px; }
+  .analisis-parcela .rentabilidad-card { margin: 0 var(--esp-sm) var(--esp-sm); }
+  .barra-ingresos-gastos { padding: var(--esp-sm); }
+  .barra-ingresos-gastos-etiqueta { flex-basis: 56px; }
+  .barra-ingresos-gastos-valor { min-width: 72px; }
+}

@@ -1,18 +1,15 @@
 import axios from './axios.js';
 const baseUrl = '/api/operaciones';
-const baseUrl1 = '/api/fumigaciones';
-const baseUrl2 = '/api/operaciones/crear';
-//este servicio se usa para todo lo relacionado con los formularios
-const getLista = () => {
-    return axios.get(`${baseUrl}`).then(res => res.data);
-}
 
-const getLista1 = () => {
-    return axios.get(`${baseUrl1}`).then(res => res.data);
+//este servicio se usa para todo lo relacionado con los formularios
+
+// numero total de operaciones de la explotacion, para el contador del panel
+const getTotal = () => {
+    return axios.get(baseUrl).then(res => res.data.total);
 }
 
 const postCrear = (formData) => {
-    return axios.post(baseUrl2, formData).then(res => res.data)
+    return axios.post(`${baseUrl}/crear`, formData).then(res => res.data)
 }
 
 const getOperacion = (id) => {
@@ -24,4 +21,4 @@ const putActualizarOperacion = (id, formData) => {
     return axios.put(`${baseUrl}/${id}`, formData).then(res => res.data)
 }
 
-export default { getLista, getLista1, postCrear, getOperacion, putActualizarOperacion }
+export default { getTotal, postCrear, getOperacion, putActualizarOperacion }

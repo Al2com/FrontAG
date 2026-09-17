@@ -57,3 +57,14 @@
     min-height: auto;
   }
 }
+
+/* tercera linea opcional (operario, material, hanegadas regadas...) */
+.burbuja-flotante-detalle {
+  font-size: 10px;
+  line-height: 1.2;
+  opacity: .75;
+}
+
+@media (max-width: 768px) {
+  .burbuja-flotante-detalle { font-size: 9px; }
+}

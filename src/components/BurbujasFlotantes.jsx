@@ -16,7 +16,10 @@ const calcularDiametro = (valor, valorMaximo) => {
 // dentro del conjunto. Pensada para listas cortas de categorias (proveedores,
 // productos...) donde no hace falta comparar tendencia ni orden temporal.
 //
-// datos: [{ id, etiqueta, valor }]
+// datos: [{ id, etiqueta, valor, detalle }]
+// detalle es opcional: una tercera linea mas pequena dentro de la burbuja
+// (operario, material, hanegadas...) para las burbujas que representan un
+// registro concreto y no una categoria
 // formatoValor(valor) -> texto mostrado dentro de la burbuja y en su aria-label
 // proporcional: si es false, todas las burbujas salen del mismo tamaño (KPIs
 // en unidades distintas, p.ej. € total vs €/hanegada, donde comparar tamaños
@@ -37,10 +40,11 @@ const BurbujasFlotantes = ({ datos, formatoValor, vacio = 'Sin datos para mostra
             key={item.id}
             className="burbuja-flotante"
             style={{ width: diametro, height: diametro }}
-            aria-label={`${item.etiqueta}: ${formatoValor(item.valor)}`}
+            aria-label={`${item.etiqueta}: ${formatoValor(item.valor)}${item.detalle ? `. ${item.detalle}` : ''}`}
           >
             <span className="burbuja-flotante-valor">{formatoValor(item.valor)}</span>
             <span className="burbuja-flotante-etiqueta">{item.etiqueta}</span>
+            {item.detalle && <span className="burbuja-flotante-detalle">{item.detalle}</span>}
           </li>
         )
       })}

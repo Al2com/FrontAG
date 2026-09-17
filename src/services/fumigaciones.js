@@ -12,8 +12,9 @@ const postCrearFumigacion = (formData) =>{
 
 }
 
-const getLista = () => {
-    return axios.get(baseUrl1).then(res => res.data)
+// numero total de fumigaciones de la explotacion, para el contador del panel
+const getTotal = () => {
+    return axios.get(baseUrl1).then(res => res.data.total)
 }
 
 //saca la fumigacion 
@@ -29,6 +30,6 @@ const putActualizarFumigacion = (id, formData) => {
 
 
 
-export default {postCrearFumigacion, getFumigacion, putActualizarFumigacion, getLista}
+export default { postCrearFumigacion, getFumigacion, putActualizarFumigacion, getTotal }
 
 
