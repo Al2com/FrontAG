@@ -1,0 +1,84 @@
+.consultor-container {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 120px);
+  padding: 20px;
+  gap: 16px;
+}
+
+.consultor-mensajes {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #E9ECEF;
+}
+
+.consultor-vacio {
+  text-align: center;
+  color: #888;
+  margin-top: 40px;
+}
+
+.consultor-mensaje {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 80%;
+}
+
+.consultor-user {
+  align-self: flex-end;
+  background: #1B4332;
+  color: white;
+  padding: 10px 14px;
+  border-radius: 12px 12px 0 12px;
+}
+
+.consultor-assistant {
+  align-self: flex-start;
+  background: #F4FDF2;
+  border: 1px solid #E9ECEF;
+  padding: 10px 14px;
+  border-radius: 12px 12px 12px 0;
+}
+
+.consultor-rol {
+  font-size: 11px;
+  font-weight: 600;
+  opacity: 0.7;
+}
+
+.consultor-user .consultor-rol { color: rgba(255,255,255,0.8); }
+
+.consultor-input {
+  display: flex;
+  gap: 10px;
+}
+
+.consultor-input input {
+  flex: 1;
+  padding: 12px 16px;
+  border: 1px solid #E9ECEF;
+  border-radius: 8px;
+  font-size: 15px;
+  outline: none;
+}
+
+.consultor-input input:focus {
+  border-color: #1B4332;
+}
+
+.consultor-input button {
+  background: #1B4332;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}

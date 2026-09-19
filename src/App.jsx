@@ -33,6 +33,7 @@ import FormForgotPassword from './components/CreateForm/FormForgotPassword.jsx'
 import FormResetPassword from './components/CreateForm/FormResetPassword.jsx'
 import Configuracion from './components/configuracion.jsx'
 import { useTheme } from './hooks/useTheme.js'
+import Consultor  from './components/Consultor.jsx'
 
 // Bloquea rutas para el rol trabajador: si lo es, lo manda al dashboard.
 // El trabajador solo puede acceder a Dashboard y Operaciones.
@@ -115,6 +116,7 @@ function App() {
               <Route path="/gastos" element={<SoloAdmin><Gastos/></SoloAdmin>} />
               <Route path="/cuaderno" element={<SoloAdmin><Cuaderno/></SoloAdmin>} />
               <Route path="/analisis" element={<SoloAdmin><Analisis/></SoloAdmin>} />
+              <Route path="/Consultor" element={<Consultor />} /> 
 
               {/* ruta comodin: cualquier direccion no definida cae aqui */}
               <Route path="*" element={
