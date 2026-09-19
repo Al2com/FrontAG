@@ -162,6 +162,19 @@ const MenuNav = ({ user, logout }) => {
               onClick={() => seleccionar('Analisis')}
             />
           )}
+
+           {rol !== 'trabajador' && (
+            <MenuBar
+              to="/consultor"
+              iconImg="./consultor.svg"
+              altText="Consultor"
+              texto="Consultor"
+              isSeleccionado={botonActivo === 'Consultor'}
+              onClick={() => seleccionar('Consultor')}
+            />
+          )}
+
+          
           <MenuBar
             to="/configuracion"
             iconImg="./iconConfiguracion.svg"
