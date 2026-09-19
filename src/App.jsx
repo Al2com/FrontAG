@@ -116,7 +116,7 @@ function App() {
               <Route path="/gastos" element={<SoloAdmin><Gastos/></SoloAdmin>} />
               <Route path="/cuaderno" element={<SoloAdmin><Cuaderno/></SoloAdmin>} />
               <Route path="/analisis" element={<SoloAdmin><Analisis/></SoloAdmin>} />
-              <Route path="/Consultor" element={<Consultor />} /> 
+              <Route path="/Consultor" element={<SoloAdmin><Consultor /></SoloAdmin>} /> 
 
               {/* ruta comodin: cualquier direccion no definida cae aqui */}
               <Route path="*" element={
