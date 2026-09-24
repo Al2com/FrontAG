@@ -18,13 +18,20 @@ const Consultor = () => {
     setMensajes(nuevosMensajes)
 
     try {
-    const data = await consultorService.consultar(nuevosMensajes)
-    console.log('respuesta Groq:', JSON.stringify(data))
-    const textoFinal = data.choices[0].message.content
-    setMensajes(prev => [...prev, { role: 'assistant', content: textoFinal }])
-} catch (err) {
-    console.error('Error completo:', err.response?.data)
-} finally {
+      const data = await consultorService.consultar(nuevosMensajes)
+      const textoFinal = data?.choices?.[0]?.message?.content
+
+      if (!textoFinal) {
+        throw new Error('Respuesta sin contenido')
+      }
+
+      setMensajes(prev => [...prev, { role: 'assistant', content: textoFinal }])
+    } catch (err) {
+      console.error('Error completo:', err.response?.data || err)
+      const mensajeError = err.response?.data?.message
+        || 'No se ha podido obtener respuesta. Inténtalo de nuevo.'
+      setMensajes(prev => [...prev, { role: 'assistant', content: mensajeError }])
+    } finally {
       setCargando(false)
     }
   }

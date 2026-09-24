@@ -480,16 +480,17 @@ const Analisis = () => {
               ) : !desglose ? (
                 <p className="rentabilidad-vacio">Cargando desglose…</p>
               ) : tipo === 'todas' ? (
-                desglose.fumigacion ? (
-                  <DesgloseFumigacion fumigacion={desglose.fumigacion} />
-                ) : (
-                  <div className="rentabilidad-desplegable">
-                    <div className="rentabilidad-total">
-                      <span>Total {etiquetaTipo.toLowerCase()}</span>
-                      <span>{formatoEuro(desglose.gastoTotal)}</span>
-                    </div>
+                <div className="rentabilidad-desplegable">
+                  <div className="rentabilidad-fila-parcela">
+                    <span>Gasto por hanegada</span>
+                    <span>{formatoEuro(desglose.gastoPorHanegada)}</span>
                   </div>
-                )
+                  <div className="rentabilidad-total">
+                    <span>Total {etiquetaTipo.toLowerCase()}</span>
+                    <span>{formatoEuro(desglose.gastoTotal)}</span>
+                  </div>
+                  {desglose.fumigacion && <DesgloseFumigacion fumigacion={desglose.fumigacion} />}
+                </div>
               ) : tipo === 'fumigacion' ? (
                 <>
                   <div className="filtro-explo">
