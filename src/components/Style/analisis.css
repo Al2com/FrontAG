@@ -27,6 +27,30 @@
   white-space: nowrap;
 }
 
+/* chip de estado (rentable/umbral/pérdidas) de la tabla del mapa de
+   dispersión gastos vs. ingresos: mismo color que la burbuja de esa parcela */
+.chip-estado {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--c-blanco);
+  white-space: nowrap;
+}
+
+.chip-estado--rentable { background-color: var(--grove); }
+.chip-estado--umbral   { background-color: var(--citrus); }
+.chip-estado--perdidas { background-color: var(--persimmon); }
+
+/* nombre de la parcela en el tooltip del mapa de dispersión: en su propia
+   línea, separado de la ganancia, para no leerlos como un par etiqueta/valor */
+.tooltip-parcela-nombre {
+  font-weight: 700;
+  color: var(--c-primario);
+  margin-bottom: 4px;
+}
+
 .leyenda-margen {
   display: flex;
   flex-wrap: wrap;
@@ -133,6 +157,26 @@
   gap: var(--esp-sm);
   padding: 0 var(--esp-xl) var(--esp-sm);
 }
+
+.analisis-parcela-titulo-fila {
+  display: flex;
+  align-items: baseline;
+  gap: var(--esp-sm);
+  flex-wrap: wrap;
+}
+
+.analisis-alternar-nombre {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 12px;
+  color: var(--c-texto);
+  opacity: 0.6;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.analisis-alternar-nombre:hover { opacity: 1; }
 
 .analisis-parcela-titulo {
   margin: 0;

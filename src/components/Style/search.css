@@ -1,5 +1,7 @@
 .barra-search {
-  border: 1px solid rgb(139, 136, 136);
+  border: 1px solid var(--c-borde);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  transition: box-shadow 0.2s, border-color 0.2s;
   border-radius: 10px;
   width: 300px;
   height: 40px;
@@ -18,15 +20,25 @@
   background: transparent;
 }
 
+.barra-search:focus-within {
+  border-color: var(--c-primario-medio);
+  box-shadow: 0 0 0 2px rgba(27,67,50,0.15);
+}
+
 .barra-select,
 .barra-select-lg {
-  border: 1px solid rgb(139, 136, 136);
+  border: 1px solid var(--c-borde);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  transition: border-color 0.2s, box-shadow 0.2s;
   border-radius: 10px;
   height: 40px;
   display: flex;
   align-items: center;
   margin-left: var(--esp-lg);
 }
+
+.barra-select:hover,
+.barra-select-lg:hover { border-color: var(--c-primario-medio); }
 
 .barra-select { width: 120px; }
 .barra-select-lg { width: 160px; }
@@ -60,5 +72,8 @@
   border-radius: 10px;
   -webkit-appearance: none;
   appearance: none;
-  padding: 0 12px;
+  padding: 0 28px 0 12px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%231B4332' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
 }

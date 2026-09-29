@@ -18,6 +18,11 @@
   --c-texto-etiqueta:#555;
   --c-peligro:#dc3545;
   --c-peligro-hover: #b02a37;
+  /* escala rentable/umbral/pérdidas del gráfico de dispersión gastos vs.
+     ingresos en Análisis (Mapa de ganancia neta por parcela) */
+  --grove:#2f5233;
+  --citrus:#c9a227;
+  --persimmon:#e2672b;
   --estado-pendiente: #E9A800;
   --estado-realizado: #2E7D52;
   --estado-revisado :#4A90D9;
