@@ -3,14 +3,16 @@ import analisisService from '../services/analisis'
 import parcelasService from '../services/parcelas'
 import gastosService from '../services/gastos'
 import GraficoRentabilidad from './GraficoRentabilidad'
+import DispersionRentabilidad from './DispersionRentabilidad'
 import BurbujasMetodos from './BurbujasMetodos'
-import BurbujasGanancia from './BurbujasGanancia'
 import BurbujasFlotantes from './BurbujasFlotantes'
 import RentabilidadBarra from './RentabilidadBarra'
 import ComparativaMediaResto from './ComparativaMediaResto'
 import BarraIngresosGastos from './BarraIngresosGastos'
 import ConsumoAguaBarra from './ConsumoAguaBarra'
-import { tramoMargen, LEYENDA_MARGEN } from '../utils/margenColor'
+import CabeceraOrden from './CabeceraOrden.jsx'
+import { useOrdenTabla } from '../hooks/useOrdenTabla'
+import { calcularEstado, COLOR_ESTADO, ETIQUETA_ESTADO } from '../utils/estadoRentabilidad'
 import './Style/cards.css'
 import './Style/search.css'
 import './Style/forms.css'
@@ -22,7 +24,6 @@ const formatoEuro = (valor) => (valor === null || valor === undefined ? '-' : `$
 const formatoNumero = (valor, unidad = '') => (valor === null || valor === undefined ? '-' : `${valor}${unidad}`)
 
 const TIPOS = [
-  { valor: 'todas', etiqueta: 'Todas' },
   { valor: 'fumigacion', etiqueta: 'Fumigación' },
   { valor: 'poda', etiqueta: 'Poda' },
   { valor: 'riego', etiqueta: 'Riego' },
@@ -32,8 +33,8 @@ const TIPOS = [
 ]
 
 // tipos cuyo detalle (operacion a operacion, o recibo a recibo en el riego)
-// vive en /api/gastos/resumen. "todas" y "fumigacion" no entran: la primera no
-// es un tipo real y la segunda ya tiene su propio desglose de dos niveles
+// vive en /api/gastos/resumen. "fumigacion" no entra: ya tiene su propio
+// desglose de dos niveles
 const TIPOS_CON_DETALLE = ['poda', 'riego', 'abonado', 'mantenimiento', 'tractor']
 
 // una burbuja por operacion: el importe manda el tamaño, y dentro se lee la
@@ -48,7 +49,7 @@ const burbujasDeOperaciones = (filas, prefijo) => filas.map((fila, indice) => ({
 }))
 
 // Desglose de fumigacion (tractor vs. mochila): mano de obra, producto y
-// litros aplicados. Se reutiliza tal cual en el tipo "todas" y en "fumigacion".
+// litros aplicados.
 const DesgloseFumigacion = ({ fumigacion }) => (
   <>
     <BurbujasMetodos
@@ -187,7 +188,18 @@ const Analisis = () => {
   const [parcelas, setParcelas] = useState([])
   const [parcelaId, setParcelaId] = useState('')
   const [anio, setAnio] = useState(anioActual.toString())
-  const [tipo, setTipo] = useState('todas')
+  const [tipo, setTipo] = useState('fumigacion')
+  // false: polígono/parcela (por defecto); true: nombre de la parcela
+  const [mostrarNombre, setMostrarNombre] = useState(false)
+
+  // las respuestas del resumen solo traen id y nombre: poligono/parcela se
+  // sacan de la lista de parcelas cargada al montar
+  const etiquetaParcela = (p) => {
+    const completa = parcelas.find(x => String(x.id) === String(p.id)) ?? p
+    return mostrarNombre || completa.poligono == null
+      ? completa.nombre
+      : `Pol. ${completa.poligono} - Par. ${completa.parcela}`
+  }
   const [resumen, setResumen] = useState(null)
   const [resumenTipo, setResumenTipo] = useState(null)
   const [gastosParcela, setGastosParcela] = useState(null)
@@ -201,7 +213,10 @@ const Analisis = () => {
   const [metodoFumigacion, setMetodoFumigacion] = useState('todas')
   const [rentabilidad, setRentabilidad] = useState([])
   const [historico, setHistorico] = useState([])
+  // vista del mapa de ganancia neta por parcela: burbujas por defecto (se ve
+  // de un vistazo quién gana más), tabla para las cifras exactas
   const [mostrarTablaMargen, setMostrarTablaMargen] = useState(false)
+  const ordenMapa = useOrdenTabla()
   const [error, setError] = useState('')
 
   // cargo las parcelas del admin una vez, y selecciono la primera por defecto
@@ -225,10 +240,9 @@ const Analisis = () => {
       .catch(() => setError('Error al cargar el análisis'))
   }, [parcelaId, anio])
 
-  // resumen del tipo seleccionado, solo para el card de desglose; con "todas"
-  // se reutiliza el resumen general y se ahorra la peticion
+  // resumen del tipo seleccionado, solo para el card de desglose
   useEffect(() => {
-    if (!parcelaId || tipo === 'todas') return
+    if (!parcelaId) return
     analisisService.getResumenParcela(parcelaId, anio, tipo)
       .then(data => setResumenTipo(data))
       .catch(() => setError('Error al cargar el desglose por tipo'))
@@ -288,7 +302,7 @@ const Analisis = () => {
   }, [parcelaComparacionEfectiva, anio, tipo])
 
   // el filtro tractor/mochila de fumigacion solo tiene sentido si tipo es
-  // exactamente 'fumigacion' (no 'todas'); fuera de ahi se ignora el select
+  // exactamente 'fumigacion'; fuera de ahi se ignora el select
   // sin necesidad de resetearlo, asi conserva su valor si el usuario vuelve
   const metodoFumigacionEfectivo = tipo === 'fumigacion' ? metodoFumigacion : 'todas'
 
@@ -325,16 +339,16 @@ const Analisis = () => {
     ? tractorMetodo.litros / costesMetodo.hanegadas / tractorMetodo.numFumigaciones
     : null
 
-  // el desglose del card de tipos: el resumen general cuando es "todas", y si
-  // no, la ultima respuesta SOLO si corresponde a los filtros actuales (asi no
-  // se pinta el tipo anterior mientras llega la peticion nueva)
+  // el desglose del card de tipos: la ultima respuesta SOLO si corresponde a
+  // los filtros actuales (asi no se pinta el tipo anterior mientras llega la
+  // peticion nueva)
   const resumenTipoVigente = resumenTipo
     && String(resumenTipo.parcela.id) === String(parcelaId)
     && String(resumenTipo.anio) === String(anio)
     && resumenTipo.tipo === tipo
     ? resumenTipo
     : null
-  const desglose = tipo === 'todas' ? resumen : resumenTipoVigente
+  const desglose = resumenTipoVigente
   // solo se usa el detalle si corresponde a la parcela y al año actuales
   const gastosVigentes = gastosParcela?.clave === `${parcelaId}-${anio}` ? gastosParcela : null
   const lineasRiego = gastosVigentes ? (gastosVigentes.datos?.riego ?? []) : null
@@ -376,12 +390,12 @@ const Analisis = () => {
           } : null))
     : (usaMetodoFumigacion
         ? (costesMetodoComparacionVigente ? {
-            etiqueta: costesMetodoComparacionVigente.parcela.nombre,
+            etiqueta: etiquetaParcela(costesMetodoComparacionVigente.parcela),
             gastoTotal: costesMetodoComparacionVigente.metodos[metodoFumigacionEfectivo].costeTotal,
             gastoPorHanegada: costesMetodoComparacionVigente.metodos[metodoFumigacionEfectivo].gastoPorHanegada,
           } : null)
         : (comparacionVigente ? {
-            etiqueta: comparacionVigente.parcela.nombre,
+            etiqueta: etiquetaParcela(comparacionVigente.parcela),
             gastoTotal: comparacionVigente.gastoTotal,
             gastoPorHanegada: comparacionVigente.gastoPorHanegada,
           } : null))
@@ -389,9 +403,25 @@ const Analisis = () => {
   // ingresos, gastos y ganancia neta de la parcela seleccionada, de la misma
   // fuente que el resto de la pestaña (/api/analisis/rentabilidad)
   const rentabilidadParcela = rentabilidad.find(p => String(p.parcela_id) === String(parcelaId))
-  const nombreParcela = resumen?.parcela?.nombre
-    ?? parcelas.find(p => String(p.id) === String(parcelaId))?.nombre
-    ?? ''
+  const parcelaActual = parcelas.find(p => String(p.id) === String(parcelaId))
+  const nombreParcela = parcelaActual ? etiquetaParcela(parcelaActual) : ''
+
+  // gastos/ingresos/hanegadas por parcela para el mapa de dispersión y su
+  // tabla: mismos datos y mismo estado (rentable/umbral/pérdidas) en las dos
+  // vistas, así el color de la burbuja y el chip de la tabla siempre coinciden
+  const datosMapa = rentabilidad
+    .filter(p => p.hanegadas > 0)
+    .map(p => ({
+      parcelaId: p.parcela_id,
+      nombre: etiquetaParcela({ id: p.parcela_id, nombre: p.nombre }),
+      hanegadas: p.hanegadas,
+      gastos: p.costes,
+      ingresos: p.ingresos,
+      gastoPorHanegada: p.costes / p.hanegadas,
+      estado: calcularEstado(p.ingresos, p.costes),
+    }))
+  const valorOrdenMapa = (fila, clave) => (clave === 'estado' ? ETIQUETA_ESTADO[fila.estado] : fila[clave])
+  const datosMapaOrdenados = ordenMapa.ordenar(datosMapa, valorOrdenMapa)
 
   return (
     <div className="rentabilidad-contenedor">
@@ -403,13 +433,23 @@ const Analisis = () => {
 
       <section className="analisis-parcela">
         <div className="analisis-parcela-cabecera">
-          <h2 className="analisis-parcela-titulo">{nombreParcela || 'Análisis de parcela'}</h2>
+          <div className="analisis-parcela-titulo-fila">
+            <h2 className="analisis-parcela-titulo">{nombreParcela || 'Análisis de parcela'}</h2>
+            <button
+              type="button"
+              className="analisis-alternar-nombre"
+              onClick={() => setMostrarNombre(m => !m)}
+              title="Alternar entre nombre y polígono/parcela"
+            >
+              nombre / ref.
+            </button>
+          </div>
           <div className="menuExplo">
             <div className="menu-button">
               <div className="filtro-explo">
                 <div className="barra-select">
                   <select value={parcelaId} onChange={(e) => setParcelaId(e.target.value)}>
-                    {parcelas.map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
+                    {parcelas.map(p => <option key={p.id} value={p.id}>{etiquetaParcela(p)}</option>)}
                   </select>
                 </div>
               </div>
@@ -479,18 +519,6 @@ const Analisis = () => {
                 />
               ) : !desglose ? (
                 <p className="rentabilidad-vacio">Cargando desglose…</p>
-              ) : tipo === 'todas' ? (
-                <div className="rentabilidad-desplegable">
-                  <div className="rentabilidad-fila-parcela">
-                    <span>Gasto por hanegada</span>
-                    <span>{formatoEuro(desglose.gastoPorHanegada)}</span>
-                  </div>
-                  <div className="rentabilidad-total">
-                    <span>Total {etiquetaTipo.toLowerCase()}</span>
-                    <span>{formatoEuro(desglose.gastoTotal)}</span>
-                  </div>
-                  {desglose.fumigacion && <DesgloseFumigacion fumigacion={desglose.fumigacion} />}
-                </div>
               ) : tipo === 'fumigacion' ? (
                 <>
                   <div className="filtro-explo">
@@ -574,7 +602,7 @@ const Analisis = () => {
                         <option value="">Media del resto</option>
                         {parcelas
                           .filter(p => String(p.id) !== String(parcelaId))
-                          .map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
+                          .map(p => <option key={p.id} value={p.id}>{etiquetaParcela(p)}</option>)}
                       </select>
                     </div>
                   </div>
@@ -594,7 +622,7 @@ const Analisis = () => {
                         </div>
                       </div>
                       <ComparativaMediaResto
-                        nombreParcela={desglose.parcela.nombre}
+                        nombreParcela={etiquetaParcela(desglose.parcela)}
                         etiquetaComparacion={comparacion.etiqueta}
                         parcelaPorHanegada={gastoPorHanegadaPrincipal}
                         comparacionPorHanegada={comparacion.gastoPorHanegada}
@@ -651,7 +679,10 @@ const Analisis = () => {
         />
       </div>
 
-      {rentabilidad.length > 0 && (
+      {/* gastos vs. ingresos por parcela: por encima de la diagonal hay
+          beneficio, por debajo pérdidas. Tabla: mismas cifras y mismo estado
+          (rentable/umbral/pérdidas, calcularEstado) fila a fila, ordenable */}
+      {datosMapa.length > 0 && (
         <div className="rentabilidad-card">
           <div className="rentabilidad-cabecera">
             <div className="rentabilidad-cabecera-izq"><h4>Mapa de ganancia neta por parcela</h4></div>
@@ -661,57 +692,48 @@ const Analisis = () => {
               onClick={() => setMostrarTablaMargen(v => !v)}
             >
               <img src={mostrarTablaMargen ? './iconTable.png' : './cuadrado.png'} alt="vista" />
-              {mostrarTablaMargen ? 'Burbujas' : 'Tabla'}
+              {mostrarTablaMargen ? 'Gráfico' : 'Tabla'}
             </button>
           </div>
 
-          {mostrarTablaMargen ? (
-            <div className="leyenda-margen">
-              {LEYENDA_MARGEN.map(t => (
-                <div className="leyenda-margen-item" key={t.clase}>
-                  <span className={`leyenda-margen-swatch ${t.clase}`}></span>
-                  <span>{t.etiqueta} ({t.rango})</span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="leyenda-ganancia">
-              <span><span className="leyenda-ganancia-swatch leyenda-ganancia-swatch--perdida"></span> Pérdida</span>
-              <span><span className="leyenda-ganancia-swatch leyenda-ganancia-swatch--ganancia"></span> Ganancia (más oscuro = más ganancia)</span>
-              <span><span className="leyenda-ganancia-swatch leyenda-ganancia-swatch--sin-datos"></span> Sin datos</span>
-            </div>
-          )}
+          <div className="leyenda-margen">
+            {Object.keys(ETIQUETA_ESTADO).map(estado => (
+              <div className="leyenda-margen-item" key={estado}>
+                <span className="leyenda-margen-swatch" style={{ backgroundColor: COLOR_ESTADO[estado] }}></span>
+                <span>{ETIQUETA_ESTADO[estado]}{estado === 'umbral' ? ' (±10%)' : ''}</span>
+              </div>
+            ))}
+          </div>
 
           {mostrarTablaMargen ? (
             <table className="tabla-operaciones tabla-margen">
               <thead>
                 <tr>
-                  <th>Parcela</th>
-                  <th>Ingresos (brutos)</th>
-                  <th>Gastos</th>
-                  <th>Ganancia neta</th>
-                  <th>Margen</th>
+                  <CabeceraOrden orden={ordenMapa} clave="nombre">Parcela</CabeceraOrden>
+                  <CabeceraOrden orden={ordenMapa} clave="hanegadas">Hanegadas</CabeceraOrden>
+                  <CabeceraOrden orden={ordenMapa} clave="gastos">Gasto total</CabeceraOrden>
+                  <CabeceraOrden orden={ordenMapa} clave="ingresos">Ingreso total</CabeceraOrden>
+                  <CabeceraOrden orden={ordenMapa} clave="gastoPorHanegada">€/hanegada</CabeceraOrden>
+                  <CabeceraOrden orden={ordenMapa} clave="estado">Estado</CabeceraOrden>
                 </tr>
               </thead>
               <tbody>
-                {rentabilidad.map(p => {
-                  const tramo = tramoMargen(p.margen)
-                  return (
-                    <tr key={p.parcela_id} className={tramo.clase}>
-                      <td>{p.nombre}</td>
-                      <td>{formatoEuro(p.ingresos)}</td>
-                      <td>{formatoEuro(p.costes)}</td>
-                      <td>{formatoEuro(p.gananciaNeta)}</td>
-                      <td className="margen-valor">
-                        {p.margen !== null ? `${p.margen.toFixed(2)}% · ${tramo.etiqueta}` : tramo.etiqueta}
-                      </td>
-                    </tr>
-                  )
-                })}
+                {datosMapaOrdenados.map(d => (
+                  <tr key={d.parcelaId}>
+                    <td>{d.nombre}</td>
+                    <td>{formatoNumero(d.hanegadas)}</td>
+                    <td>{formatoEuro(d.gastos)}</td>
+                    <td>{formatoEuro(d.ingresos)}</td>
+                    <td>{formatoEuro(d.gastoPorHanegada)}</td>
+                    <td>
+                      <span className={`chip-estado chip-estado--${d.estado}`}>{ETIQUETA_ESTADO[d.estado]}</span>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           ) : (
-            <BurbujasGanancia datos={rentabilidad} formatoEuro={formatoEuro} />
+            <DispersionRentabilidad datos={datosMapa} />
           )}
         </div>
       )}

@@ -4,6 +4,10 @@ import './Style/burbujasGanancia.css'
 // visible, maximo razonable para no desbordar la card
 const DIAMETRO_MIN = 60
 const DIAMETRO_MAX = 170
+// por debajo de este diámetro un importe tipo "1.234,56 €" a 13px ya no cabe
+// sin desbordar el círculo ni encogerse hasta ilegible: se oculta el texto y
+// el importe pasa a verse solo al pasar el cursor (title, tooltip nativo)
+const DIAMETRO_MIN_PARA_VALOR = 90
 
 const calcularDiametro = (valorAbsoluto, maximoAbsoluto) => {
   if (!maximoAbsoluto || maximoAbsoluto <= 0) return DIAMETRO_MIN
@@ -48,16 +52,23 @@ const BurbujasGanancia = ({ datos, formatoEuro }) => {
           ? `${p.nombre}: sin datos suficientes para calcular el margen`
           : `${p.nombre}: ${esPerdida ? 'pérdida' : 'ganancia'} de ${formatoEuro(Math.abs(p.gananciaNeta))}${p.margen !== null ? `, margen ${p.margen.toFixed(2)}%` : ''}`
 
+        // en burbujas pequeñas el importe no cabe: se quita del interior y
+        // solo queda accesible al pasar el cursor, vía title (tooltip nativo)
+        const valorVisible = diametro >= DIAMETRO_MIN_PARA_VALOR
+
         return (
           <li
             key={p.parcela_id}
             className="burbuja-ganancia"
             style={{ width: diametro, height: diametro, background: fondo }}
             aria-label={descripcion}
+            title={valorVisible ? undefined : descripcion}
           >
-            <span className="burbuja-ganancia-valor">
-              {sinDatos ? '—' : `${esPerdida ? '-' : '+'}${formatoEuro(Math.abs(p.gananciaNeta))}`}
-            </span>
+            {valorVisible && (
+              <span className="burbuja-ganancia-valor">
+                {sinDatos ? '—' : `${esPerdida ? '-' : '+'}${formatoEuro(Math.abs(p.gananciaNeta))}`}
+              </span>
+            )}
             <span className="burbuja-ganancia-nombre">{p.nombre}</span>
           </li>
         )
