@@ -5,6 +5,12 @@ import { COLOR_ESTADO } from '../utils/estadoRentabilidad'
 
 const formatoEuro = (valor) => (valor === null || valor === undefined ? '-' : `${valor.toFixed(2)} €`)
 
+// Formato compacto para los ticks de los ejes: evita que se salgan del marco
+const formatoTick = (valor) => {
+  if (valor >= 1000) return `${(valor / 1000).toFixed(1)}k€`
+  return `${valor}€`
+}
+
 // Tooltip propio: el formatter por defecto de Recharts no deja mostrar
 // varios campos a la vez con el mismo formato que el resto de la pestaña.
 // Solo ganancia (no gastos/ingresos por separado): es lo que responde a la
@@ -36,7 +42,7 @@ const TooltipParcela = ({ active, payload }) => {
 // según calcularEstado, el mismo criterio que usa la tabla de esta tarjeta.
 //
 // datos: [{ nombre, gastos, ingresos, hanegadas, gastoPorHanegada, estado }]
-const DispersionRentabilidad = ({ datos, alturaMinima = 320 }) => {
+const DispersionRentabilidad = ({ datos, alturaMinima = 280 }) => {
   if (!datos || datos.length === 0) {
     return <p className="rentabilidad-vacio">No hay datos para mostrar.</p>
   }
@@ -46,21 +52,24 @@ const DispersionRentabilidad = ({ datos, alturaMinima = 320 }) => {
   return (
     <div style={{ width: '100%', height: alturaMinima }}>
       <ResponsiveContainer>
-        <ScatterChart margin={{ top: 8, right: 16, bottom: 8, left: 8 }}>
+        <ScatterChart margin={{ top: 8, right: 16, bottom: 32, left: 60 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--c-borde)" />
           <XAxis
             dataKey="gastos"
             type="number"
             name="Gastos"
             stroke="var(--c-texto-apagado)"
-            tickFormatter={formatoEuro}
+            tickFormatter={formatoTick}
+            label={{ value: 'Gastos', position: 'insideBottom', offset: -18, fill: 'var(--c-texto-apagado)', fontSize: 12 }}
           />
           <YAxis
             dataKey="ingresos"
             type="number"
             name="Ingresos"
             stroke="var(--c-texto-apagado)"
-            tickFormatter={formatoEuro}
+            tickFormatter={formatoTick}
+            width={55}
+            label={{ value: 'Ingresos', angle: -90, position: 'insideLeft', offset: -8, fill: 'var(--c-texto-apagado)', fontSize: 12 }}
           />
           <ZAxis dataKey="hanegadas" range={[80, 700]} name="Hanegadas" />
           <ReferenceLine
