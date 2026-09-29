@@ -31,6 +31,7 @@ const Consultor = () => {
     const [input, setInput] = useState('')
     const [cargando, setCargando] = useState(false)
     const [error, setError] = useState(null)
+    const [ultimaPregunta, setUltimaPregunta] = useState('')
     const mensajesRef = useRef(null)
 
     // Desplaza al último mensaje cada vez que hay uno nuevo
@@ -47,6 +48,7 @@ const Consultor = () => {
         setInput('')
         setError(null)
         setCargando(true)
+        setUltimaPregunta(pregunta)
         setMensajes(prev => [...prev, { rol: 'usuario', texto: pregunta }])
 
         try {
@@ -73,6 +75,7 @@ const Consultor = () => {
         setMensajes([])
         setError(null)
         setInput('')
+        setUltimaPregunta('')
     }
 
     return (
@@ -133,9 +136,11 @@ const Consultor = () => {
                     <div className="consultor-error">
                         <img src="/advertencia.png" alt="Error" className="consultor-icono-error" />
                         <span>{error}</span>
-                        <button className="consultor-btn-reintentar" onClick={() => enviar(mensajes[mensajes.length - 2]?.texto || '')}>
-                            Reintentar
-                        </button>
+                        {ultimaPregunta && (
+                            <button className="consultor-btn-reintentar" onClick={() => enviar(ultimaPregunta)}>
+                                Reintentar
+                            </button>
+                        )}
                     </div>
                 )}
             </div>
