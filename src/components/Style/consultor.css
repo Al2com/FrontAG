@@ -2,49 +2,135 @@
   display: flex;
   flex-direction: column;
   height: calc(100vh - 120px);
-  padding: 20px;
-  gap: 16px;
+  padding: var(--esp-xl);
+  gap: var(--esp-md);
 }
 
+/* Cabecera con título y botón de nueva consulta */
+.consultor-cabecera {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--esp-md);
+}
+
+.consultor-cabecera h2 {
+  margin: 0 0 4px;
+  color: var(--c-texto);
+}
+
+.consultor-subtitulo {
+  margin: 0;
+  color: var(--c-texto-apagado);
+  font-size: 14px;
+}
+
+.consultor-btn-limpiar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: 1px solid var(--c-borde);
+  border-radius: var(--rad-md);
+  padding: 6px 12px;
+  font-size: 13px;
+  color: var(--c-texto-apagado);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.consultor-btn-limpiar:hover {
+  border-color: var(--c-primario);
+  color: var(--c-primario);
+}
+
+.consultor-icono-limpiar {
+  width: 14px;
+  height: 14px;
+  opacity: 0.6;
+}
+
+/* Área de mensajes */
 .consultor-mensajes {
   flex: 1;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 16px;
-  background: white;
-  border-radius: 12px;
-  border: 1px solid #E9ECEF;
+  gap: var(--esp-sm);
+  padding: var(--esp-md);
+  background: var(--c-blanco);
+  border-radius: var(--rad-lg);
+  border: 1px solid var(--c-borde);
 }
 
+/* Estado vacío con sugerencias */
 .consultor-vacio {
-  text-align: center;
-  color: #888;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   margin-top: 40px;
+  gap: var(--esp-md);
+  color: var(--c-texto-apagado);
 }
 
+.consultor-icono-vacio {
+  width: 48px;
+  height: 48px;
+  opacity: 0.35;
+}
+
+.consultor-vacio > p {
+  margin: 0;
+  font-size: 15px;
+}
+
+.consultor-sugerencias {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  max-width: 520px;
+}
+
+.consultor-sugerencia {
+  background: var(--c-fondo-verde);
+  border: 1px solid var(--c-primario-claro);
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 13px;
+  color: var(--c-primario);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.consultor-sugerencia:hover {
+  background: var(--c-primario-claro);
+  color: var(--c-blanco);
+}
+
+/* Mensajes individuales */
 .consultor-mensaje {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  max-width: 80%;
+  max-width: 82%;
 }
 
-.consultor-user {
+.consultor-usuario {
   align-self: flex-end;
-  background: #1B4332;
-  color: white;
+  background: var(--c-primario);
+  color: var(--c-blanco);
   padding: 10px 14px;
-  border-radius: 12px 12px 0 12px;
+  border-radius: var(--rad-lg) var(--rad-lg) 0 var(--rad-lg);
 }
 
-.consultor-assistant {
+.consultor-consultor {
   align-self: flex-start;
-  background: #F4FDF2;
-  border: 1px solid #E9ECEF;
+  background: var(--c-fondo-verde);
+  border: 1px solid var(--c-borde);
   padding: 10px 14px;
-  border-radius: 12px 12px 12px 0;
+  border-radius: var(--rad-lg) var(--rad-lg) var(--rad-lg) 0;
 }
 
 .consultor-rol {
@@ -53,32 +139,135 @@
   opacity: 0.7;
 }
 
-.consultor-user .consultor-rol { color: rgba(255,255,255,0.8); }
+.consultor-usuario .consultor-rol {
+  color: rgba(255, 255, 255, 0.8);
+}
 
-.consultor-input {
+/* Texto de la respuesta: plano, con saltos de línea respetados */
+.consultor-respuesta-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.consultor-respuesta-texto p {
+  margin: 0;
+  white-space: pre-line;
+  line-height: 1.55;
+  font-size: 14px;
+}
+
+/* Títulos de sección en mayúsculas (RESUMEN:, DETALLE:, etc.) */
+.consultor-titulo-seccion {
+  font-weight: 700;
+  color: var(--c-primario);
+  margin-top: 8px !important;
+}
+
+/* Animación de puntos de carga */
+.consultor-cargando {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--c-texto-apagado);
+}
+
+.consultor-puntos {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.consultor-puntos span {
+  width: 6px;
+  height: 6px;
+  background: var(--c-primario-claro);
+  border-radius: 50%;
+  animation: consultor-parpadeo 1.2s infinite;
+}
+
+.consultor-puntos span:nth-child(2) { animation-delay: 0.2s; }
+.consultor-puntos span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes consultor-parpadeo {
+  0%, 80%, 100% { opacity: 0.25; }
+  40% { opacity: 1; }
+}
+
+/* Error */
+.consultor-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: #fff3f3;
+  border: 1px solid #f5c6cb;
+  border-radius: var(--rad-md);
+  font-size: 14px;
+  color: var(--c-peligro);
+}
+
+.consultor-icono-error {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.consultor-btn-reintentar {
+  margin-left: auto;
+  background: transparent;
+  border: 1px solid var(--c-peligro);
+  border-radius: var(--rad-sm);
+  padding: 4px 10px;
+  font-size: 12px;
+  color: var(--c-peligro);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.consultor-btn-reintentar:hover {
+  background: var(--c-peligro);
+  color: white;
+}
+
+/* Área de entrada */
+.consultor-input-area {
   display: flex;
   gap: 10px;
 }
 
-.consultor-input input {
+.consultor-input-area input {
   flex: 1;
   padding: 12px 16px;
-  border: 1px solid #E9ECEF;
-  border-radius: 8px;
+  border: 1px solid var(--c-borde);
+  border-radius: var(--rad-md);
   font-size: 15px;
   outline: none;
+  background: var(--c-blanco);
+  color: var(--c-texto);
+  transition: border-color 0.15s;
 }
 
-.consultor-input input:focus {
-  border-color: #1B4332;
+.consultor-input-area input:focus {
+  border-color: var(--c-primario);
 }
 
-.consultor-input button {
-  background: #1B4332;
-  color: white;
+.consultor-btn-enviar {
+  background: var(--c-primario);
+  color: var(--c-blanco);
   border: none;
   padding: 12px 24px;
-  border-radius: 8px;
+  border-radius: var(--rad-md);
   cursor: pointer;
   font-weight: 600;
+  transition: background 0.15s;
+}
+
+.consultor-btn-enviar:hover:not(:disabled) {
+  background: var(--c-primario-medio);
+}
+
+.consultor-btn-enviar:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
