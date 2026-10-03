@@ -107,17 +107,17 @@ const DetalleProducto = () => {
             {resumen && (
                 <>
                     <div className="primeraSeccion">
-                        <InfoPanel texto="Gasto total" iconImg="./expenses.svg" altText="gasto" valor={euro(resumen.gasto_total)} />
-                        <InfoPanel texto="Precio medio" iconImg="./iconAlmacen.svg" altText="medio" valor={euro(resumen.precio_medio)} />
-                        <InfoPanel texto="Precio mínimo" iconImg="./iconAlmacen.svg" altText="mínimo" valor={euro(resumen.precio_minimo)} />
-                        <InfoPanel texto="Precio máximo" iconImg="./iconAlmacen.svg" altText="máximo" valor={euro(resumen.precio_maximo)} />
+                        <InfoPanel texto="Gasto total" iconImg="/expenses.svg" altText="gasto" valor={euro(resumen.gasto_total)} />
+                        <InfoPanel texto="Precio medio" iconImg="/iconAlmacen.svg" altText="medio" valor={euro(resumen.precio_medio)} />
+                        <InfoPanel texto="Precio mínimo" iconImg="/iconAlmacen.svg" altText="mínimo" valor={euro(resumen.precio_minimo)} />
+                        <InfoPanel texto="Precio máximo" iconImg="/iconAlmacen.svg" altText="máximo" valor={euro(resumen.precio_maximo)} />
                         <InfoPanel
                             texto="Última compra"
-                            iconImg="./iconAlmacen.svg"
+                            iconImg="/iconAlmacen.svg"
                             altText="última compra"
                             valor={resumen.ultima_compra ? euro(resumen.ultima_compra.precio) : '—'}
                         />
-                        <InfoPanel texto="Valor del stock" iconImg="./iconAlmacen.svg" altText="valor stock" valor={euro(resumen.valor_stock_actual)} />
+                        <InfoPanel texto="Valor del stock" iconImg="/iconAlmacen.svg" altText="valor stock" valor={euro(resumen.valor_stock_actual)} />
                     </div>
 
                     {/* gráficos */}

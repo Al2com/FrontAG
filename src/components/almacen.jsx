@@ -147,7 +147,6 @@ const Almacen = () => {
           )}
         </div>
       </div>
-
       {errorCarga && <span className="mensaje-error">{errorCarga}</span>}
       {errorCompras && <span className="mensaje-error">{errorCompras}</span>}
       {errorResumen && <span className="mensaje-error">{errorResumen}</span>}
