@@ -150,7 +150,6 @@ const Almacen = () => {
       {errorCarga && <span className="mensaje-error">{errorCarga}</span>}
       {errorCompras && <span className="mensaje-error">{errorCompras}</span>}
       {errorResumen && <span className="mensaje-error">{errorResumen}</span>}
-
       {vista === 'resumen' && resumenGeneral ? (
         <div className="detalle-producto-graficos">
           <div className="rentabilidad-card detalle-producto-grafico">
