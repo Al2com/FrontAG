@@ -21,8 +21,8 @@ const FormResetPassword = () => {
   const [cargando, setCargando] = useState(false)
   const [enlaceValido, setEnlaceValido] = useState(true)
 
-  // el back exige minimo 8 caracteres y confirmacion
-  const regexPassword = /^.{8,}$/
+  // el back exige minimo 8 caracteres con letras y numeros, y confirmacion
+  const regexPassword = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/
 
   // si falta el token o el email, el enlace está roto: no mostramos el formulario
   useEffect(() => {
@@ -34,7 +34,7 @@ const FormResetPassword = () => {
     setMensajeOk('')
 
     const nuevosErrores = { password: '', confirm: '' }
-    if (!regexPassword.test(password)) nuevosErrores.password = 'La contraseña debe tener mínimo 8 caracteres'
+    if (!regexPassword.test(password)) nuevosErrores.password = 'La contraseña debe tener mínimo 8 caracteres, con letras y números'
     if (password !== passwordConfirm) nuevosErrores.confirm = 'Las contraseñas no coinciden'
     setErrors(nuevosErrores)
     if (nuevosErrores.password || nuevosErrores.confirm) return
