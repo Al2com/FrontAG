@@ -269,6 +269,7 @@ const Operaciones = () => {
 
       {errorCarga && <span className="mensaje-error">{errorCarga}</span>}
 
+      <div className="op-columnas">
       <SeccionColapsable
         titulo="Operaciones"
         cantidad={operacionesFiltradas.length}
@@ -454,6 +455,7 @@ const Operaciones = () => {
         </div>
       )}
       </SeccionColapsable>
+      </div>
     </div>
   )
 }
