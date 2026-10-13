@@ -1,18 +1,14 @@
-
-const InfoPanel = ({ texto, iconImg, altText, valor}) => {
+// Celda KPI del sistema GestióCamp (misma apariencia que la franja del
+// dashboard). Mantiene la firma antigua (iconImg/altText/texto/valor) para
+// no tener que tocar cada pantalla que lo usa.
+const InfoPanel = ({ texto, iconImg, altText, valor }) => {
   return (
-    <div className="card">
-      <div className="texto">
-        <h3>{texto}</h3>
-        <img className="explo-icon" src={iconImg} alt={altText} />
-      </div>
-
-      <h5 className="value">{valor}</h5>
-
-      {/* <div>
-        <p className="texto">{comentario}</p>
-      </div> */}
-
+    <div className="gc-kpi">
+      <span className="l">
+        {iconImg && <img src={iconImg} alt={altText || ''} />}
+        {texto}
+      </span>
+      <span className="v">{valor}</span>
     </div>
   );
 };

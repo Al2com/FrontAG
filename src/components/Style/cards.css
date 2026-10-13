@@ -18,11 +18,16 @@
   background-color: var(--c-borde);
 }
 
+/* Franja de KPIs (misma apariencia que el dashboard): tarjeta blanca con
+   celdas .gc-kpi divididas por borde. Cada celda trae su propio padding. */
 .primeraSeccion {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: var(--esp-xl);
-  padding: var(--esp-xl);
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  background: var(--c-blanco);
+  border: 1px solid var(--c-borde);
+  border-radius: var(--rad-lg);
+  margin-bottom: var(--esp-xl);
+  overflow: hidden;
 }
 
 .segundaSeccion {
@@ -47,7 +52,7 @@
 /* CARDS */
 .card {
   background-color: var(--c-blanco);
-  border: 1px solid var(--c-borde-oscuro);
+  border: 1px solid var(--c-borde);
   border-radius: var(--rad-lg);
   padding: var(--esp-xl);
   width: 100%;
@@ -59,7 +64,6 @@
   border: 1px solid var(--c-borde);
   border-radius: var(--rad-lg);
   padding: var(--esp-xl);
-  box-shadow: var(--som-md);
 }
 
 /* grid de bloques: contenedor de la vista "Bloques" en cualquier listado
@@ -77,15 +81,14 @@
   gap: 8px;
   background-color: var(--c-blanco);
   border: 1px solid var(--c-borde);
-  border-radius: var(--rad-md);
-  padding: var(--esp-lg);
-  box-shadow: var(--som-md);
-  transition: transform 0.2s, box-shadow 0.2s;
+  border-radius: var(--rad-lg);
+  padding: var(--esp-md);
+  transition: border-color 0.18s, background-color 0.18s;
 }
 
 .explotacionCard:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--som-lg);
+  border-color: var(--c-borde-oscuro);
+  background-color: #fafaf7;
 }
 
 .explotacionCard h3,
@@ -186,24 +189,34 @@
   color: var(--c-texto-apagado);
 }
 
+/* Tag de estado al estilo del dashboard: texto de color + punto, fondo claro */
 .actividad-estado {
-  font-size: 11px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
   padding: 2px 8px;
-  border-radius: 99px;
+  border-radius: 6px;
   font-weight: 600;
   text-transform: capitalize;
-  color: var(--c-blanco);
   white-space: nowrap;
   flex-shrink: 0;
+}
+.actividad-estado::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
 }
 
 .estado-borde--pendiente { border-left-color: var(--estado-pendiente); }
 .estado-borde--realizada { border-left-color: var(--estado-realizado); }
 .estado-borde--revisada  { border-left-color: var(--estado-revisado); }
 
-.estado-badge--pendiente { background-color: var(--estado-pendiente); }
-.estado-badge--realizada { background-color: var(--estado-realizado); }
-.estado-badge--revisada  { background-color: var(--estado-revisado); }
+.estado-badge--pendiente { color: var(--amber, #b7791f); background-color: var(--amberbg, #fdf3e1); }
+.estado-badge--realizada { color: var(--g700, #356150); background-color: var(--g100, #e6efe9); }
+.estado-badge--revisada  { color: var(--blue, #2f6690); background-color: var(--bluebg, #e7eff6); }
 
 .actividad-item--alerta { border-left-color: #E9A800; }
 
@@ -259,18 +272,20 @@
   margin: 0 var(--esp-xl) var(--esp-xl);
   border-collapse: collapse;
   background-color: var(--c-blanco);
-  border-radius: var(--rad-md);
+  border: 1px solid var(--c-borde);
+  border-radius: var(--rad-lg);
   overflow: hidden;
-  box-shadow: var(--som-md);
 }
 
+/* cabecera clara, como en el dashboard */
 .tabla-operaciones th {
-  background-color: var(--c-primario);
-  color: var(--c-blanco);
-  padding: 10px 14px;
+  background-color: var(--c-blanco);
+  color: var(--c-texto-apagado);
+  padding: 10px 20px;
   text-align: left;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 12px;
+  font-weight: 500;
+  border-bottom: 1px solid var(--c-borde);
 }
 
 /* cabecera de columna ordenable: mismo patron en cualquier tabla de listado */
@@ -279,7 +294,7 @@
   user-select: none;
 }
 
-.tabla-operaciones th.ordenable:hover { background-color: var(--c-primario-medio); }
+.tabla-operaciones th.ordenable:hover { background-color: var(--c-fondo-verde); color: var(--c-texto); }
 
 .tabla-operaciones th.ordenable .indicador-orden {
   display: inline-block;
@@ -291,14 +306,14 @@
 .tabla-operaciones th.ordenable.ordenable--activa .indicador-orden { opacity: 1; }
 
 .tabla-operaciones td {
-  padding: 10px 14px;
+  padding: 11px 20px;
   font-size: 13px;
   color: var(--c-texto);
-  border-bottom: 1px solid var(--c-borde);
+  border-bottom: 1px solid #f0f0ea;
 }
 
 .tabla-operaciones tr:last-child td { border-bottom: none; }
-.tabla-operaciones tr:hover td { background-color: var(--c-fondo-verde); }
+.tabla-operaciones tr:hover td { background-color: #fafaf7; }
 
 .tabla-fila-material td {
   color: var(--c-texto-apagado);
@@ -507,7 +522,6 @@
 
   .primeraSeccion {
     grid-template-columns: repeat(2, 1fr);
-    padding: var(--esp-md);
   }
 
   .segundaSeccion {
@@ -548,7 +562,6 @@
 @media (max-width: 480px) {
   .primeraSeccion {
     grid-template-columns: 1fr;
-    padding: var(--esp-sm);
   }
 
   .separador-btn { display: none; }

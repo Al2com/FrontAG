@@ -132,6 +132,7 @@
 .gc-kpi:first-child { border-left: 0; }
 .gc-kpi .l { display: flex; align-items: center; gap: 7px; color: var(--ink2); font-size: 13px; font-weight: 500; }
 .gc-kpi .l svg { width: 16px; height: 16px; color: var(--g600); }
+.gc-kpi .l img { width: 16px; height: 16px; object-fit: contain; }
 .gc-kpi .v { font-size: 30px; font-weight: 600; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
 .gc-kpi .s { font-size: 12px; color: var(--ink3); }
 .gc-kpi .s.w { color: var(--amber); font-weight: 600; }
