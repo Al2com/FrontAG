@@ -201,6 +201,18 @@
 
 .gc-foot { padding: 12px 20px; border-top: 1px solid var(--line); font-size: 13px; color: var(--ink3); }
 
+/* Lista de operaciones/fumigaciones con el aspecto de la actividad del dashboard.
+   La columna final agrupa el tag de estado y los botones de acción. */
+.op-item-acciones { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+.op-item-botones { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
+.op-item-botones button { height: 30px; padding: 0 10px; font-size: 12px; margin: 0; }
+.op-item-botones .router-link { text-decoration: none; }
+@media (max-width: 760px) {
+  .gc-it.op-fila { grid-template-columns: 34px minmax(0, 1fr); }
+  .gc-it.op-fila .op-item-acciones { grid-column: 1 / -1; align-items: flex-start; }
+  .op-item-botones { justify-content: flex-start; }
+}
+
 /* ---------- Avisos ---------- */
 .gc-aviso {
   display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;

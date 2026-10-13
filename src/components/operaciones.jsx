@@ -8,6 +8,7 @@ import SeccionColapsable from './SeccionColapsable.jsx'
 import Pill from './Pill.jsx'
 import CabeceraOrden from './CabeceraOrden.jsx'
 import { useOrdenTabla } from '../hooks/useOrdenTabla.js'
+import { ClipboardList, SprayCan } from 'lucide-react'
 import './Style/cards.css';
 import './Style/forms.css'
 import './Style/search.css'
@@ -18,6 +19,11 @@ const tonoEstado = (estado) => (
   estado === 'realizada' ? 'bueno' : estado === 'revisada' ? 'info' : 'aviso'
 )
 const etiquetaEstado = (estado) => estado.charAt(0).toUpperCase() + estado.slice(1)
+
+// clase del tag de estado (mismo criterio visual que la actividad del dashboard)
+const claseTagEstado = (estado) => (
+  estado === 'realizada' ? 't-blue' : estado === 'revisada' ? 't-grn' : 't-amb'
+)
 
 // claves de localStorage: estado de las secciones (cerradas la primera vez)
 // y preferencia de vista tabla/cards (sin preferencia -> se decide por dispositivo)
@@ -196,6 +202,40 @@ const Operaciones = () => {
     localStorage.setItem(CLAVE_SECCION_FUMIGACIONES, String(nuevoValor))
   }
 
+  // Fila con el aspecto de la actividad del dashboard: icono cuadrado (op/fu),
+  // título, metadatos y, a la derecha, el tag de estado y las acciones.
+  const FilaActividad = ({ item, tipo }) => {
+    const titulo = tipo === 'operacion' ? item.tipo_operacion : item.metodo_aplicacion
+    const editarTo = tipo === 'operacion' ? `/operacion/${item.id}` : `/editar-fumigacion/${item.id}`
+    return (
+      <div className="gc-it op-fila">
+        <div className={`gc-ic ${tipo === 'operacion' ? 'op' : 'fu'}`}>
+          {tipo === 'operacion' ? <ClipboardList /> : <SprayCan />}
+        </div>
+        <div>
+          <b style={{ textTransform: 'capitalize' }}>{titulo}</b>
+          <small>
+            {formatoParcela(item.parcela) || '—'}<i>·</i>{item.operario || '—'}<i>·</i>
+            <span className="num">{item.hora_inicio}</span>
+          </small>
+        </div>
+        <div className="op-item-acciones">
+          <span className={`gc-tag ${claseTagEstado(item.estado)}`}>{etiquetaEstado(item.estado)}</span>
+          <div className="op-item-botones">
+            {item.estado === 'pendiente' && (
+              <button onClick={() => marcarRealizada(tipo, item.id)}>Realizada</button>
+            )}
+            {item.estado === 'realizada' && rol !== 'trabajador' && (
+              <button onClick={() => marcarRevisada(tipo, item.id)}>Revisada</button>
+            )}
+            {rol !== 'trabajador' && <BtnSubmit texto="Editar" to={editarTo} />}
+            {rol !== 'trabajador' && <BtnEliminar texto="Eliminar" onClick={() => pedirConfirmacion(tipo, item.id)} />}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div>
 
@@ -311,34 +351,12 @@ const Operaciones = () => {
           </tbody>
         </table>
       ) : (
-        <div className="grid-bloques">
-        {operacionesOrdenadas.map(operacion => (
-          <div key={operacion.id} className="explotacionCard">
-            <div className="cabecera-cardExplo">
-              <span style={{ textTransform: 'capitalize', fontWeight: 600, color: 'var(--c-texto)' }}>{operacion.tipo_operacion}</span>
-              <Pill texto={etiquetaEstado(operacion.estado)} tono={tonoEstado(operacion.estado)} />
-            </div>
-            <div className="datos-cardExplo">
-              <p><strong>Parcela:</strong> {operacion.parcela?.poligono} - {operacion.parcela?.parcela}</p>
-              <p><strong>Operario:</strong> {operacion.operario}</p>
-              <p><strong>Inicio:</strong> <span className="num">{operacion.hora_inicio}</span></p>
-              <p><strong>Duración:</strong> <span className="num">{operacion.duracion_minutos} min</span></p>
-              <p><strong>Precio:</strong> <span className="num">{operacion.precio} €</span></p>
-              <p><strong>Descripción:</strong> {operacion.descripcion}</p>
-            </div>
-            <div className="card-botones">
-              {operacion.estado === 'pendiente' && (
-                <button onClick={() => marcarRealizada('operacion', operacion.id)}>Realizada</button>
-              )}
-              {operacion.estado === 'realizada' && rol !== 'trabajador' && (
-                <button onClick={() => marcarRevisada('operacion', operacion.id)}>Revisada</button>
-              )}
-              {rol !== 'trabajador' && <BtnSubmit texto="Editar" to={`/operacion/${operacion.id}`} />}
-              {/* al pulsar eliminar sale el modal para confirmar */}
-              {rol !== 'trabajador' && <BtnEliminar texto="Eliminar" onClick={() => pedirConfirmacion('operacion', operacion.id)} />}
-            </div>
+        <div className="gc-card">
+          <div className="gc-list">
+            {operacionesOrdenadas.map(operacion => (
+              <FilaActividad key={operacion.id} item={operacion} tipo="operacion" />
+            ))}
           </div>
-        ))}
         </div>
       )}
       </SeccionColapsable>
@@ -427,33 +445,12 @@ const Operaciones = () => {
           </tbody>
         </table>
       ) : (
-        <div className="grid-bloques">
-        {fumigacionesOrdenadas.map(fumigacion => (
-          <div key={fumigacion.id} className="explotacionCard">
-            <div className="cabecera-cardExplo">
-              <span style={{ textTransform: 'capitalize', fontWeight: 600, color: 'var(--c-texto)' }}>{fumigacion.metodo_aplicacion}</span>
-              <Pill texto={etiquetaEstado(fumigacion.estado)} tono={tonoEstado(fumigacion.estado)} />
-            </div>
-            <div className="datos-cardExplo">
-              <p><strong>Parcela:</strong> {fumigacion.parcela?.poligono} - {fumigacion.parcela?.parcela}</p>
-              <p><strong>Operario:</strong> {fumigacion.operario}</p>
-              <p><strong>Inicio:</strong> <span className="num">{fumigacion.hora_inicio}</span></p>
-              <p><strong>Duración:</strong> <span className="num">{fumigacion.duracion_minutos} min</span></p>
-              <p><strong>Descripción:</strong> {fumigacion.descripcion}</p>
-            </div>
-            <div className="card-botones">
-              {fumigacion.estado === 'pendiente' && (
-                <button onClick={() => marcarRealizada('fumigacion', fumigacion.id)}>Realizada</button>
-              )}
-              {fumigacion.estado === 'realizada' && rol !== 'trabajador' && (
-                <button onClick={() => marcarRevisada('fumigacion', fumigacion.id)}>Revisada</button>
-              )}
-              {rol !== 'trabajador' && <BtnSubmit texto="Editar" to={`/editar-fumigacion/${fumigacion.id}`} />}
-              {/* al pulsar eliminar sale el modal para confirmar */}
-              {rol !== 'trabajador' && <BtnEliminar texto="Eliminar" onClick={() => pedirConfirmacion('fumigacion', fumigacion.id)} />}
-            </div>
+        <div className="gc-card">
+          <div className="gc-list">
+            {fumigacionesOrdenadas.map(fumigacion => (
+              <FilaActividad key={fumigacion.id} item={fumigacion} tipo="fumigacion" />
+            ))}
           </div>
-        ))}
         </div>
       )}
       </SeccionColapsable>
