@@ -43,6 +43,15 @@
 .mapa-modal-cerrar:hover { background: var(--c-fondo-verde); color: var(--c-texto); }
 .mapa-modal-cerrar svg { width: 18px; height: 18px; display: block; }
 
+.mapa-modal-ayuda {
+  margin: 0;
+  padding: var(--esp-xs) var(--esp-xl);
+  font-size: 13px;
+  color: var(--c-texto-apagado);
+  background: var(--c-fondo-verde);
+  border-bottom: 1px solid var(--c-borde);
+}
+
 .mapa-modal-mapa { width: 100%; height: 440px; }
 .mapa-modal-mapa .leaflet-container { width: 100%; height: 100%; }
 
