@@ -6,6 +6,7 @@ import ParcelaCard from './InfoPanel/ParcelaCard.jsx';
 import BtnSubmit from './buttons/BtnSubmit.jsx';
 import BtnEliminar from './buttons/btnEliminar.jsx';
 import Modal from './Modal/Modal.jsx';
+import ModalMapaParcela from './Modal/ModalMapaParcela.jsx';
 import Pill from './Pill.jsx';
 import CabeceraOrden from './CabeceraOrden.jsx';
 import { MapPin } from 'lucide-react';
@@ -109,12 +110,11 @@ const Parcela = () => {
         />
       )}
 
-      {/* PROVISIONAL (Paso A): placeholder hasta que el Paso B monte el mapa real.
-          Se sustituye por <ModalMapaParcela /> en el siguiente paso. */}
+      {/* modal con el mapa de la parcela (coordenadas aún provisionales) */}
       {parcelaMapa && (
-        <Modal
-          mesajeError={`Mapa de la parcela ${parcelaMapa.poligono} - ${parcelaMapa.parcela} (próximamente)`}
-          cerrarModal={() => setParcelaMapa(null)}
+        <ModalMapaParcela
+          parcela={parcelaMapa}
+          onCerrar={() => setParcelaMapa(null)}
         />
       )}
 
