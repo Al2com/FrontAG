@@ -417,10 +417,9 @@
 
 .rentabilidad-card {
   border: 1px solid var(--c-borde);
-  border-radius: var(--rad-md);
-  padding: var(--esp-md);
+  border-radius: var(--rad-lg);
+  padding: var(--esp-xl);
   background-color: var(--c-blanco);
-  box-shadow: var(--som-md);
   margin: 0 var(--esp-xl) var(--esp-md);
 }
 

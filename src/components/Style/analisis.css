@@ -32,7 +32,7 @@
 .chip-estado {
   display: inline-block;
   padding: 2px 10px;
-  border-radius: 999px;
+  border-radius: var(--rad-sm);
   font-size: 12px;
   font-weight: 600;
   color: var(--c-blanco);
