@@ -82,10 +82,9 @@ function App() {
             <Route path="/reset-password" element={<FormResetPassword />} />
             <Route path="*" element={<FormLogin setUser={setUser} />} />
           </Routes>
-        : <div className="app-container">
+        : <div className="gc-app">
             <MenuNav user={user} logout={logout} />
-            <div className="main-content">
-              <main className="content">
+            <main className="gc-main">
                 <Routes>
               {/* accesibles para todos los roles (trabajador incluido) */}
               <Route path="/" element={<Dashboard />} />
@@ -128,10 +127,9 @@ function App() {
               } />
 
                 </Routes>
-              </main>
-            </div>
+            </main>
           </div>
-        } 
+        }
     </Router>
   )
 }

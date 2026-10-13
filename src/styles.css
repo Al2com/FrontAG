@@ -1,0 +1,257 @@
+/* =============================================================
+   GestióCamp · sistema visual único (basado en Dashboard GestioCamp.html)
+   Todas las clases van prefijadas con gc- y los selectores de elemento
+   van scopeados dentro de .gc-* para poder convivir con el CSS antiguo
+   mientras se migran el resto de pantallas.
+   ============================================================= */
+
+:root {
+  --g900:#1f3d30; --g800:#2a4f3e; --g700:#356150; --g600:#3f7a5f;
+  --g100:#e6efe9; --g50:#f2f6f3;
+  --bg:#f6f6f2; --card:#fff; --line:#e5e6df;
+  --ink:#1d2420; --ink2:#5c665f; --ink3:#8a928c;
+  --amber:#b7791f; --amberbg:#fdf3e1;
+  --red:#b4382f; --redbg:#fbe9e7;
+  --blue:#2f6690; --bluebg:#e7eff6;
+}
+
+/* ---------- Layout general ---------- */
+.gc-app {
+  font-family: Figtree, system-ui, sans-serif;
+  font-size: 14px;
+  color: var(--ink);
+  background: var(--bg);
+  display: grid;
+  grid-template-columns: 232px minmax(0, 1fr);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+.gc-app a { color: var(--g600); text-decoration: none; }
+.gc-app a:hover { color: var(--g800); text-decoration: underline; }
+
+.gc-main {
+  padding: 28px 36px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  width: 100%;
+  max-width: 1440px;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+/* ---------- Sidebar ---------- */
+.gc-aside {
+  background: var(--g900);
+  color: #dfe9e3;
+  display: flex;
+  flex-direction: column;
+  padding: 20px 14px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+.gc-brand { display: flex; gap: 10px; align-items: center; padding: 4px 8px 22px; }
+.gc-brand .gc-logo {
+  width: 34px; height: 34px; border-radius: 8px; flex: 0 0 34px;
+  background: #fff; color: var(--g800);
+  display: grid; place-items: center; font-weight: 700; font-size: 13px;
+  object-fit: cover;
+}
+.gc-brand b { display: block; color: #fff; font-size: 15px; font-weight: 600; }
+.gc-brand small { font-size: 12px; color: #9fb8aa; }
+
+.gc-nav { display: flex; flex-direction: column; gap: 2px; overflow-y: auto; }
+.gc-nav .gc-sec {
+  font-size: 11px; letter-spacing: .08em; text-transform: uppercase;
+  color: #7f9a8b; padding: 16px 10px 6px;
+}
+.gc-nav a {
+  display: flex; align-items: center; gap: 11px;
+  padding: 9px 10px; border-radius: 7px;
+  color: #cfdcd4; font-size: 14px; font-weight: 500;
+}
+.gc-nav a svg { width: 18px; height: 18px; stroke-width: 1.75; flex: 0 0 18px; }
+.gc-nav a:hover { background: rgba(255,255,255,.06); color: #fff; text-decoration: none; }
+.gc-nav a.on { background: rgba(255,255,255,.12); color: #fff; }
+.gc-nav a .n {
+  margin-left: auto; font-size: 11px; font-weight: 600;
+  background: var(--amber); color: #fff; border-radius: 10px; padding: 1px 7px;
+}
+
+.gc-user {
+  margin-top: auto; display: flex; align-items: center; gap: 10px;
+  padding: 12px 8px 0; border-top: 1px solid rgba(255,255,255,.1);
+}
+.gc-user .gc-av {
+  width: 32px; height: 32px; border-radius: 50%; flex: 0 0 32px;
+  background: var(--g600); color: #fff;
+  display: grid; place-items: center; font-weight: 600; font-size: 13px;
+  object-fit: cover;
+}
+.gc-user b { display: block; color: #fff; font-size: 13px; font-weight: 600; }
+.gc-user small { color: #9fb8aa; font-size: 12px; text-transform: capitalize; }
+.gc-user button {
+  margin-left: auto; background: none; border: 0; color: #9fb8aa;
+  cursor: pointer; padding: 6px; border-radius: 6px;
+}
+.gc-user button:hover { background: rgba(255,255,255,.08); color: #fff; }
+.gc-user button svg { width: 17px; height: 17px; display: block; }
+
+/* ---------- Cabecera de página ---------- */
+.gc-head {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  gap: 16px; flex-wrap: wrap;
+}
+.gc-head h1 { font-size: 24px; font-weight: 600; letter-spacing: -.01em; color: var(--ink); }
+.gc-head p { color: var(--ink2); margin-top: 4px; }
+.gc-acts { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* ---------- Botones ---------- */
+.gc-btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  height: 36px; padding: 0 14px; border-radius: 8px;
+  font: 600 13px Figtree, sans-serif;
+  border: 1px solid var(--line); background: #fff; color: var(--ink);
+  cursor: pointer; white-space: nowrap; text-decoration: none;
+}
+.gc-btn svg { width: 16px; height: 16px; }
+.gc-btn:hover { border-color: #cfd2c8; text-decoration: none; }
+.gc-btn.pri { background: var(--g700); border-color: var(--g700); color: #fff; }
+.gc-btn.pri:hover { background: var(--g800); }
+
+/* ---------- KPIs ---------- */
+.gc-kpis {
+  display: grid; grid-template-columns: repeat(5, minmax(0, 1fr));
+  background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+}
+.gc-kpi {
+  padding: 18px 20px; display: flex; flex-direction: column; gap: 6px;
+  color: inherit; border-left: 1px solid var(--line);
+}
+.gc-kpi:first-child { border-left: 0; }
+.gc-kpi .l { display: flex; align-items: center; gap: 7px; color: var(--ink2); font-size: 13px; font-weight: 500; }
+.gc-kpi .l svg { width: 16px; height: 16px; color: var(--g600); }
+.gc-kpi .v { font-size: 30px; font-weight: 600; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.gc-kpi .s { font-size: 12px; color: var(--ink3); }
+.gc-kpi .s.w { color: var(--amber); font-weight: 600; }
+
+/* ---------- Rejilla de tarjetas ---------- */
+.gc-grid {
+  display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  gap: 22px; align-items: start;
+}
+.gc-card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.gc-ch {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 16px 20px; border-bottom: 1px solid var(--line);
+}
+.gc-ch h2 { font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px; color: var(--ink); }
+.gc-ch h2 .c { font-size: 12px; font-weight: 600; color: var(--ink2); background: var(--bg); border-radius: 10px; padding: 1px 8px; }
+.gc-ch a { font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 4px; }
+.gc-ch a svg { width: 14px; height: 14px; }
+
+/* ---------- Tablas ---------- */
+.gc-table { width: 100%; border-collapse: collapse; }
+.gc-table th {
+  font-size: 12px; font-weight: 500; color: var(--ink3); text-align: left;
+  padding: 10px 20px; border-bottom: 1px solid var(--line);
+}
+.gc-table td { padding: 11px 20px; border-bottom: 1px solid #f0f0ea; vertical-align: middle; }
+.gc-table tr:last-child td { border-bottom: 0; }
+.gc-table tbody tr:hover { background: #fafaf7; }
+.gc-table td.p b { font-weight: 600; white-space: nowrap; }
+.gc-table td.num { font-variant-numeric: tabular-nums; color: var(--ink2); white-space: nowrap; }
+
+.gc-bar { height: 6px; border-radius: 3px; background: #eeeee8; width: 100%; min-width: 60px; overflow: hidden; }
+.gc-bar i { display: block; height: 100%; border-radius: 3px; }
+
+/* ---------- Tags de estado ---------- */
+.gc-tag {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 12px; font-weight: 600; border-radius: 6px; padding: 2px 8px; white-space: nowrap;
+}
+.gc-tag::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.gc-tag.t-red { color: var(--red); background: var(--redbg); }
+.gc-tag.t-amb { color: var(--amber); background: var(--amberbg); }
+.gc-tag.t-blue { color: var(--blue); background: var(--bluebg); }
+.gc-tag.t-grn { color: var(--g700); background: var(--g100); }
+
+.gc-lnk { background: none; border: 0; font: 600 13px Figtree, sans-serif; color: var(--g600); cursor: pointer; padding: 4px 6px; border-radius: 6px; }
+.gc-lnk:hover { background: var(--g100); }
+
+/* ---------- Tabs segmentados ---------- */
+.gc-tabs { display: flex; gap: 2px; background: var(--bg); border-radius: 8px; padding: 3px; }
+.gc-tabs button { border: 0; background: none; font: 500 12px Figtree, sans-serif; color: var(--ink2); padding: 5px 10px; border-radius: 6px; cursor: pointer; }
+.gc-tabs button.on { background: #fff; color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+
+/* ---------- Listas ---------- */
+.gc-list { display: flex; flex-direction: column; }
+.gc-it { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 12px 20px; border-bottom: 1px solid #f0f0ea; }
+.gc-it:last-child { border-bottom: 0; }
+.gc-it:hover { background: #fafaf7; }
+.gc-ic { width: 34px; height: 34px; border-radius: 8px; display: grid; place-items: center; }
+.gc-ic svg { width: 17px; height: 17px; }
+.gc-ic.op { background: var(--g100); color: var(--g700); }
+.gc-ic.fu { background: var(--bluebg); color: var(--blue); }
+.gc-it b { font-weight: 600; display: block; color: var(--ink); }
+.gc-it small { color: var(--ink2); font-size: 13px; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.gc-it small i { font-style: normal; color: var(--ink3); }
+
+.gc-foot { padding: 12px 20px; border-top: 1px solid var(--line); font-size: 13px; color: var(--ink3); }
+
+/* ---------- Avisos ---------- */
+.gc-aviso {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  background: var(--amberbg); border: 1px solid #f0dcb4; color: #7a5312;
+  border-radius: 12px; padding: 14px 18px; font-size: 13px; font-weight: 500;
+}
+.gc-error { color: var(--red); font-size: 13px; font-weight: 600; }
+
+.gc-empty { display: flex; align-items: center; gap: 8px; padding: 16px 20px; color: var(--ink2); font-size: 13px; }
+
+/* ---------- Formularios (tokens compartidos para fases siguientes) ---------- */
+.gc-field { display: flex; flex-direction: column; gap: 6px; }
+.gc-field label { font-size: 12px; font-weight: 600; color: var(--ink2); }
+.gc-input, .gc-app select.gc-input, .gc-app textarea.gc-input {
+  height: 36px; border-radius: 8px; border: 1px solid var(--line);
+  background: #fff; color: var(--ink); padding: 0 11px; font: 400 14px Figtree, sans-serif;
+}
+.gc-app textarea.gc-input { height: auto; padding: 10px 11px; }
+.gc-input:focus { outline: none; border-color: var(--g600); box-shadow: 0 0 0 3px rgba(63,122,95,.18); }
+
+/* ---------- Cabecera móvil + drawer ---------- */
+.gc-mobilebar { display: none; }
+.gc-overlay { display: none; }
+
+@media (max-width: 1100px) {
+  .gc-grid { grid-template-columns: minmax(0, 1fr); }
+  .gc-kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .gc-kpi { border-left: 0; border-top: 1px solid var(--line); }
+  .gc-kpi:nth-child(-n+3) { border-top: 0; }
+  .gc-kpi:not(:nth-child(3n+1)) { border-left: 1px solid var(--line); }
+}
+
+@media (max-width: 900px) {
+  .gc-app { grid-template-columns: minmax(0, 1fr); }
+  .gc-aside {
+    position: fixed; top: 0; left: 0; z-index: 60; width: 260px;
+    transform: translateX(-100%); transition: transform .22s ease;
+  }
+  .gc-aside.open { transform: translateX(0); }
+  .gc-overlay.show { display: block; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 55; }
+  .gc-mobilebar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 16px; background: var(--g900); color: #fff;
+    position: sticky; top: 0; z-index: 50;
+  }
+  .gc-mobilebar .gc-mb-brand { display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 600; }
+  .gc-mobilebar .gc-mb-brand img { width: 28px; height: 28px; border-radius: 7px; }
+  .gc-hamb { background: none; border: 0; color: #fff; cursor: pointer; padding: 6px; display: grid; place-items: center; }
+  .gc-hamb svg { width: 24px; height: 24px; }
+  .gc-main { height: auto; padding: 20px; }
+  .gc-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .gc-kpi, .gc-kpi:not(:nth-child(3n+1)) { border-left: 0; border-top: 1px solid var(--line); }
+  .gc-kpi:nth-child(-n+2) { border-top: 0; }
+  .gc-kpi:nth-child(even) { border-left: 1px solid var(--line); }
+}

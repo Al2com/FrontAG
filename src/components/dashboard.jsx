@@ -1,7 +1,4 @@
-import './Style/cards.css';
 import './Style/variables.css'
-import InfoPanel from './InfoPanel/InfoPanel.jsx';
-import InfoPanel2 from './InfoPanel/InfoPanel2.jsx';
 import explotacionService from '../services/explotaciones.js';
 import parcelasService from '../services/parcelas.js';
 import operacionesService from '../services/operaciones.js';
@@ -12,25 +9,25 @@ import productosService from '../services/productos.js';
 import backupService from '../services/backup.js';
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import {
+  MapPin, Map, ClipboardList, SprayCan, Package, TriangleAlert,
+  ArrowRight, Plus,
+} from 'lucide-react';
 
 // pendientes primero; entre iguales se respeta el orden que ya trae el back
-// (mas recientes primero). El peso numerico mantiene el orden estable: el
-// comparador anterior devolvia 1 tambien para elementos iguales
+// (mas recientes primero). El peso numerico mantiene el orden estable.
 const ordenarPorEstado = (items) =>
   [...items].sort((a, b) => (a.estado === 'pendiente' ? 0 : 1) - (b.estado === 'pendiente' ? 0 : 1));
 
-// operaciones y fumigaciones se pintan igual: solo cambia el campo que titula
-// la ficha (el tipo de operacion o el metodo de aplicacion)
-const ListaActividad = ({ items, campoTitulo }) =>
-  ordenarPorEstado(items).map((item) => (
-    <div key={item.id} className={`actividad-item estado-borde--${item.estado}`}>
-      <div className="actividad-item-header">
-        <strong>{item[campoTitulo]}</strong>
-        <span className={`actividad-estado estado-badge--${item.estado}`}>{item.estado}</span>
-      </div>
-      <p className="actividad-item-sub">{item.operario}</p>
-    </div>
-  ));
+// estado -> clase de tag y etiqueta visible
+const TAG_ESTADO = {
+  pendiente: 't-amb',
+  realizada: 't-blue',
+  revisada: 't-grn',
+};
+const EstadoTag = ({ estado }) => (
+  <span className={`gc-tag ${TAG_ESTADO[estado] || 't-blue'}`}>{estado}</span>
+);
 
 const Dashboard = () => {
   const [numExplo, setNumExplo] = useState(0);
@@ -42,6 +39,10 @@ const Dashboard = () => {
   const [productosStockBajo, setProductosStockBajo] = useState([]);
   const [errorCarga, setErrorCarga] = useState('');
   const [appVacia, setAppVacia] = useState(false);
+  const [filtro, setFiltro] = useState('all'); // all | op | fu
+
+  const rol = sessionStorage.getItem('rol');
+  const usuario = JSON.parse(sessionStorage.getItem('usuario') || 'null');
 
   useEffect(() => {
     // el aviso de "importar copia de seguridad" solo aplica a quien puede
@@ -85,69 +86,140 @@ const Dashboard = () => {
       .catch(avisarError);
   }, []);
 
-  const paneles = [
-    { iconImg: './explotaciones.svg', texto: 'Explotaciones', valor: numExplo,          comentario: 'Total de Fincas'    },
-    { iconImg: './parcela.svg',       texto: 'Parcelas',       valor: numParcelas,       comentario: 'Total Parcelas'     },
-    { iconImg: './operaciones.svg',   texto: 'Operaciones',    valor: totalOperaciones,  comentario: 'Total Operaciones'  },
-    { iconImg: './fumigar1.svg',       texto: 'Fumigaciones',   valor: totalFumigaciones, comentario: 'Total Fumigaciones' },
-    { iconImg: './almacen.svg',       texto: 'Productos',      valor: totalProductos,                 comentario: 'En almacén'         },
+  const stockBajo = productosStockBajo.length;
+
+  const kpis = [
+    { Icono: MapPin, texto: 'Explotaciones', valor: numExplo, nota: 'Total de fincas' },
+    { Icono: Map, texto: 'Parcelas', valor: numParcelas, nota: `En ${numExplo} explotaciones` },
+    { Icono: ClipboardList, texto: 'Operaciones', valor: totalOperaciones, nota: 'Registradas' },
+    { Icono: SprayCan, texto: 'Fumigaciones', valor: totalFumigaciones, nota: 'Registradas' },
+    { Icono: Package, texto: 'Productos', valor: totalProductos,
+      nota: stockBajo ? `${stockBajo} bajo mínimo` : 'En almacén', aviso: stockBajo > 0 },
   ];
 
+  // actividad combinada para la tarjeta de pendientes
+  const actividad = [
+    ...actividadReciente.operaciones.map(o => ({ ...o, tipo: 'op', titulo: o.tipo_operacion })),
+    ...actividadReciente.fumigaciones.map(f => ({ ...f, tipo: 'fu', titulo: f.metodo_aplicacion })),
+  ];
+  const actividadFiltrada = ordenarPorEstado(
+    actividad.filter(a => filtro === 'all' || a.tipo === filtro)
+  );
+
   return (
-    <div>
+    <>
+      <header className="gc-head">
+        <div>
+          <h1>Hola{usuario?.name ? `, ${usuario.name}` : ''}</h1>
+          <p>{stockBajo} productos bajo mínimo · {totalProductos} en almacén</p>
+        </div>
+        {rol !== 'trabajador' && (
+          <div className="gc-acts">
+            <Link className="gc-btn" to="/nueva-fumigacion"><SprayCan />Registrar fumigación</Link>
+            <Link className="gc-btn pri" to="/nueva-operacion"><Plus />Nueva operación</Link>
+          </div>
+        )}
+      </header>
 
       {appVacia && (
-        <div className="aviso-app-vacia">
+        <div className="gc-aviso">
           <span>No tienes datos guardados. ¿Quieres importar una copia de seguridad?</span>
-          <Link to="/configuracion" className="btn-vista">Ir a Configuración</Link>
+          <Link to="/configuracion" className="gc-btn">Ir a Configuración</Link>
         </div>
       )}
 
-      {errorCarga && <span className="mensaje-error">{errorCarga}</span>}
+      {errorCarga && <span className="gc-error">{errorCarga}</span>}
 
-      {/* tarjetas resumen */}
-      <div className="primeraSeccion">
-        {paneles.map((panel) => (
-          <InfoPanel key={panel.texto} {...panel} />
-        ))}
-      </div>
+      {/* Franja de KPIs */}
+      <section className="gc-kpis">
+        {kpis.map((kpi) => {
+          const Icono = kpi.Icono
+          return (
+            <div className="gc-kpi" key={kpi.texto}>
+              <span className="l"><Icono />{kpi.texto}</span>
+              <span className="v">{kpi.valor}</span>
+              <span className={`s ${kpi.aviso ? 'w' : ''}`}>{kpi.nota}</span>
+            </div>
+          )
+        })}
+      </section>
 
-      <div className="segundaSeccion">
+      <div className="gc-grid">
+        {/* Stock bajo mínimo */}
+        <section className="gc-card">
+          <div className="gc-ch">
+            <h2>
+              <TriangleAlert style={{ width: 17, height: 17, color: 'var(--amber)' }} />
+              Stock bajo mínimo
+              {stockBajo > 0 && <span className="c">{stockBajo}</span>}
+            </h2>
+            {rol !== 'trabajador' && <Link to="/almacen">Ver almacén<ArrowRight /></Link>}
+          </div>
 
-        {/* alertas de stock bajo */}
-        <InfoPanel2 iconImg="./advertencia1.png" titulo="Alertas" texto="Requieren atención">
-          {productosStockBajo.length === 0
-            ? (
-                <div className="stock-ok">
-                  <img src="./check.svg" alt="" width="16" />
-                  Todos los productos tienen stock suficiente
+          {stockBajo === 0 ? (
+            <div className="gc-empty">Todos los productos tienen stock suficiente</div>
+          ) : (
+            <table className="gc-table">
+              <thead>
+                <tr><th>Producto</th><th>Actual</th><th>Mínimo</th><th style={{ width: '22%' }}>Nivel</th><th>Estado</th></tr>
+              </thead>
+              <tbody>
+                {productosStockBajo.map(p => {
+                  const agotado = Number(p.stock_actual) === 0;
+                  const pct = Math.min(100, Math.max(3, (p.stock_actual / p.stock_minimo) * 100 || 3));
+                  return (
+                    <tr key={p.id}>
+                      <td className="p"><b>{p.nombre}</b></td>
+                      <td className="num">{p.stock_actual} {p.unidad}</td>
+                      <td className="num">{p.stock_minimo} {p.unidad}</td>
+                      <td>
+                        <div className="gc-bar">
+                          <i style={{ width: `${pct}%`, background: agotado ? 'var(--red)' : 'var(--amber)' }}></i>
+                        </div>
+                      </td>
+                      <td><span className={`gc-tag ${agotado ? 't-red' : 't-amb'}`}>{agotado ? 'Agotado' : 'Bajo'}</span></td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          )}
+        </section>
+
+        {/* Actividad reciente / pendientes */}
+        <section className="gc-card">
+          <div className="gc-ch">
+            <h2>Actividad reciente</h2>
+            <div className="gc-tabs">
+              <button className={filtro === 'all' ? 'on' : ''} onClick={() => setFiltro('all')}>Todas</button>
+              <button className={filtro === 'op' ? 'on' : ''} onClick={() => setFiltro('op')}>Operaciones</button>
+              <button className={filtro === 'fu' ? 'on' : ''} onClick={() => setFiltro('fu')}>Fumigaciones</button>
+            </div>
+          </div>
+
+          <div className="gc-list">
+            {actividadFiltrada.length === 0 ? (
+              <div className="gc-empty">Sin actividad reciente</div>
+            ) : actividadFiltrada.map(item => (
+              <div className="gc-it" key={`${item.tipo}-${item.id}`}>
+                <div className={`gc-ic ${item.tipo}`}>
+                  {item.tipo === 'op' ? <ClipboardList /> : <SprayCan />}
                 </div>
-              )
-            : productosStockBajo.map(producto => (
-                <div key={producto.id} className="actividad-item actividad-item--alerta">
-                  <div className="actividad-item-header">
-                    <strong>{producto.nombre}</strong>
-                    <span className="actividad-estado estado-badge--pendiente">Stock bajo</span>
-                  </div>
-                  <p className="actividad-item-sub">
-                    Actual: {producto.stock_actual} {producto.unidad} — Mínimo: {producto.stock_minimo} {producto.unidad}
-                  </p>
+                <div>
+                  <b>{item.titulo}</b>
+                  <small>{item.tipo === 'op' ? 'Operación' : 'Fumigación'}<i>·</i>{item.operario}</small>
                 </div>
-              ))
-          }
-        </InfoPanel2>
+                <EstadoTag estado={item.estado} />
+              </div>
+            ))}
+          </div>
 
-        {/* últimas operaciones y fumigaciones, pendientes primero */}
-        <InfoPanel2 iconImg="./operaciones.svg" titulo="Actividad Reciente">
-          <h3>Operaciones</h3>
-          <ListaActividad items={actividadReciente.operaciones} campoTitulo="tipo_operacion" />
-
-          <h3>Fumigaciones</h3>
-          <ListaActividad items={actividadReciente.fumigaciones} campoTitulo="metodo_aplicacion" />
-        </InfoPanel2>
-
+          {rol !== 'trabajador' && (
+            <div className="gc-foot"><Link to="/operaciones">Ver todo el historial</Link></div>
+          )}
+        </section>
       </div>
-    </div>
+    </>
   );
 };
 

@@ -1,195 +1,115 @@
 import { useState } from 'react'
-import MenuBar from './BarraBusqueda/MenuBar'
+import { NavLink } from 'react-router-dom'
 import AvatarPerfil from './AvatarPerfil'
-import './Style/cards.css'
-import './Style/navbar.css'
+import {
+  LayoutDashboard, MapPin, Map, ClipboardList, Waves, Apple,
+  Package, Receipt, NotebookPen, BarChart3, Bot, Settings, LogOut, Menu,
+} from 'lucide-react'
+
+// Secciones y enlaces de la barra lateral. soloAdmin=true oculta el enlace
+// al rol trabajador (misma regla que las rutas SoloAdmin de App.jsx).
+const SECCIONES = [
+  {
+    titulo: null,
+    items: [
+      { to: '/dashboard', texto: 'Dashboard', Icono: LayoutDashboard },
+    ],
+  },
+  {
+    titulo: 'Campo',
+    items: [
+      { to: '/explotaciones', texto: 'Explotaciones', Icono: MapPin, soloAdmin: true },
+      { to: '/parcelas', texto: 'Parcelas', Icono: Map, soloAdmin: true },
+      { to: '/operaciones', texto: 'Operaciones', Icono: ClipboardList },
+      { to: '/riego', texto: 'Riego', Icono: Waves, soloAdmin: true },
+      { to: '/recoleccion', texto: 'Recolección', Icono: Apple, soloAdmin: true },
+    ],
+  },
+  {
+    titulo: 'Gestión',
+    items: [
+      { to: '/almacen', texto: 'Almacén', Icono: Package, soloAdmin: true },
+      { to: '/gastos', texto: 'Gastos', Icono: Receipt, soloAdmin: true },
+      { to: '/cuaderno', texto: 'Cuaderno', Icono: NotebookPen, soloAdmin: true },
+      { to: '/analisis', texto: 'Análisis', Icono: BarChart3, soloAdmin: true },
+      { to: '/consultor', texto: 'Consultor', Icono: Bot, soloAdmin: true },
+    ],
+  },
+  {
+    titulo: 'Cuenta',
+    items: [
+      { to: '/configuracion', texto: 'Configuración', Icono: Settings },
+    ],
+  },
+]
 
 const MenuNav = ({ user, logout }) => {
-
-  const rol = sessionStorage.getItem('rol');
-
-  const [botonActivo, setBotonActivo] = useState('Dashboard')
+  const rol = sessionStorage.getItem('rol')
   const [menuAbierto, setMenuAbierto] = useState(false)
 
-  // Marca el item activo y cierra el drawer en movil
-  const seleccionar = (nombre) => {
-    setBotonActivo(nombre)
-    setMenuAbierto(false)
-  }
+  const cerrar = () => setMenuAbierto(false)
+  const puedeVer = (item) => !item.soloAdmin || rol !== 'trabajador'
 
   return (
     <>
-      {/* Cabecera movil: logo a la izquierda, hamburguesa a la derecha */}
-      <div className="mobile-header">
-        <div className="mobile-header-logo">
-          <img src="./logo_gestiocamp.png" alt="GestioCamp" className="logo-img" />
-          <h4>GestióCamp</h4>
-        </div>
-        <button
-          className={`hamburger-btn ${menuAbierto ? 'abierto' : ''}`}
-          onClick={() => setMenuAbierto(!menuAbierto)}
-          aria-label="Abrir menú"
-          aria-expanded={menuAbierto}
-        >
-          <span></span>
-          <span></span>
-          <span></span>
+      {/* Cabecera solo visible en móvil */}
+      <div className="gc-mobilebar">
+        <span className="gc-mb-brand">
+          <img src="./logo_gestiocamp.png" alt="" />
+          GestióCamp
+        </span>
+        <button className="gc-hamb" onClick={() => setMenuAbierto(true)} aria-label="Abrir menú">
+          <Menu />
         </button>
       </div>
 
-      {/* Overlay oscuro al abrir el menu en movil */}
-      {menuAbierto && (
-        <div className="navbar-overlay" onClick={() => setMenuAbierto(false)}></div>
-      )}
+      <div className={`gc-overlay ${menuAbierto ? 'show' : ''}`} onClick={cerrar}></div>
 
-      <nav className={`navbar ${menuAbierto ? 'navbar-abierta' : ''}`}>
-        <div className="navbar-logo">
-          <img src="./logo_gestiocamp.png" alt="gestiocamp" className="logo-img" />
-          <div className="logo-text">
-            <h4>GestióCamp</h4>
-            <span>Gestió de terres agricoles</span>
+      <aside className={`gc-aside ${menuAbierto ? 'open' : ''}`}>
+        <div className="gc-brand">
+          <img className="gc-logo" src="./logo_gestiocamp.png" alt="GestióCamp" />
+          <div>
+            <b>GestióCamp</b>
+            <small>Gestión de fincas agrícolas</small>
           </div>
         </div>
 
-        {/* Perfil: nombre y rol del usuario */}
-        <div className="navbar-perfil">
-          <AvatarPerfil usuario={user} className="navbar-perfil-avatar" />
-          <div className="navbar-perfil-info">
-            <span className="navbar-perfil-nombre">{user?.name}</span>
-            <span className="navbar-perfil-rol">{user?.rol}</span>
+        <nav className="gc-nav">
+          {SECCIONES.map((seccion, i) => {
+            const items = seccion.items.filter(puedeVer)
+            if (items.length === 0) return null
+            return (
+              <div key={seccion.titulo ?? i}>
+                {seccion.titulo && <div className="gc-sec">{seccion.titulo}</div>}
+                {items.map((item) => {
+                  const Icono = item.Icono
+                  return (
+                    <NavLink
+                      key={item.to}
+                      to={item.to}
+                      onClick={cerrar}
+                      className={({ isActive }) => (isActive ? 'on' : undefined)}
+                    >
+                      <Icono />{item.texto}
+                    </NavLink>
+                  )
+                })}
+              </div>
+            )
+          })}
+        </nav>
+
+        <div className="gc-user">
+          <AvatarPerfil usuario={user} className="gc-av" />
+          <div>
+            <b>{user?.name}</b>
+            <small>{user?.rol}</small>
           </div>
+          <button onClick={logout} title="Cerrar sesión" aria-label="Cerrar sesión">
+            <LogOut />
+          </button>
         </div>
-
-        <div className="navbar-divider"></div>
-
-        <div className="navbar-items">
-          <MenuBar
-            to="/dashboard"
-            iconImg="./iconDashboard.svg"
-            altText="Dashboard"
-            texto="Dashboard"
-            isSeleccionado={botonActivo === 'Dashboard'}
-            onClick={() => seleccionar('Dashboard')}
-          />
-          {rol !== 'trabajador' && (
-            <MenuBar
-              to="/explotaciones"
-              iconImg="./explotaciones.svg"
-              altText="Explotaciones"
-              texto="Explotaciones"
-              isSeleccionado={botonActivo === 'Explotaciones'}
-              onClick={() => seleccionar('Explotaciones')}
-            />
-          )}
-          {rol !== 'trabajador' && (
-            <MenuBar
-              to="/parcelas"
-              iconImg="./parcela.svg"
-              altText="Parcelas"
-              texto="Parcelas"
-              isSeleccionado={botonActivo === 'Parcelas'}
-              onClick={() => seleccionar('Parcelas')}
-            />
-          )}
-
-          <MenuBar
-            to="/operaciones"
-            iconImg="./operaciones.svg"
-            altText="Operaciones"
-            texto="Operaciones"
-            isSeleccionado={botonActivo === 'Operaciones'}
-            onClick={() => seleccionar('Operaciones')}
-          />
-          {rol !== 'trabajador' && (
-            <MenuBar
-              to="/riego"
-              iconImg="./riego.svg"
-              altText="Riego"
-              texto="Riego"
-              isSeleccionado={botonActivo === 'Riego'}
-              onClick={() => seleccionar('Riego')}
-            />
-          )}
-          {rol !== 'trabajador' && (
-            <MenuBar
-              to="/recoleccion"
-              iconImg="./iconRecoleccion.svg"
-              altText="Recoleccion"
-              texto="Recolección"
-              isSeleccionado={botonActivo === 'Recoleccion'}
-              onClick={() => seleccionar('Recoleccion')}
-            />
-          )}
-
-          {rol !== 'trabajador' && (
-            <MenuBar
-              to="/almacen"
-              iconImg="./iconAlmacen.svg"
-              altText="Almacen"
-              texto="Almacén"
-              isSeleccionado={botonActivo === 'Almacen'}
-              onClick={() => seleccionar('Almacen')}
-            />
-          )}
-
-          {rol !== 'trabajador' && (
-            <MenuBar
-              to="/gastos"
-              iconImg="./expenses.svg"
-              altText="Gastos"
-              texto="Gastos"
-              isSeleccionado={botonActivo === 'Gastos'}
-              onClick={() => seleccionar('Gastos')}
-            />
-          )}
-          {rol !== 'trabajador' && (
-            <MenuBar
-              to="/cuaderno"
-              iconImg="./operaciones.svg"
-              altText="Cuaderno"
-              texto="Cuaderno"
-              isSeleccionado={botonActivo === 'Cuaderno'}
-              onClick={() => seleccionar('Cuaderno')}
-            />
-          )}
-          {rol !== 'trabajador' && (
-            <MenuBar
-              to="/analisis"
-              iconImg="./analisis.svg"
-              altText="Análisis"
-              texto="Análisis"
-              isSeleccionado={botonActivo === 'Analisis'}
-              onClick={() => seleccionar('Analisis')}
-            />
-          )}
-
-           {rol !== 'trabajador' && (
-            <MenuBar
-              to="/consultor"
-              iconImg="./consultor.svg"
-              altText="Consultor"
-              texto="Consultor"
-              isSeleccionado={botonActivo === 'Consultor'}
-              onClick={() => seleccionar('Consultor')}
-            />
-          )}
-
-          
-          <MenuBar
-            to="/configuracion"
-            iconImg="./iconConfiguracion.svg"
-            altText="Configuracion"
-            texto="Configuración"
-            isSeleccionado={botonActivo === 'Configuracion'}
-            onClick={() => seleccionar('Configuracion')}
-          />
-        </div>
-
-        {/* Cerrar sesion al final del menu */}
-        <button className="navbar-logout" onClick={logout}>
-          Cerrar sesión
-        </button>
-      </nav>
+      </aside>
     </>
   )
 }
