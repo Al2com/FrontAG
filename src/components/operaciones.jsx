@@ -4,7 +4,6 @@ import BtnCrear from './buttons/BtnCrear.jsx';
 import BtnSubmit from './buttons/BtnSubmit.jsx'
 import BtnEliminar from './buttons/btnEliminar.jsx'
 import Modal from './Modal/Modal.jsx'
-import SeccionColapsable from './SeccionColapsable.jsx'
 import Pill from './Pill.jsx'
 import CabeceraOrden from './CabeceraOrden.jsx'
 import { useOrdenTabla } from '../hooks/useOrdenTabla.js'
@@ -25,13 +24,8 @@ const claseTagEstado = (estado) => (
   estado === 'realizada' ? 't-blue' : estado === 'revisada' ? 't-grn' : 't-amb'
 )
 
-// claves de localStorage: estado de las secciones (cerradas la primera vez)
-// y preferencia de vista tabla/cards (sin preferencia -> se decide por dispositivo)
-const CLAVE_SECCION_OPERACIONES = 'operaciones_seccion_operaciones_abierta'
-const CLAVE_SECCION_FUMIGACIONES = 'operaciones_seccion_fumigaciones_abierta'
+// preferencia de vista tabla/cards (sin preferencia -> se decide por dispositivo)
 const CLAVE_VISTA_TABLA = 'operaciones_vista_tabla'
-
-const leerSeccionAbierta = (clave) => localStorage.getItem(clave) === 'true'
 
 // primera visita (nada guardado): tabla en escritorio, cards en móvil.
 // Si ya hay preferencia guardada, esa manda siempre, sin importar el dispositivo.
@@ -55,10 +49,7 @@ const Operaciones = () => {
   const [campañaFumigacion, setCampañaFumigacion] = useState('todas')
   const [mesFumigacion, setMesFumigacion] = useState('todos')
   const [mostrarTabla, setMostrarTabla] = useState(vistaTablaInicial)
-
-  // acordeón: cerradas por defecto la primera vez, luego recuerdan su estado
-  const [seccionOperacionesAbierta, setSeccionOperacionesAbierta] = useState(() => leerSeccionAbierta(CLAVE_SECCION_OPERACIONES))
-  const [seccionFumigacionesAbierta, setSeccionFumigacionesAbierta] = useState(() => leerSeccionAbierta(CLAVE_SECCION_FUMIGACIONES))
+  const [pestaña, setPestaña] = useState('all') // 'all' | 'op' | 'fu'
 
   // filtros nuevos: parcela en operaciones; variedad y parcela en fumigaciones
   const [parcelaOperacion, setParcelaOperacion] = useState('todas')
@@ -190,17 +181,11 @@ const Operaciones = () => {
     localStorage.setItem(CLAVE_VISTA_TABLA, String(nuevoValor))
   }
 
-  const alternarSeccionOperaciones = () => {
-    const nuevoValor = !seccionOperacionesAbierta
-    setSeccionOperacionesAbierta(nuevoValor)
-    localStorage.setItem(CLAVE_SECCION_OPERACIONES, String(nuevoValor))
-  }
-
-  const alternarSeccionFumigaciones = () => {
-    const nuevoValor = !seccionFumigacionesAbierta
-    setSeccionFumigacionesAbierta(nuevoValor)
-    localStorage.setItem(CLAVE_SECCION_FUMIGACIONES, String(nuevoValor))
-  }
+  // lista combinada para la pestaña "Todas", ordenada por fecha descendente
+  const actividadTodas = [
+    ...operacionesOrdenadas.map(o => ({ item: o, tipo: 'operacion' })),
+    ...fumigacionesOrdenadas.map(f => ({ item: f, tipo: 'fumigacion' })),
+  ].sort((a, b) => (a.item.hora_inicio < b.item.hora_inicio ? 1 : -1))
 
   // Fila con el aspecto de la actividad del dashboard: icono cuadrado (op/fu),
   // título, metadatos y, a la derecha, el tag de estado y las acciones.
@@ -257,25 +242,32 @@ const Operaciones = () => {
             <BtnCrear to="/nueva-fumigacion" titulo="Nueva Fumigación" iconIng="./plusNegro.png" />
           )}
           <div className="separador-btn"></div>
-          <button
-            className={`btn-vista ${mostrarTabla ? 'activo' : ''}`}
-            onClick={alternarVista}
-          >
-            <img src={mostrarTabla ? './iconTable.png' : './cuadrado.png'} alt="vista" />
-            {mostrarTabla ? 'Bloques' : 'Tabla'}
-          </button>
+          {pestaña !== 'all' && (
+            <button
+              className={`btn-vista ${mostrarTabla ? 'activo' : ''}`}
+              onClick={alternarVista}
+            >
+              <img src={mostrarTabla ? './iconTable.png' : './cuadrado.png'} alt="vista" />
+              {mostrarTabla ? 'Bloques' : 'Tabla'}
+            </button>
+          )}
         </div>
       </div>
 
       {errorCarga && <span className="mensaje-error">{errorCarga}</span>}
 
-      <div className="op-columnas">
-      <SeccionColapsable
-        titulo="Operaciones"
-        cantidad={operacionesFiltradas.length}
-        abierta={seccionOperacionesAbierta}
-        onToggle={alternarSeccionOperaciones}
-      >
+      {/* Tarjeta única con pestañas, al estilo de la actividad del dashboard */}
+      <div className="gc-card op-card">
+      <div className="gc-ch">
+        <h2>Actividad</h2>
+        <div className="gc-tabs">
+          <button className={pestaña === 'all' ? 'on' : ''} onClick={() => setPestaña('all')}>Todas</button>
+          <button className={pestaña === 'op' ? 'on' : ''} onClick={() => setPestaña('op')}>Operaciones ({operacionesFiltradas.length})</button>
+          <button className={pestaña === 'fu' ? 'on' : ''} onClick={() => setPestaña('fu')}>Fumigaciones ({fumigacionesFiltradas.length})</button>
+        </div>
+      </div>
+
+      {pestaña === 'op' && (<>
       {/* filtros de operaciones */}
       <div className="filtro-explo">
         <div className="barra-select">
@@ -352,22 +344,15 @@ const Operaciones = () => {
           </tbody>
         </table>
       ) : (
-        <div className="gc-card">
-          <div className="gc-list">
-            {operacionesOrdenadas.map(operacion => (
-              <FilaActividad key={operacion.id} item={operacion} tipo="operacion" />
-            ))}
-          </div>
+        <div className="gc-list">
+          {operacionesOrdenadas.map(operacion => (
+            <FilaActividad key={operacion.id} item={operacion} tipo="operacion" />
+          ))}
         </div>
       )}
-      </SeccionColapsable>
+      </>)}
 
-      <SeccionColapsable
-        titulo="Fumigaciones"
-        cantidad={fumigacionesFiltradas.length}
-        abierta={seccionFumigacionesAbierta}
-        onToggle={alternarSeccionFumigaciones}
-      >
+      {pestaña === 'fu' && (<>
       {/* filtros propios de fumigaciones, no afectan a operaciones */}
       <div className="filtro-explo">
         <div className="barra-select">
@@ -446,15 +431,23 @@ const Operaciones = () => {
           </tbody>
         </table>
       ) : (
-        <div className="gc-card">
-          <div className="gc-list">
-            {fumigacionesOrdenadas.map(fumigacion => (
-              <FilaActividad key={fumigacion.id} item={fumigacion} tipo="fumigacion" />
-            ))}
-          </div>
+        <div className="gc-list">
+          {fumigacionesOrdenadas.map(fumigacion => (
+            <FilaActividad key={fumigacion.id} item={fumigacion} tipo="fumigacion" />
+          ))}
         </div>
       )}
-      </SeccionColapsable>
+      </>)}
+
+      {pestaña === 'all' && (
+        actividadTodas.length === 0
+          ? <div className="gc-empty">Sin actividad</div>
+          : <div className="gc-list">
+              {actividadTodas.map(({ item, tipo }) => (
+                <FilaActividad key={`${tipo}-${item.id}`} item={item} tipo={tipo} />
+              ))}
+            </div>
+      )}
       </div>
     </div>
   )

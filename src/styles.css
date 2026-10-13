@@ -213,12 +213,9 @@
   .op-item-botones { justify-content: flex-start; }
 }
 
-/* Operaciones y Fumigaciones en dos columnas, como las tarjetas del dashboard */
-.op-columnas { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; align-items: start; }
-.op-columnas .seccion-colapsable-interior { overflow-x: auto; } /* tablas anchas no desbordan */
-@media (max-width: 1100px) {
-  .op-columnas { grid-template-columns: minmax(0, 1fr); }
-}
+/* Operaciones: tabla a ras dentro de la tarjeta (sin doble borde ni márgenes) */
+.op-card .tabla-operaciones { margin: 0; width: 100%; border: 0; border-radius: 0; }
+.op-card .filtro-explo { border-bottom: 1px solid var(--line); }
 
 /* ---------- Avisos ---------- */
 .gc-aviso {
