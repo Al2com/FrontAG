@@ -8,6 +8,7 @@ import BtnEliminar from './buttons/btnEliminar.jsx';
 import Modal from './Modal/Modal.jsx';
 import Pill from './Pill.jsx';
 import CabeceraOrden from './CabeceraOrden.jsx';
+import { MapPin } from 'lucide-react';
 import { useOrdenTabla } from '../hooks/useOrdenTabla.js';
 import './Style/cards.css';
 import './Style/forms.css';
@@ -43,6 +44,9 @@ const Parcela = () => {
   // modal de confirmacion para eliminar
   const [modalConfirm, setModalConfirm] = useState({ visible: false, id: null });
 
+  // parcela cuya ficha de mapa se está viendo (null = modal cerrado)
+  const [parcelaMapa, setParcelaMapa] = useState(null);
+
   const rol = sessionStorage.getItem('rol');
 
   // al entrar pido los datos al back
@@ -76,6 +80,11 @@ const Parcela = () => {
     setModalConfirm({ visible: true, id });
   };
 
+  // abre el modal del mapa guardando la parcela seleccionada
+  const manejarVerMapa = (parcela) => {
+    setParcelaMapa(parcela);
+  };
+
   // pido confirmacion antes de borrar y actualizo la lista sin recargar
   const eliminarParcela = () => {
     parcelasService.borrarParcela(modalConfirm.id)
@@ -97,6 +106,15 @@ const Parcela = () => {
           mesajeError="¿Estás seguro de eliminar esta parcela?"
           cerrarModal={() => setModalConfirm({ visible: false, id: null })}
           onConfirmar={eliminarParcela}
+        />
+      )}
+
+      {/* PROVISIONAL (Paso A): placeholder hasta que el Paso B monte el mapa real.
+          Se sustituye por <ModalMapaParcela /> en el siguiente paso. */}
+      {parcelaMapa && (
+        <Modal
+          mesajeError={`Mapa de la parcela ${parcelaMapa.poligono} - ${parcelaMapa.parcela} (próximamente)`}
+          cerrarModal={() => setParcelaMapa(null)}
         />
       )}
 
@@ -178,6 +196,15 @@ const Parcela = () => {
                 {rol !== 'trabajador' && (
                   <td>
                     <div className="tabla-botones">
+                      <button
+                        type="button"
+                        className="btn-mapa"
+                        title="Ver la parcela en el mapa"
+                        aria-label="Ver la parcela en el mapa"
+                        onClick={() => manejarVerMapa(parcela)}
+                      >
+                        <MapPin />Mapa
+                      </button>
                       <BtnSubmit texto="Editar" to={`/parcela/${parcela.id}`} />
                       <BtnEliminar texto="Eliminar" onClick={() => confirmarEliminar(parcela.id)} />
                     </div>
@@ -205,6 +232,15 @@ const Parcela = () => {
             nombre={parcela.nombre}
           >
             <div className="card-botones">
+              <button
+                type="button"
+                className="btn-mapa"
+                title="Ver la parcela en el mapa"
+                aria-label="Ver la parcela en el mapa"
+                onClick={() => manejarVerMapa(parcela)}
+              >
+                <MapPin />Mapa
+              </button>
               {rol !== 'trabajador' && (
                 <BtnSubmit texto="Editar" to={`/parcela/${parcela.id}`} />
               )}

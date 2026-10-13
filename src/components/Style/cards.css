@@ -13,6 +13,19 @@
   gap: var(--esp-sm);
 }
 
+/* Botón "Mapa" de las parcelas: secundario (blanco con borde), mismo tamaño
+   que Editar/Eliminar. Solo tokens, sin colores fijos. */
+.btn-mapa {
+  background-color: var(--c-blanco);
+  color: var(--c-texto);
+  border: 1px solid var(--c-borde);
+}
+.btn-mapa:hover {
+  background-color: var(--c-fondo-verde);
+  border-color: var(--c-borde-oscuro);
+}
+.btn-mapa svg { width: 15px; height: 15px; }
+
 .separador-btn {
   width: 1px;
   height: 30px;
