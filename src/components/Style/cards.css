@@ -408,7 +408,7 @@
 }
 
 /* GASTOS */
-.rentabilidad-contenedor { padding: var(--esp-md); }
+.rentabilidad-contenedor { padding: 0 var(--esp-md) var(--esp-md); }
 
 .rentabilidad-titulo-seccion {
   padding: var(--esp-xs) var(--esp-xl);
