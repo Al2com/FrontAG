@@ -217,6 +217,10 @@
 .op-card .tabla-operaciones { margin: 0; width: 100%; border: 0; border-radius: 0; }
 .op-card .filtro-explo { border-bottom: 1px solid var(--line); }
 
+/* Concepto de Gastos con icono por tipo (fumigación, tractor, riego...) */
+.gasto-concepto { display: inline-flex; align-items: center; gap: 7px; }
+.gasto-concepto svg { width: 15px; height: 15px; flex: 0 0 15px; color: var(--g600); stroke-width: 1.75; }
+
 /* ---------- Avisos ---------- */
 .gc-aviso {
   display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;

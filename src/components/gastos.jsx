@@ -1,6 +1,17 @@
 import { useEffect, useState, Fragment } from 'react'
 import gastosService from '../services/gastos'
+import { Scissors, Sprout, Wrench, Tractor, SprayCan, Droplets, Landmark, ClipboardList } from 'lucide-react'
 import './Style/cards.css'
+
+// icono segun el tipo de operacion (poda, abonado, mantenimiento, tractor...)
+const IconoTipo = ({ tipo }) => {
+  const t = (tipo || '').toLowerCase()
+  if (t.includes('poda')) return <Scissors />
+  if (t.includes('abon')) return <Sprout />
+  if (t.includes('manten')) return <Wrench />
+  if (t.includes('tractor')) return <Tractor />
+  return <ClipboardList />
+}
 
 const Gastos = () => {
   const anioActual = new Date().getFullYear()
@@ -150,8 +161,13 @@ const Gastos = () => {
                       <Fragment key={op.tipo}>
                         {op.filas.map((f, i) => (
                           <tr key={`${op.tipo}-${i}`}>
-                            <td style={{ textTransform: 'capitalize', fontWeight: i === 0 ? 600 : 400 }}>
-                              {i === 0 ? op.tipo : ''}
+                            <td style={{ fontWeight: i === 0 ? 600 : 400 }}>
+                              {i === 0 && (
+                                <span className="gasto-concepto">
+                                  <IconoTipo tipo={op.tipo} />
+                                  <span style={{ textTransform: 'capitalize' }}>{op.tipo}</span>
+                                </span>
+                              )}
                             </td>
                             <td className="detalle-fechas">{f.fecha} · {f.operario}</td>
                             <td>{f.horas.toFixed(1)} h</td>
@@ -187,7 +203,7 @@ const Gastos = () => {
                       : parcela.fumigacionesTractor.map(fum => (
                         <Fragment key={`tractor-${fum.id}`}>
                           <tr>
-                            <td>Tractor</td>
+                            <td><span className="gasto-concepto"><Tractor /><span>Tractor</span></span></td>
                             <td className="detalle-fechas">
                               {fum.fecha} · {fum.unidades} turbo{fum.unidades !== 1 ? 's' : ''}
                               {fum.hanegadas > 0 && ` · ${fum.hanegadas} han.`}
@@ -228,7 +244,7 @@ const Gastos = () => {
                       : parcela.fumigacionesMochila.map(fum => (
                         <Fragment key={`mochila-${fum.id}`}>
                           <tr>
-                            <td>Mochila hierba</td>
+                            <td><span className="gasto-concepto"><SprayCan /><span>Mochila hierba</span></span></td>
                             <td className="detalle-fechas">
                               {fum.fecha} · {fum.operario} · {fum.unidades} mochila{fum.unidades !== 1 ? 's' : ''}
                             </td>
@@ -260,7 +276,7 @@ const Gastos = () => {
                         <tr className="tabla-separador"><td colSpan={5}></td></tr>
                         {parcela.impuestos.municipal > 0 && (
                           <tr>
-                            <td>Impuesto municipal</td>
+                            <td><span className="gasto-concepto"><Landmark /><span>Impuesto municipal</span></span></td>
                             <td>Anual</td>
                             <td>—</td>
                             <td>—</td>
@@ -269,7 +285,7 @@ const Gastos = () => {
                         )}
                         {parcela.impuestos.cequiaje > 0 && (
                           <tr>
-                            <td>Cequiaje</td>
+                            <td><span className="gasto-concepto"><Droplets /><span>Cequiaje</span></span></td>
                             <td>Anual</td>
                             <td>—</td>
                             <td>—</td>
@@ -285,7 +301,7 @@ const Gastos = () => {
                         <tr className="tabla-separador"><td colSpan={5}></td></tr>
                         {Object.entries(riegoPorConcepto).map(([concepto, importe]) => (
                           <tr key={`riego-${concepto}`}>
-                            <td style={{ textTransform: 'capitalize' }}>Riego · {concepto}</td>
+                            <td><span className="gasto-concepto"><Droplets /><span style={{ textTransform: 'capitalize' }}>Riego · {concepto}</span></span></td>
                             <td>Recibos del año</td>
                             <td>—</td>
                             <td>—</td>
