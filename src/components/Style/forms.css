@@ -163,16 +163,9 @@
 .header-login img {
    width: 150px; 
 }
-.menu-button {
-  display: flex;
-  padding: 0px;
-  
-  
-}
-.menu-button button {
-  margin: 5px;
-  margin-top: 100px;
-}
+/* El estilo de .menu-button vive en cards.css (barra de herramientas con gap).
+   Aquí había un resto antiguo con margin-top:100px que empujaba hacia abajo los
+   botones de crear/tabla en todas las pantallas; se elimina. */
 
 /* -- Selector de parcelas en chips (FormFumigacion, tractor) --------------
    Antes era una lista vertical de checkboxes: con muchas parcelas ocupaba
