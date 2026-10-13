@@ -42,4 +42,13 @@ const borrarParcela = (id) => {
   return axios.delete(`${baseUrl}/${id}`).then(res => res.data)
 }
 
-export default { getCount, getResumenP, postCrear, getLista, getParcela, putActualizar, borrarParcela }
+// ubicación de la parcela en el mapa (lat/lng guardados en el back)
+const getUbicacion = (id) => {
+  return axios.get(`${baseUrl}/${id}/ubicacion`).then(res => res.data)
+}
+
+const guardarUbicacion = (id, { latitud, longitud }) => {
+  return axios.put(`${baseUrl}/${id}/ubicacion`, { latitud, longitud }).then(res => res.data)
+}
+
+export default { getCount, getResumenP, postCrear, getLista, getParcela, putActualizar, borrarParcela, getUbicacion, guardarUbicacion }

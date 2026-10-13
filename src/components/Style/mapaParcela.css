@@ -52,7 +52,18 @@
   border-bottom: 1px solid var(--c-borde);
 }
 
+.mapa-modal-error { color: var(--c-peligro); font-weight: 600; }
+
 .mapa-modal-mapa { width: 100%; height: 440px; }
+.mapa-modal-cargando {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  color: var(--c-texto-apagado);
+  font-size: 13px;
+  background: var(--c-fondo-verde);
+}
 .mapa-modal-mapa .leaflet-container { width: 100%; height: 100%; }
 
 .mapa-modal-enlaces {
