@@ -74,29 +74,30 @@ h1, h2 { color: var(--c-primario); }
 button {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  padding: 12px 24px;
-  background-color: var(--c-primario);
+  gap: 7px;
+  height: 36px;
+  padding: 0 14px;
+  background-color: var(--c-primario-medio); /* g700 */
   color: white;
   border: none;
   border-radius: var(--rad-md);
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 600;
+  font-family: var(--font-ui);
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: background-color 0.18s ease;
   margin-left: 0;
+  white-space: nowrap;
 }
 
 button img {
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   filter: brightness(0) invert(1);
 }
 
 button:hover {
-  background-color: var(--c-primario-medio);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(82, 183, 136, 0.3);
+  background-color: var(--c-primario); /* g800 */
 }
 
 .btn-logout { 
@@ -112,16 +113,17 @@ button:hover {
 }
 
 .btn-cancel {
-  background-color: #f5f5f5;
+  background-color: #fff;
   border: 1px solid var(--c-borde);
   color: var(--c-texto);
   margin-left: 0;
 }
 
+.btn-cancel img { filter: none; }
+
 .btn-cancel:hover {
-  background-color: #e0e0e0;
-  transform: none;
-  box-shadow: none;
+  background-color: var(--c-fondo-verde);
+  border-color: var(--c-borde-oscuro);
 }
 .header-user {
   display: flex;

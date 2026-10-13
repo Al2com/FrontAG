@@ -4,28 +4,28 @@
    ============================================================ */
 
 :root {
-  /* Colores */
-  --c-primario:#1B4332;
-  --c-primario-medio:#40916C;
-  --c-primario-claro:#52B788;
-  --c-fondo: #F8F9FA;
-  --c-fondo-verde:#f4fdf2;
-  --c-blanco:#ffffff;
-  --c-borde: #ddd;
-  --c-borde-oscuro:#bdc0c4;
-  --c-texto:#333;
-  --c-texto-apagado:#666;
-  --c-texto-etiqueta:#555;
-  --c-peligro:#dc3545;
-  --c-peligro-hover: #b02a37;
+  /* Colores — alineados con el sistema GestióCamp (styles.css) */
+  --c-primario:#2a4f3e;        /* g800: títulos y botón primario */
+  --c-primario-medio:#356150;  /* g700 */
+  --c-primario-claro:#3f7a5f;  /* g600: foco/acentos */
+  --c-fondo: #f6f6f2;          /* bg */
+  --c-fondo-verde:#f2f6f3;     /* g50 */
+  --c-blanco:#ffffff;          /* card */
+  --c-borde: #e5e6df;          /* line */
+  --c-borde-oscuro:#cfd2c8;
+  --c-texto:#1d2420;           /* ink */
+  --c-texto-apagado:#5c665f;   /* ink2 */
+  --c-texto-etiqueta:#5c665f;  /* ink2 */
+  --c-peligro:#b4382f;         /* red */
+  --c-peligro-hover: #8f2c25;
   /* escala rentable/umbral/pérdidas del gráfico de dispersión gastos vs.
      ingresos en Análisis (Mapa de ganancia neta por parcela) */
   --grove:#2f5233;
   --citrus:#c9a227;
   --persimmon:#e2672b;
-  --estado-pendiente: #E9A800;
-  --estado-realizado: #2E7D52;
-  --estado-revisado :#4A90D9;
+  --estado-pendiente: #b7791f;
+  --estado-realizado: #356150;
+  --estado-revisado :#2f6690;
 
   /* Semáforo de rentabilidad por hanegada (barra de Análisis): de baja
      (rojo) a alta (azul oscuro), pasando por naranja y azul claro/verde */
@@ -43,7 +43,7 @@
   --esp-2xl: 30px;
 
   /* Bordes redondeados */
-  --rad-sm: 5px;
+  --rad-sm: 6px;
   --rad-md: 8px;
   --rad-lg: 12px;
 
@@ -55,36 +55,9 @@
 
   /* Tipografia: UI/texto y una mono para cifras en columna (precios,
      hanegadas, stock...) para que los datos numericos se lean alineados */
-  --font-ui: 'Public Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-ui: 'Figtree', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-mono: 'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace;
 }
 
-/* ============================================================
-   Modo oscuro: mismos nombres de variable, otros valores. Como
-   todos los componentes ya pintan con var(--c-...), aplicar
-   data-tema="oscuro" en <html> repinta toda la app sin tocar
-   cada componente uno a uno.
-   ============================================================ */
-:root[data-tema="oscuro"] {
-  --c-primario: #52B788;
-  --c-primario-medio: #40916C;
-  --c-primario-claro: #74C69D;
-  --c-fondo: #1B1F1C;
-  --c-fondo-verde: #17201A;
-  --c-blanco: #242926;
-  --c-borde: #3A403C;
-  --c-borde-oscuro: #4C534E;
-  --c-texto: #E8EAE8;
-  --c-texto-apagado: #A8ADA9;
-  --c-texto-etiqueta: #B8BDB9;
-  --c-peligro: #E5606D;
-  --c-peligro-hover: #C94A56;
-  --estado-pendiente: #E9A800;
-  --estado-realizado: #52B788;
-  --estado-revisado: #6BA8E5;
-
-  --som-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
-  --som-md: 0 2px 4px rgba(0, 0, 0, 0.35);
-  --som-lg: 0 4px 8px rgba(0, 0, 0, 0.4);
-  --som-xl: 0 4px 20px rgba(0, 0, 0, 0.45);
-}
+/* El modo oscuro se retiró en el rediseño: la app usa solo el tema claro
+   de la paleta GestióCamp. El conmutador de Configuración también se quitó. */

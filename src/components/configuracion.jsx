@@ -1,5 +1,4 @@
 import { useRef, useState } from 'react'
-import { useTheme } from '../hooks/useTheme.js'
 import settingsService from '../services/settings'
 import backupService from '../services/backup'
 import Modal from './Modal/Modal.jsx'
@@ -13,7 +12,6 @@ const TAMANO_MAX_BYTES = 2 * 1024 * 1024
 const fechaHoy = () => new Date().toISOString().slice(0, 10)
 
 const Configuracion = ({ user, setUser }) => {
-  const { tema, alternarTema } = useTheme()
   const rol = sessionStorage.getItem('rol')
 
   const actualizarUsuarioLocal = (cambios) => {
@@ -130,18 +128,6 @@ const Configuracion = ({ user, setUser }) => {
   return (
     <div className="form-container configuracion">
       <h1>Configuración</h1>
-
-      {/* MODO OSCURO */}
-      <section className="config-seccion">
-        <h2>Apariencia</h2>
-        <div className="config-fila">
-          <span>Modo oscuro</span>
-          <label className="switch">
-            <input type="checkbox" checked={tema === 'oscuro'} onChange={alternarTema} />
-            <span className="switch-slider"></span>
-          </label>
-        </div>
-      </section>
 
       {/* FOTO DE PERFIL */}
       <section className="config-seccion">

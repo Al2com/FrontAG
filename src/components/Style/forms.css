@@ -34,17 +34,21 @@
 .form-grupo input,
 .form-grupo select,
 .form-grupo textarea {
-  padding: 10px;
+  padding: 9px 11px;
   border: 1px solid var(--c-borde);
-  border-radius: var(--rad-sm);
-  font-size: 16px;
+  border-radius: var(--rad-md);
+  font-size: 14px;
+  font-family: var(--font-ui);
+  background: #fff;
+  color: var(--c-texto);
 }
 
 .form-grupo input:focus,
 .form-grupo select:focus,
 .form-grupo textarea:focus {
   outline: none;
-  border-color: var(--c-primario-medio);
+  border-color: var(--c-primario-claro);
+  box-shadow: 0 0 0 3px rgba(63, 122, 95, 0.18);
 }
 
 .full-width { grid-column: 1 / -1; }
