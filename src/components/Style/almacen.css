@@ -1,0 +1,123 @@
+/* ============================================================
+   almacen.css — Rediseño del almacén: tarjetas Frecuentes / Menos
+   frecuentes con barra de stock, y modales de detalle y compra.
+   Usa los tokens del proyecto (variables.css) y los del sistema gc.
+   ============================================================ */
+
+/* cabecera de página con acciones */
+.alm-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.alm-head h1 { font-size: 24px; font-weight: 600; margin: 0; color: var(--c-texto); }
+.alm-head .sub { color: var(--c-texto-apagado); font-size: 13px; margin-top: 2px; }
+.alm-acts { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* tarjetas */
+.alm-stack { display: flex; flex-direction: column; gap: 20px; }
+
+/* filas de producto */
+.alm-fila-head, .alm-fila {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) 120px minmax(0, 2fr) 96px 110px;
+  gap: 16px;
+  align-items: center;
+  padding: 12px 20px;
+}
+.alm-fila-head {
+  background: var(--c-fondo-verde);
+  border-bottom: 1px solid var(--c-borde);
+  color: var(--c-texto-apagado);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.alm-fila {
+  border-bottom: 1px solid #f0f0ea;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.alm-fila:last-child { border-bottom: 0; }
+.alm-fila:hover { background: #fafaf7; }
+
+.alm-prod { min-width: 0; }
+.alm-prod .alm-n { font-weight: 600; color: var(--c-texto); display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.alm-prod .alm-cat { font-size: 12px; color: var(--c-texto-apagado); }
+
+.alm-stock b { font-weight: 600; font-variant-numeric: tabular-nums; }
+.alm-stock small { display: block; color: var(--c-texto-apagado); font-size: 11px; }
+
+/* barra de nivel con marca del mínimo */
+.alm-bar { position: relative; height: 8px; background: #eeeee8; border-radius: 4px; overflow: hidden; width: 100%; min-width: 60px; }
+.alm-bar i { display: block; height: 100%; border-radius: 4px; }
+.alm-bar .alm-marca { position: absolute; top: -2px; bottom: -2px; width: 2px; background: rgba(0,0,0,0.22); border-radius: 1px; overflow: visible; }
+
+.alm-consumo { text-align: right; font-size: 12px; color: var(--c-texto-apagado); font-variant-numeric: tabular-nums; }
+.alm-consumo b { color: var(--c-texto); font-weight: 700; }
+.alm-consumo small { display: block; font-size: 10px; text-transform: uppercase; letter-spacing: 0.04em; margin-top: 1px; }
+
+.alm-vacio { padding: 28px 20px; text-align: center; color: var(--c-texto-apagado); font-size: 13px; }
+
+/* ---------- Modal (detalle y compra) ---------- */
+.alm-modal {
+  background: var(--c-blanco);
+  border-radius: var(--rad-lg);
+  width: 100%;
+  max-width: 640px;
+  max-height: calc(100vh - 48px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.2);
+}
+.alm-modal-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 18px 22px; border-bottom: 1px solid var(--c-borde); }
+.alm-modal-head h2 { margin: 0; font-size: 19px; font-weight: 700; color: var(--c-texto); }
+.alm-modal-head .cat { font-size: 13px; color: var(--c-texto-apagado); margin-top: 2px; }
+.alm-modal-cerrar { background: none; border: 0; color: var(--c-texto-apagado); cursor: pointer; padding: 6px; height: auto; border-radius: var(--rad-sm); }
+.alm-modal-cerrar:hover { background: var(--c-fondo-verde); color: var(--c-texto); }
+.alm-modal-cerrar svg { width: 18px; height: 18px; display: block; }
+
+/* bloque de stock grande con barra y marcas */
+.alm-modal-stock { display: flex; align-items: center; gap: 20px; padding: 16px 22px; background: var(--c-fondo-verde); border-bottom: 1px solid var(--c-borde); }
+.alm-modal-stock .big { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.alm-modal-stock .big small { font-size: 12px; color: var(--c-texto-apagado); font-weight: 500; margin-left: 4px; }
+.alm-modal-stock .cap { font-size: 12px; color: var(--c-texto-apagado); margin-top: 2px; }
+.alm-modal-stock .barwrap { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+.alm-modal-stock .foot { display: flex; justify-content: space-between; font-size: 11px; color: var(--c-texto-apagado); }
+
+/* tabs (reusa .gc-tabs si están, pero aquí con subrayado) */
+.alm-tabs { display: flex; gap: 24px; padding: 0 22px; border-bottom: 1px solid var(--c-borde); }
+.alm-tab { background: none; border: 0; padding: 13px 2px; font: 600 13px var(--font-ui); color: var(--c-texto-apagado); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+.alm-tab.on { color: var(--c-texto); border-bottom-color: var(--c-primario-medio); }
+.alm-tab .n { margin-left: 6px; font-size: 11px; font-weight: 500; }
+
+.alm-pane { max-height: 320px; overflow-y: auto; }
+.alm-hist { display: grid; grid-template-columns: 96px minmax(0,1fr) 90px 90px; gap: 12px; padding: 10px 22px; align-items: center; font-size: 13px; border-bottom: 1px solid #f0f0ea; }
+.alm-hist:last-child { border-bottom: 0; }
+.alm-hist .fecha { color: var(--c-texto-apagado); font-size: 12px; font-variant-numeric: tabular-nums; }
+.alm-hist .donde small { display: block; color: var(--c-texto-apagado); font-size: 11px; }
+.alm-hist .qty { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
+.alm-hist .qty.pos { color: var(--estado-realizado); }
+.alm-hist .qty.neg { color: var(--c-peligro); }
+.alm-hist .extra { text-align: right; color: var(--c-texto-apagado); font-size: 12px; font-variant-numeric: tabular-nums; }
+
+.alm-modal-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 22px; border-top: 1px solid var(--c-borde); background: var(--c-fondo-verde); flex-wrap: wrap; }
+.alm-modal-foot .total { font-size: 12px; color: var(--c-texto-apagado); }
+.alm-modal-foot .total b { color: var(--c-texto); font-weight: 700; }
+
+/* formulario de compra dentro del modal */
+.alm-form { padding: 18px 22px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.alm-form .full { grid-column: 1 / -1; }
+
+@media (max-width: 760px) {
+  .alm-fila-head { display: none; }
+  .alm-fila {
+    grid-template-columns: 1fr auto;
+    grid-template-areas: "prod estado" "stock consumo" "bar bar";
+    gap: 8px 12px;
+  }
+  .alm-fila .alm-prod { grid-area: prod; }
+  .alm-fila .alm-stock { grid-area: stock; }
+  .alm-fila .alm-nivel { grid-area: bar; }
+  .alm-fila .alm-estado { grid-area: estado; justify-self: end; }
+  .alm-fila .alm-consumo { grid-area: consumo; justify-self: end; }
+  .alm-form { grid-template-columns: 1fr; }
+}

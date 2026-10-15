@@ -21,6 +21,11 @@ const getResumenGeneral = (filtros = {}) => {
     return axios.get(`${baseUrl1}/resumen`, { params: filtros }).then(response => response.data)
 }
 
-export default { createProducto, getStockBajo, getResumenGeneral };
+// productos clasificados en frecuentes / menos frecuentes (rediseño de almacén)
+const getClasificado = () => {
+    return axios.get(`${baseUrl1}/clasificado`).then(response => response.data)
+}
+
+export default { createProducto, getStockBajo, getResumenGeneral, getClasificado };
 
 
