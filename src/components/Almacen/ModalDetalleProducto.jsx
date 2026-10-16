@@ -10,10 +10,16 @@ const colorStock = (p) => {
   return 'var(--estado-realizado)'
 }
 
-const ModalDetalleProducto = ({ producto, onCerrar, onComprar }) => {
+const ModalDetalleProducto = ({ producto, onCerrar, onComprar, onAjustado }) => {
   const [hist, setHist] = useState(null)
   const [tab, setTab] = useState('compras')
   const [error, setError] = useState('')
+  // stock local: se actualiza en vivo al ajustar (regularizar inventario)
+  const [stock, setStock] = useState(producto.stock)
+  const [ajustando, setAjustando] = useState(false)
+  const [valor, setValor] = useState('')
+  const [guardandoAjuste, setGuardandoAjuste] = useState(false)
+  const [errorAjuste, setErrorAjuste] = useState('')
 
   useEffect(() => {
     productosService.getHistorial(producto.id)
@@ -29,8 +35,19 @@ const ModalDetalleProducto = ({ producto, onCerrar, onComprar }) => {
 
   const u = producto.unidad || ''
   const escala = Number(producto.maximo) > 0 ? Number(producto.maximo) : Number(producto.minimo) * 2 || 1
-  const fill = Math.min(100, (Number(producto.stock) / escala) * 100)
+  const fill = Math.min(100, (Number(stock) / escala) * 100)
   const marca = Math.min(100, (Number(producto.minimo) / escala) * 100)
+
+  // regulariza el inventario: fija el stock al valor contado
+  const guardarAjuste = () => {
+    if (valor === '' || Number(valor) < 0) { setErrorAjuste('Introduce un stock válido.'); return }
+    setGuardandoAjuste(true)
+    setErrorAjuste('')
+    productosService.ajustarStock(producto.id, Number(valor))
+      .then(res => { setStock(res.stock_actual); setAjustando(false); onAjustado?.() })
+      .catch(() => setErrorAjuste('No se pudo ajustar el stock.'))
+      .finally(() => setGuardandoAjuste(false))
+  }
 
   const compras = hist?.compras ?? []
   const usos = hist?.usos ?? []
@@ -50,14 +67,33 @@ const ModalDetalleProducto = ({ producto, onCerrar, onComprar }) => {
 
         <div className="alm-modal-stock">
           <div>
-            <div className="big">{producto.stock} <small>{u} en almacén</small></div>
+            {ajustando ? (
+              <div className="alm-ajuste">
+                <input
+                  type="number" step="0.01" min="0" value={valor}
+                  onChange={e => setValor(e.target.value)} autoFocus
+                />
+                <button onClick={guardarAjuste} disabled={guardandoAjuste}>
+                  {guardandoAjuste ? '…' : 'Guardar'}
+                </button>
+                <button className="btn-cancel" onClick={() => { setAjustando(false); setErrorAjuste('') }}>Cancelar</button>
+              </div>
+            ) : (
+              <div className="big">{stock} <small>{u} en almacén</small></div>
+            )}
             <div className="cap">
               mínimo {producto.minimo} {u}{producto.maximo != null ? ` · máximo ${producto.maximo} ${u}` : ''}
+              {!ajustando && (
+                <button className="alm-ajuste-link" onClick={() => { setValor(String(stock)); setAjustando(true) }}>
+                  Ajustar
+                </button>
+              )}
             </div>
+            {errorAjuste && <div className="mensaje-error" style={{ fontSize: 12 }}>{errorAjuste}</div>}
           </div>
           <div className="barwrap">
             <div className="alm-bar">
-              <i style={{ width: `${Math.max(fill, 2)}%`, background: colorStock(producto) }} />
+              <i style={{ width: `${Math.max(fill, 2)}%`, background: colorStock({ stock, minimo: producto.minimo }) }} />
               <span className="alm-marca" style={{ left: `${marca}%` }} />
             </div>
             <div className="foot">

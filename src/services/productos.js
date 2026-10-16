@@ -29,4 +29,9 @@ const getHistorial = (id) => {
   return axios.get(`${base}/${id}/historial`).then(res => res.data)
 }
 
-export default { getProductos,getProducto,putActualizarProductos,borrarProducto,getHistorial }
+// regulariza el inventario: fija el stock al valor contado
+const ajustarStock = (id, stock_actual) => {
+  return axios.put(`${base}/${id}/stock`, { stock_actual }).then(res => res.data)
+}
+
+export default { getProductos,getProducto,putActualizarProductos,borrarProducto,getHistorial,ajustarStock }

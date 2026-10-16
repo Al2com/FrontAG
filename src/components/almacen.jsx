@@ -135,6 +135,7 @@ const Almacen = () => {
           producto={detalle}
           onCerrar={() => setDetalle(null)}
           onComprar={(id) => { setDetalle(null); setComprar({ productoId: id }) }}
+          onAjustado={cargar}
         />
       )}
 

@@ -37,6 +37,7 @@ const Dashboard = () => {
   const [totalProductos, setTotalProductos] = useState(0);
   const [actividadReciente, setActividadReciente] = useState({ operaciones: [], fumigaciones: [] });
   const [productosStockBajo, setProductosStockBajo] = useState([]);
+  const [masUsados, setMasUsados] = useState([]);
   const [errorCarga, setErrorCarga] = useState('');
   const [appVacia, setAppVacia] = useState(false);
   const [filtro, setFiltro] = useState('all'); // all | op | fu
@@ -84,6 +85,14 @@ const Dashboard = () => {
     almacenService.getStockBajo()
       .then(datos => setProductosStockBajo(datos))
       .catch(avisarError);
+
+    // productos más utilizados (consumo de este año): solo admin, el endpoint
+    // de clasificado está restringido a administrador
+    if (sessionStorage.getItem('rol') === 'admin') {
+      almacenService.getClasificado()
+        .then(d => setMasUsados((d.frecuentes || []).slice(0, 5)))
+        .catch(avisarError);
+    }
   }, []);
 
   const stockBajo = productosStockBajo.length;
@@ -145,46 +154,44 @@ const Dashboard = () => {
       </section>
 
       <div className="gc-grid">
-        {/* Stock bajo mínimo */}
-        <section className="gc-card">
-          <div className="gc-ch">
-            <h2>
-              <TriangleAlert style={{ width: 17, height: 17, color: 'var(--amber)' }} />
-              Stock bajo mínimo
-              {stockBajo > 0 && <span className="c">{stockBajo}</span>}
-            </h2>
-            {rol !== 'trabajador' && <Link to="/almacen">Ver almacén<ArrowRight /></Link>}
-          </div>
+        {/* Productos más utilizados (admin) */}
+        {rol !== 'trabajador' && (
+          <section className="gc-card">
+            <div className="gc-ch">
+              <h2>
+                <Package style={{ width: 17, height: 17, color: 'var(--g600)' }} />
+                Productos más utilizados
+                {masUsados.length > 0 && <span className="c">{masUsados.length}</span>}
+              </h2>
+              <Link to="/almacen">Ver todo<ArrowRight /></Link>
+            </div>
 
-          {stockBajo === 0 ? (
-            <div className="gc-empty">Todos los productos tienen stock suficiente</div>
-          ) : (
-            <table className="gc-table">
-              <thead>
-                <tr><th>Producto</th><th>Actual</th><th>Mínimo</th><th style={{ width: '22%' }}>Nivel</th><th>Estado</th></tr>
-              </thead>
-              <tbody>
-                {productosStockBajo.map(p => {
-                  const agotado = Number(p.stock_actual) === 0;
-                  const pct = Math.min(100, Math.max(3, (p.stock_actual / p.stock_minimo) * 100 || 3));
-                  return (
-                    <tr key={p.id}>
-                      <td className="p"><b>{p.nombre}</b></td>
-                      <td className="num">{p.stock_actual} {p.unidad}</td>
-                      <td className="num">{p.stock_minimo} {p.unidad}</td>
-                      <td>
-                        <div className="gc-bar">
-                          <i style={{ width: `${pct}%`, background: agotado ? 'var(--red)' : 'var(--amber)' }}></i>
-                        </div>
-                      </td>
-                      <td><span className={`gc-tag ${agotado ? 't-red' : 't-amb'}`}>{agotado ? 'Agotado' : 'Bajo'}</span></td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          )}
-        </section>
+            {masUsados.length === 0 ? (
+              <div className="gc-empty">Sin consumo registrado este año</div>
+            ) : (
+              <table className="gc-table">
+                <thead>
+                  <tr><th>Producto</th><th>Consumo</th><th>Stock</th><th>Estado</th></tr>
+                </thead>
+                <tbody>
+                  {masUsados.map(p => {
+                    const agotado = Number(p.stock) === 0;
+                    const bajo = Number(p.stock) < Number(p.minimo);
+                    const est = agotado ? { c: 't-red', t: 'Agotado' } : bajo ? { c: 't-amb', t: 'Bajo' } : { c: 't-grn', t: 'OK' };
+                    return (
+                      <tr key={p.id}>
+                        <td className="p"><b>{p.nombre}</b></td>
+                        <td className="num">{p.consumo_anual} {p.unidad}</td>
+                        <td className="num">{p.stock} {p.unidad}</td>
+                        <td><span className={`gc-tag ${est.c}`}>{est.t}</span></td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            )}
+          </section>
+        )}
 
         {/* Actividad reciente / pendientes */}
         <section className="gc-card">
