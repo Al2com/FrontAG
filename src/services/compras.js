@@ -26,4 +26,9 @@ const getResumenProducto = (productoId, filtros = {}) => {
         .then(res => res.data);
 };
 
-export default { getCompras, postCrearCompra, getHistorialProducto, getResumenProducto };
+// alta de compra del rediseño (proveedor en texto libre, albarán, notas)
+const registrarCompra = (data) => {
+    return axios.post(base, data).then(res => res.data);
+};
+
+export default { getCompras, postCrearCompra, getHistorialProducto, getResumenProducto, registrarCompra };
