@@ -2,13 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import analisisService from '../services/analisis'
 import parcelasService from '../services/parcelas'
 import gastosService from '../services/gastos'
-import GraficoRentabilidad from './GraficoRentabilidad'
-import DispersionRentabilidad from './DispersionRentabilidad'
-import BurbujasMetodos from './BurbujasMetodos'
-import BurbujasFlotantes from './BurbujasFlotantes'
-import RentabilidadBarra from './RentabilidadBarra'
-import ComparativaMediaResto from './ComparativaMediaResto'
-import BarraIngresosGastos from './BarraIngresosGastos'
+import BarrasMargenParcela from './BarrasMargenParcela'
 import ConsumoAguaBarra from './ConsumoAguaBarra'
 import CabeceraOrden from './CabeceraOrden.jsx'
 import { useOrdenTabla } from '../hooks/useOrdenTabla'
@@ -21,6 +15,7 @@ import './Style/analisis.css'
 // formatea en € con dos decimales; "-" si el valor no existe (division por
 // cero evitada en el backend, que devuelve null en vez de 0/0)
 const formatoEuro = (valor) => (valor === null || valor === undefined ? '-' : `${valor.toFixed(2)} €`)
+const formatoEuroHng = (valor) => (valor === null || valor === undefined ? '-' : `${valor.toFixed(2)} €/hng`)
 const formatoNumero = (valor, unidad = '') => (valor === null || valor === undefined ? '-' : `${valor}${unidad}`)
 
 const TIPOS = [
@@ -37,66 +32,36 @@ const TIPOS = [
 // desglose de dos niveles
 const TIPOS_CON_DETALLE = ['poda', 'riego', 'abonado', 'mantenimiento', 'tractor']
 
-// una burbuja por operacion: el importe manda el tamaño, y dentro se lee la
-// fecha, el operario y (si lo hay) el material imputado a esa operacion
-const burbujasDeOperaciones = (filas, prefijo) => filas.map((fila, indice) => ({
-  id: `${prefijo}-${indice}`,
-  etiqueta: fila.fecha,
-  valor: fila.precio + (fila.precioMaterial ?? 0),
-  detalle: fila.precioMaterial > 0
-    ? `${fila.operario} · material ${formatoEuro(fila.precioMaterial)}`
-    : fila.operario,
-}))
+// KPI card interna reutilizable: etiqueta arriba, valor grande, y un subvalor
+// opcional (p.ej. el €/hanegada bajo el total). Sin globos ni arcoíris.
+const KpiCard = ({ etiqueta, valor, sub }) => (
+  <div className="analisis-kpi">
+    <span className="analisis-kpi-label">{etiqueta}</span>
+    <span className="analisis-kpi-valor">{valor}</span>
+    {sub !== undefined && sub !== null && <span className="analisis-kpi-sub">{sub}</span>}
+  </div>
+)
 
-// Desglose de fumigacion (tractor vs. mochila): mano de obra, producto y
-// litros aplicados.
+// Fila etiqueta/valor de un desglose, como lista limpia (sin globos).
+const FilaDesglose = ({ children }) => (
+  <div className="rentabilidad-fila-parcela">{children}</div>
+)
+
+// Desglose de fumigacion (tractor vs. mochila): dos KPI cards con el total de
+// cada metodo y debajo las lineas (mano de obra, producto, litros).
 const DesgloseFumigacion = ({ fumigacion }) => (
   <>
-    <BurbujasMetodos
-      tractor={{
-        costeTotal: fumigacion.tractor.costeTotal,
-        productos: [
-          { producto_id: 'producto', nombre: 'Producto', valor: fumigacion.tractor.costeProducto },
-          { producto_id: 'manoObra', nombre: 'Mano de obra', valor: fumigacion.tractor.costeManoObra },
-        ],
-      }}
-      mochila={{
-        costeTotal: fumigacion.mochila.costeTotal,
-        productos: [
-          { producto_id: 'producto', nombre: 'Producto', valor: fumigacion.mochila.costeProducto },
-          { producto_id: 'manoObra', nombre: 'Mano de obra', valor: fumigacion.mochila.costeManoObra },
-        ],
-      }}
-      valorPrincipal={(m) => m.costeTotal}
-      etiquetaPrincipal={(m) => formatoEuro(m.costeTotal)}
-      valorProducto={(p) => p.valor}
-      etiquetaProducto={(p) => formatoEuro(p.valor)}
-    />
+    <div className="analisis-kpis">
+      <KpiCard etiqueta="Tractor" valor={formatoEuro(fumigacion.tractor.costeTotal)} />
+      <KpiCard etiqueta="Mochila" valor={formatoEuro(fumigacion.mochila.costeTotal)} />
+    </div>
     <div className="rentabilidad-desplegable">
-      <div className="rentabilidad-fila-parcela">
-        <span>Tractor: mano de obra</span>
-        <span>{formatoEuro(fumigacion.tractor.costeManoObra)}</span>
-      </div>
-      <div className="rentabilidad-fila-parcela">
-        <span>Tractor: producto</span>
-        <span>{formatoEuro(fumigacion.tractor.costeProducto)}</span>
-      </div>
-      <div className="rentabilidad-fila-parcela">
-        <span>Tractor: litros aplicados</span>
-        <span>{formatoNumero(fumigacion.tractor.litros)} L</span>
-      </div>
-      <div className="rentabilidad-fila-parcela">
-        <span>Mochila: mano de obra</span>
-        <span>{formatoEuro(fumigacion.mochila.costeManoObra)}</span>
-      </div>
-      <div className="rentabilidad-fila-parcela">
-        <span>Mochila: producto</span>
-        <span>{formatoEuro(fumigacion.mochila.costeProducto)}</span>
-      </div>
-      <div className="rentabilidad-fila-parcela">
-        <span>Mochila: litros aplicados</span>
-        <span>{formatoNumero(fumigacion.mochila.litros)} L</span>
-      </div>
+      <FilaDesglose><span>Tractor: mano de obra</span><span>{formatoEuro(fumigacion.tractor.costeManoObra)}</span></FilaDesglose>
+      <FilaDesglose><span>Tractor: producto</span><span>{formatoEuro(fumigacion.tractor.costeProducto)}</span></FilaDesglose>
+      <FilaDesglose><span>Tractor: litros aplicados</span><span>{formatoNumero(fumigacion.tractor.litros)} L</span></FilaDesglose>
+      <FilaDesglose><span>Mochila: mano de obra</span><span>{formatoEuro(fumigacion.mochila.costeManoObra)}</span></FilaDesglose>
+      <FilaDesglose><span>Mochila: producto</span><span>{formatoEuro(fumigacion.mochila.costeProducto)}</span></FilaDesglose>
+      <FilaDesglose><span>Mochila: litros aplicados</span><span>{formatoNumero(fumigacion.mochila.litros)} L</span></FilaDesglose>
       <div className="rentabilidad-total">
         <span>Total fumigación</span>
         <span>{formatoEuro(fumigacion.costeTotal)}</span>
@@ -123,61 +88,61 @@ const DesgloseRiego = ({ lineasRiego, costeOperacionesRiego }) => {
     return acumulado
   }, {})
 
-  const burbujasGoteo = Object.entries(goteoPorConcepto).map(([concepto, importe]) => ({
-    id: `goteo-${concepto}`,
-    etiqueta: concepto,
-    valor: importe,
-  }))
-
-  // cada riego a manta es un registro con su fecha y las hanegadas que se
-  // regaron ese dia (las de la parcela en ese momento, no las actuales)
-  const burbujasManta = manta.map((linea, indice) => ({
-    id: `manta-${indice}`,
-    etiqueta: linea.fecha,
-    valor: linea.importe,
-    detalle: linea.hanegadas !== null && linea.hanegadas !== undefined
-      ? `${linea.hanegadas} hanegadas`
-      : undefined,
-  }))
-
   return (
     <>
-      <h5 className="analisis-subtitulo-burbujas">Riego por goteo</h5>
-      <BurbujasFlotantes
-        datos={burbujasGoteo}
-        formatoValor={(v) => formatoEuro(v)}
-        vacio="Sin gastos de goteo registrados."
-      />
+      <div className="analisis-kpis">
+        <KpiCard etiqueta="Riego por goteo" valor={formatoEuro(totalGoteo)} />
+        <KpiCard etiqueta="Riego a manta" valor={formatoEuro(totalManta)} sub={`${manta.length} registro(s)`} />
+      </div>
 
-      <h5 className="analisis-subtitulo-burbujas">Riego a manta</h5>
-      <BurbujasFlotantes
-        datos={burbujasManta}
-        formatoValor={(v) => formatoEuro(v)}
-        vacio="Sin riegos a manta registrados."
-      />
-
-      {/* los importes concepto a concepto y riego a riego ya se leen en las
-          burbujas de arriba: aqui solo quedan los totales */}
       <div className="rentabilidad-desplegable">
-        <div className="rentabilidad-fila-parcela">
-          <span>Riego por goteo</span>
-          <span>{formatoEuro(totalGoteo)}</span>
-        </div>
-        <div className="rentabilidad-fila-parcela">
+        {Object.entries(goteoPorConcepto).map(([concepto, importe]) => (
+          <FilaDesglose key={concepto}>
+            <span style={{ textTransform: 'capitalize' }}>Goteo: {concepto}</span>
+            <span>{formatoEuro(importe)}</span>
+          </FilaDesglose>
+        ))}
+        <FilaDesglose>
           <span>Riego a manta ({manta.length} registro(s))</span>
           <span>{formatoEuro(totalManta)}</span>
-        </div>
-        <div className="rentabilidad-fila-parcela">
+        </FilaDesglose>
+        <FilaDesglose>
           <span>Mano de obra de riego (operaciones)</span>
           <span>{formatoEuro(costeOperacionesRiego)}</span>
-        </div>
-
+        </FilaDesglose>
         <div className="rentabilidad-total">
           <span>Total riego</span>
           <span>{formatoEuro(totalGoteo + totalManta + (costeOperacionesRiego ?? 0))}</span>
         </div>
       </div>
     </>
+  )
+}
+
+// Comparativa en dos barras horizontales CSS puras, proporcionales al mayor de
+// los dos valores: la parcela actual en verde de la app, el punto de
+// comparacion (media del resto u otra parcela) en gris.
+const ComparativaBarras = ({ nombreParcela, etiquetaComparacion, parcelaPorHanegada, comparacionPorHanegada }) => {
+  const maximo = Math.max(parcelaPorHanegada ?? 0, comparacionPorHanegada ?? 0)
+  const ancho = (valor) => (maximo > 0 ? Math.max(((valor ?? 0) / maximo) * 100, 1) : 0)
+
+  return (
+    <div className="analisis-comp">
+      <div className="analisis-comp-fila">
+        <span className="analisis-comp-etiqueta">{nombreParcela}</span>
+        <div className="analisis-comp-pista">
+          <div className="analisis-comp-relleno analisis-comp-relleno--parcela" style={{ width: `${ancho(parcelaPorHanegada)}%` }} />
+        </div>
+        <span className="analisis-comp-valor">{formatoEuroHng(parcelaPorHanegada)}</span>
+      </div>
+      <div className="analisis-comp-fila">
+        <span className="analisis-comp-etiqueta">{etiquetaComparacion}</span>
+        <div className="analisis-comp-pista">
+          <div className="analisis-comp-relleno analisis-comp-relleno--resto" style={{ width: `${ancho(comparacionPorHanegada)}%` }} />
+        </div>
+        <span className="analisis-comp-valor">{formatoEuroHng(comparacionPorHanegada)}</span>
+      </div>
+    </div>
   )
 }
 
@@ -212,9 +177,8 @@ const Analisis = () => {
   // submetodo del desglose de fumigacion (solo relevante si tipo === 'fumigacion')
   const [metodoFumigacion, setMetodoFumigacion] = useState('todas')
   const [rentabilidad, setRentabilidad] = useState([])
-  const [historico, setHistorico] = useState([])
-  // vista del mapa de ganancia neta por parcela: burbujas por defecto (se ve
-  // de un vistazo quién gana más), tabla para las cifras exactas
+  // vista del mapa de ganancia neta por parcela: gráfico por defecto, tabla
+  // para las cifras exactas
   const [mostrarTablaMargen, setMostrarTablaMargen] = useState(false)
   const ordenMapa = useOrdenTabla()
   const [error, setError] = useState('')
@@ -323,13 +287,6 @@ const Analisis = () => {
       .catch(() => setError('Error al cargar la rentabilidad'))
   }, [anio])
 
-  // histórico (todos los años con datos): no depende del año seleccionado, se pide una vez
-  useEffect(() => {
-    analisisService.getRentabilidadHistorico()
-      .then(data => setHistorico(data.anios))
-      .catch(() => setError('Error al cargar el histórico de rentabilidad'))
-  }, [])
-
   // litros de caldo del tractor por hanegada y por aplicacion individual (no
   // acumulado anual): litros_totales_tractor_anio / hanegadas / nº_aplicaciones.
   // numFumigaciones ya cuenta los registros de Fumigacion de tractor de la
@@ -353,7 +310,6 @@ const Analisis = () => {
   const gastosVigentes = gastosParcela?.clave === `${parcelaId}-${anio}` ? gastosParcela : null
   const lineasRiego = gastosVigentes ? (gastosVigentes.datos?.riego ?? []) : null
   const filasTipo = gastosVigentes?.datos?.operaciones?.find(o => o.tipo === tipo)?.filas ?? []
-  const burbujasTipo = burbujasDeOperaciones(filasTipo, tipo)
   const etiquetaTipo = TIPOS.find(t => t.valor === tipo)?.etiqueta ?? tipo
   const usaMetodoFumigacion = metodoFumigacionEfectivo !== 'todas'
   const etiquetaMetodoFumigacion = { tractor: 'Tractor', mochila: 'Mochila' }[metodoFumigacionEfectivo]
@@ -406,9 +362,18 @@ const Analisis = () => {
   const parcelaActual = parcelas.find(p => String(p.id) === String(parcelaId))
   const nombreParcela = parcelaActual ? etiquetaParcela(parcelaActual) : ''
 
-  // gastos/ingresos/hanegadas por parcela para el mapa de dispersión y su
-  // tabla: mismos datos y mismo estado (rentable/umbral/pérdidas) en las dos
-  // vistas, así el color de la burbuja y el chip de la tabla siempre coinciden
+  // hanegadas de la parcela y helpers €/hanegada para las KPI cards del Card 1
+  const hanegadas = rentabilidadParcela?.hanegadas ?? resumen?.parcela.hanegadas ?? 0
+  const porHng = (valor) => (hanegadas > 0 && valor !== null && valor !== undefined ? valor / hanegadas : null)
+
+  // barra de progreso gastos/ingresos: proporción del gasto sobre el ingreso
+  // (100% = se gasta todo lo que se ingresa; más allá hay pérdidas, se capa)
+  const ratioGastos = rentabilidadParcela && rentabilidadParcela.ingresos > 0
+    ? Math.min((rentabilidadParcela.costes / rentabilidadParcela.ingresos) * 100, 100)
+    : (rentabilidadParcela && rentabilidadParcela.costes > 0 ? 100 : 0)
+
+  // gastos/ingresos/hanegadas por parcela para el mapa y su tabla: mismas
+  // cifras y mismo estado (rentable/umbral/pérdidas) en las dos vistas
   const datosMapa = rentabilidad
     .filter(p => p.hanegadas > 0)
     .map(p => ({
@@ -418,10 +383,14 @@ const Analisis = () => {
       gastos: p.costes,
       ingresos: p.ingresos,
       gastoPorHanegada: p.costes / p.hanegadas,
+      margenPorHanegada: (p.ingresos - p.costes) / p.hanegadas,
       estado: calcularEstado(p.ingresos, p.costes),
     }))
   const valorOrdenMapa = (fila, clave) => (clave === 'estado' ? ETIQUETA_ESTADO[fila.estado] : fila[clave])
   const datosMapaOrdenados = ordenMapa.ordenar(datosMapa, valorOrdenMapa)
+
+  // datos del gráfico de barras: margen neto por hanegada de cada parcela
+  const datosBarras = datosMapa.map(d => ({ categoria: d.nombre, valor: d.margenPorHanegada }))
 
   return (
     <div className="rentabilidad-contenedor">
@@ -464,228 +433,223 @@ const Analisis = () => {
           </div>
         </div>
 
+        {/* Card 1: resumen de rentabilidad (ingresos, gastos, ganancia neta) */}
         {rentabilidadParcela && (
-          <BarraIngresosGastos
-            ingresos={rentabilidadParcela.ingresos}
-            gastos={rentabilidadParcela.costes}
-            gananciaNeta={rentabilidadParcela.gananciaNeta}
-            margen={rentabilidadParcela.margen}
-            sinDatos={rentabilidadParcela.sinDatos}
-          />
-        )}
+          <div className="rentabilidad-card">
+            <div className="rentabilidad-cabecera-izq">
+              <img src="./analisis.svg" alt="Análisis" />
+              <h4>Resumen de rentabilidad</h4>
+            </div>
+            <div className="rentabilidad-resumen">
+              <span>{formatoNumero(hanegadas)} hanegadas</span>
+            </div>
 
-        {resumen && (
-          <>
-            {/* Card 1: gasto total y gasto por hanegada del año completo */}
-            <div className="rentabilidad-card">
-              <div className="rentabilidad-cabecera-izq">
-                <img src="./analisis.svg" alt="Análisis" />
-                <h4>Gasto de la parcela</h4>
-              </div>
-              <div className="rentabilidad-resumen">
-                <span>{resumen.parcela.hanegadas} hanegadas</span>
-              </div>
-              <RentabilidadBarra
-                categoria={resumen.rentabilidad?.categoria}
-                percentil={resumen.rentabilidad?.percentil}
+            <div className="analisis-kpis">
+              <KpiCard
+                etiqueta="Ingresos"
+                valor={formatoEuro(rentabilidadParcela.ingresos)}
+                sub={formatoEuroHng(porHng(rentabilidadParcela.ingresos))}
               />
-              <BurbujasFlotantes
-                datos={[
-                  { id: 'total', etiqueta: `Gasto total (${resumen.anio})`, valor: resumen.gastoTotal },
-                  { id: 'hanegada', etiqueta: 'Gasto por hanegada', valor: resumen.gastoPorHanegada },
-                ]}
-                formatoValor={(v) => formatoEuro(v)}
-                proporcional={false}
+              <KpiCard
+                etiqueta="Gastos totales"
+                valor={formatoEuro(rentabilidadParcela.costes)}
+                sub={formatoEuroHng(resumen ? resumen.gastoPorHanegada : porHng(rentabilidadParcela.costes))}
               />
             </div>
 
-            {/* Card 2: desglose por tipo de operación */}
-            <div className="rentabilidad-card">
-              <div className="rentabilidad-cabecera">
-                <div className="rentabilidad-cabecera-izq"><h4>Desglose por tipo de operación</h4></div>
+            <div className={`analisis-neto ${rentabilidadParcela.gananciaNeta >= 0 ? 'es-positivo' : 'es-negativo'}`}>
+              <div className="analisis-neto-cifras">
+                <span className="analisis-neto-label">Ganancia neta</span>
+                <span className="analisis-neto-valor">
+                  {formatoEuro(rentabilidadParcela.gananciaNeta)}
+                  <span className="analisis-neto-hng"> · {formatoEuroHng(rentabilidadParcela.gananciaNetaHanegada)}</span>
+                </span>
+              </div>
+              <span className={`analisis-badge ${rentabilidadParcela.gananciaNeta >= 0 ? 'es-positivo' : 'es-negativo'}`}>
+                {rentabilidadParcela.gananciaNeta >= 0 ? 'Beneficio' : 'Pérdidas'}
+              </span>
+            </div>
+
+            {/* barra de progreso simple: proporción gastos/ingresos */}
+            <div className="analisis-ratio">
+              <div className="analisis-ratio-pista">
+                <div className="analisis-ratio-relleno" style={{ width: `${ratioGastos}%` }} />
+              </div>
+              <div className="analisis-ratio-labels">
+                <span>Gastos</span>
+                <span>Ingresos</span>
+              </div>
+            </div>
+
+            {rentabilidadParcela.sinDatos && (
+              <p className="rentabilidad-vacio">Sin recolección o sin gastos registrados: el margen no se calcula.</p>
+            )}
+          </div>
+        )}
+
+        {/* Card 2: desglose por tipo de operación */}
+        {resumen && (
+          <div className="rentabilidad-card">
+            <div className="rentabilidad-cabecera">
+              <div className="rentabilidad-cabecera-izq"><h4>Desglose por tipo de operación</h4></div>
+              <div className="filtro-explo">
+                <div className="barra-select">
+                  <select value={tipo} onChange={(e) => setTipo(e.target.value)}>
+                    {TIPOS.map(t => <option key={t.valor} value={t.valor}>{t.etiqueta}</option>)}
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            {tipo === 'riego' ? (
+              <DesgloseRiego
+                lineasRiego={lineasRiego}
+                costeOperacionesRiego={desglose?.gastoTotal ?? null}
+              />
+            ) : !desglose ? (
+              <p className="rentabilidad-vacio">Cargando desglose…</p>
+            ) : tipo === 'fumigacion' ? (
+              <>
                 <div className="filtro-explo">
                   <div className="barra-select">
-                    <select value={tipo} onChange={(e) => setTipo(e.target.value)}>
-                      {TIPOS.map(t => <option key={t.valor} value={t.valor}>{t.etiqueta}</option>)}
+                    <select value={metodoFumigacion} onChange={(e) => setMetodoFumigacion(e.target.value)}>
+                      <option value="todas">Todas</option>
+                      <option value="tractor">Tractor</option>
+                      <option value="mochila">Mochila</option>
                     </select>
                   </div>
                 </div>
-              </div>
 
-              {tipo === 'riego' ? (
-                <DesgloseRiego
-                  lineasRiego={lineasRiego}
-                  costeOperacionesRiego={desglose?.gastoTotal ?? null}
-                />
-              ) : !desglose ? (
-                <p className="rentabilidad-vacio">Cargando desglose…</p>
-              ) : tipo === 'fumigacion' ? (
-                <>
-                  <div className="filtro-explo">
-                    <div className="barra-select">
-                      <select value={metodoFumigacion} onChange={(e) => setMetodoFumigacion(e.target.value)}>
-                        <option value="todas">Todas</option>
-                        <option value="tractor">Tractor</option>
-                        <option value="mochila">Mochila</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  {metodoFumigacion === 'todas' ? (
-                    desglose.fumigacion ? (
-                      <DesgloseFumigacion fumigacion={desglose.fumigacion} />
-                    ) : (
-                      <div className="rentabilidad-desplegable">
-                        <div className="rentabilidad-total">
-                          <span>Total fumigación</span>
-                          <span>{formatoEuro(desglose.gastoTotal)}</span>
-                        </div>
-                      </div>
-                    )
-                  ) : !costesMetodo ? (
-                    <p className="rentabilidad-vacio">Cargando datos de {etiquetaMetodoFumigacion.toLowerCase()}…</p>
+                {metodoFumigacion === 'todas' ? (
+                  desglose.fumigacion ? (
+                    <DesgloseFumigacion fumigacion={desglose.fumigacion} />
                   ) : (
-                    <>
-                      <BurbujasFlotantes
-                        datos={costesMetodo.metodos[metodoFumigacion].productos.map(prod => ({
-                          id: prod.producto_id,
-                          etiqueta: prod.nombre,
-                          valor: prod.costeTotal,
-                        }))}
-                        formatoValor={(v) => formatoEuro(v)}
-                        vacio={`Sin productos aplicados con ${metodoFumigacion} en ${anio}.`}
-                      />
-                      <div className="rentabilidad-desplegable">
-                        <div className="rentabilidad-fila-parcela">
-                          <span>Gasto por hanegada</span>
-                          <span>{formatoEuro(costesMetodo.metodos[metodoFumigacion].gastoPorHanegada)}</span>
-                        </div>
-                        <div className="rentabilidad-total">
-                          <span>Total {metodoFumigacion}</span>
-                          <span>{formatoEuro(costesMetodo.metodos[metodoFumigacion].costeTotal)}</span>
-                        </div>
+                    <div className="rentabilidad-desplegable">
+                      <div className="rentabilidad-total">
+                        <span>Total fumigación</span>
+                        <span>{formatoEuro(desglose.gastoTotal)}</span>
                       </div>
-                    </>
-                  )}
-                </>
-              ) : (
-                <>
-                  <BurbujasFlotantes
-                    datos={burbujasTipo}
-                    formatoValor={(v) => formatoEuro(v)}
-                    vacio={`Sin operaciones de ${etiquetaTipo.toLowerCase()} registradas en ${anio}.`}
+                    </div>
+                  )
+                ) : !costesMetodo ? (
+                  <p className="rentabilidad-vacio">Cargando datos de {etiquetaMetodoFumigacion.toLowerCase()}…</p>
+                ) : (
+                  <>
+                    <div className="analisis-kpis">
+                      <KpiCard
+                        etiqueta={`Total ${metodoFumigacion}`}
+                        valor={formatoEuro(costesMetodo.metodos[metodoFumigacion].costeTotal)}
+                      />
+                      <KpiCard
+                        etiqueta="Gasto por hanegada"
+                        valor={formatoEuroHng(costesMetodo.metodos[metodoFumigacion].gastoPorHanegada)}
+                      />
+                    </div>
+                    <div className="rentabilidad-desplegable">
+                      {costesMetodo.metodos[metodoFumigacion].productos.length === 0 ? (
+                        <p className="rentabilidad-vacio">Sin productos aplicados con {metodoFumigacion} en {anio}.</p>
+                      ) : costesMetodo.metodos[metodoFumigacion].productos.map(prod => (
+                        <FilaDesglose key={prod.producto_id}>
+                          <span>{prod.nombre}</span>
+                          <span>{formatoEuro(prod.costeTotal)}</span>
+                        </FilaDesglose>
+                      ))}
+                      <div className="rentabilidad-total">
+                        <span>Total {metodoFumigacion}</span>
+                        <span>{formatoEuro(costesMetodo.metodos[metodoFumigacion].costeTotal)}</span>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </>
+            ) : (
+              <>
+                <div className="analisis-kpis">
+                  <KpiCard etiqueta={`Total ${etiquetaTipo.toLowerCase()}`} valor={formatoEuro(desglose.gastoTotal)} />
+                  <KpiCard etiqueta="Gasto por hanegada" valor={formatoEuroHng(desglose.gastoPorHanegada)} />
+                </div>
+                <div className="rentabilidad-desplegable">
+                  {filasTipo.length === 0 ? (
+                    <p className="rentabilidad-vacio">Sin operaciones de {etiquetaTipo.toLowerCase()} registradas en {anio}.</p>
+                  ) : filasTipo.map((fila, indice) => (
+                    <FilaDesglose key={`${tipo}-${indice}`}>
+                      <span>{fila.fecha} · {fila.operario}{fila.precioMaterial > 0 ? ` · material ${formatoEuro(fila.precioMaterial)}` : ''}</span>
+                      <span>{formatoEuro(fila.precio + (fila.precioMaterial ?? 0))}</span>
+                    </FilaDesglose>
+                  ))}
+                  <div className="rentabilidad-total">
+                    <span>Total {etiquetaTipo.toLowerCase()} (mano de obra y material)</span>
+                    <span>{formatoEuro(desglose.gastoTotal)}</span>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* comparativa con la media del resto (o con una parcela concreta
+                elegida abajo), para ESE mismo tipo/metodo y año */}
+            {desglose && (
+              <>
+                <h5 className="analisis-subtitulo-burbujas">Comparativa con el resto de parcelas</h5>
+
+                <div className="filtro-explo">
+                  <div className="barra-select">
+                    <select value={parcelaComparacionEfectiva} onChange={(e) => setParcelaComparacionId(e.target.value)}>
+                      <option value="">Media del resto</option>
+                      {parcelas
+                        .filter(p => String(p.id) !== String(parcelaId))
+                        .map(p => <option key={p.id} value={p.id}>{etiquetaParcela(p)}</option>)}
+                    </select>
+                  </div>
+                </div>
+
+                {gastoPorHanegadaPrincipal === null || !comparacion ? (
+                  <p className="rentabilidad-vacio">Cargando comparativa…</p>
+                ) : (
+                  <ComparativaBarras
+                    nombreParcela={etiquetaParcela(desglose.parcela)}
+                    etiquetaComparacion={comparacion.etiqueta}
+                    parcelaPorHanegada={gastoPorHanegadaPrincipal}
+                    comparacionPorHanegada={comparacion.gastoPorHanegada}
                   />
-                  <div className="rentabilidad-desplegable">
-                    <div className="rentabilidad-fila-parcela">
-                      <span>Gasto por hanegada</span>
-                      <span>{formatoEuro(desglose.gastoPorHanegada)}</span>
-                    </div>
-                    <div className="rentabilidad-total">
-                      <span>Total {etiquetaTipo.toLowerCase()} (mano de obra y material)</span>
-                      <span>{formatoEuro(desglose.gastoTotal)}</span>
-                    </div>
-                  </div>
-                </>
-              )}
-
-              {/* comparativa con la media del resto de parcelas (o con una
-                  parcela concreta elegida abajo), para ESE mismo tipo/metodo
-                  y año: AnalisisController ya filtra por tipo y por metodo,
-                  no hay que recalcular nada aqui */}
-              {desglose && (
-                <>
-                  <h5 className="analisis-subtitulo-burbujas">Comparativa con el resto de parcelas</h5>
-
-                  <div className="filtro-explo">
-                    <div className="barra-select">
-                      <select value={parcelaComparacionEfectiva} onChange={(e) => setParcelaComparacionId(e.target.value)}>
-                        <option value="">Media del resto</option>
-                        {parcelas
-                          .filter(p => String(p.id) !== String(parcelaId))
-                          .map(p => <option key={p.id} value={p.id}>{etiquetaParcela(p)}</option>)}
-                      </select>
-                    </div>
-                  </div>
-
-                  {gastoPorHanegadaPrincipal === null || !comparacion ? (
-                    <p className="rentabilidad-vacio">Cargando comparativa…</p>
-                  ) : (
-                    <>
-                      <div className="rentabilidad-desplegable">
-                        <div className="rentabilidad-fila-parcela">
-                          <span>{comparacion.etiqueta} ({(usaMetodoFumigacion ? etiquetaMetodoFumigacion : etiquetaTipo).toLowerCase()})</span>
-                          <span>{formatoEuro(comparacion.gastoTotal)}</span>
-                        </div>
-                        <div className="rentabilidad-fila-parcela">
-                          <span>{comparacion.etiqueta} por hanegada</span>
-                          <span>{formatoEuro(comparacion.gastoPorHanegada)}</span>
-                        </div>
-                      </div>
-                      <ComparativaMediaResto
-                        nombreParcela={etiquetaParcela(desglose.parcela)}
-                        etiquetaComparacion={comparacion.etiqueta}
-                        parcelaPorHanegada={gastoPorHanegadaPrincipal}
-                        comparacionPorHanegada={comparacion.gastoPorHanegada}
-                      />
-                    </>
-                  )}
-                </>
-              )}
-            </div>
-          </>
+                )}
+              </>
+            )}
+          </div>
         )}
 
+        {/* Card químico: gasto de productos por hanegada, tractor vs. mochila */}
         {costesMetodo && (
           <div className="rentabilidad-card">
             <div className="rentabilidad-cabecera-izq"><h4>Gasto de productos químicos por hanegada: tractor vs. mochila</h4></div>
             <ConsumoAguaBarra litrosPorHanegadaPorAplicacion={litrosPorHanegadaPorAplicacion} />
-            <BurbujasMetodos
-              tractor={costesMetodo.metodos.tractor}
-              mochila={costesMetodo.metodos.mochila}
-              valorPrincipal={(m) => m.gastoPorHanegada}
-              etiquetaPrincipal={(m) => formatoEuro(m.gastoPorHanegada)}
-              valorProducto={(p) => p.costeTotal}
-              etiquetaProducto={(p) => formatoEuro(p.costeTotal)}
-            />
+            <div className="analisis-kpis">
+              <KpiCard
+                etiqueta="Tractor"
+                valor={formatoEuroHng(costesMetodo.metodos.tractor.gastoPorHanegada)}
+                sub={`total ${formatoEuro(costesMetodo.metodos.tractor.costeTotal)}`}
+              />
+              <KpiCard
+                etiqueta="Mochila"
+                valor={formatoEuroHng(costesMetodo.metodos.mochila.gastoPorHanegada)}
+                sub={`total ${formatoEuro(costesMetodo.metodos.mochila.costeTotal)}`}
+              />
+            </div>
             <div className="rentabilidad-desplegable">
-              <div className="rentabilidad-fila-parcela">
-                <span>Tractor: coste total</span>
-                <span>{formatoEuro(costesMetodo.metodos.tractor.costeTotal)}</span>
-              </div>
-              <div className="rentabilidad-fila-parcela">
-                <span>Mochila: coste total</span>
-                <span>{formatoEuro(costesMetodo.metodos.mochila.costeTotal)}</span>
-              </div>
-              <div className="rentabilidad-fila-parcela">
-                <span>Tractor: litros totales</span>
-                <span>{formatoNumero(costesMetodo.metodos.tractor.litros)} L</span>
-              </div>
-              <div className="rentabilidad-fila-parcela">
-                <span>Mochila: litros totales</span>
-                <span>{formatoNumero(costesMetodo.metodos.mochila.litros)} L</span>
-              </div>
+              <FilaDesglose><span>Tractor: coste total</span><span>{formatoEuro(costesMetodo.metodos.tractor.costeTotal)}</span></FilaDesglose>
+              <FilaDesglose><span>Mochila: coste total</span><span>{formatoEuro(costesMetodo.metodos.mochila.costeTotal)}</span></FilaDesglose>
+              <FilaDesglose><span>Tractor: litros totales</span><span>{formatoNumero(costesMetodo.metodos.tractor.litros)} L</span></FilaDesglose>
+              <FilaDesglose><span>Mochila: litros totales</span><span>{formatoNumero(costesMetodo.metodos.mochila.litros)} L</span></FilaDesglose>
             </div>
           </div>
         )}
       </section>
 
-      {/* Ganancia neta histórica: mismo componente y misma escala de color
-          que el resto de gráficos de rentabilidad de la pestaña */}
-      <div className="rentabilidad-card">
-        <div className="rentabilidad-cabecera-izq"><h4>Ganancia neta histórica (todas las parcelas)</h4></div>
-        <GraficoRentabilidad
-          datos={historico.map(a => ({ categoria: String(a.anio), valor: a.gananciaNeta, margen: a.margen }))}
-          nombreValor="Ganancia neta (€)"
-        />
-      </div>
-
-      {/* gastos vs. ingresos por parcela: por encima de la diagonal hay
-          beneficio, por debajo pérdidas. Tabla: mismas cifras y mismo estado
-          (rentable/umbral/pérdidas, calcularEstado) fila a fila, ordenable */}
+      {/* Card 3: rentabilidad por parcela — un único gráfico de barras
+          horizontales (margen neto €/hanegada) o su tabla de cifras exactas */}
       {datosMapa.length > 0 && (
         <div className="rentabilidad-card">
           <div className="rentabilidad-cabecera">
-            <div className="rentabilidad-cabecera-izq"><h4>Mapa de ganancia neta por parcela</h4></div>
+            <div className="rentabilidad-cabecera-izq"><h4>Rentabilidad por parcela ({anio})</h4></div>
             <button
               type="button"
               className={`btn-vista ${mostrarTablaMargen ? 'activo' : ''}`}
@@ -696,44 +660,45 @@ const Analisis = () => {
             </button>
           </div>
 
-          <div className="leyenda-margen">
-            {Object.keys(ETIQUETA_ESTADO).map(estado => (
-              <div className="leyenda-margen-item" key={estado}>
-                <span className="leyenda-margen-swatch" style={{ backgroundColor: COLOR_ESTADO[estado] }}></span>
-                <span>{ETIQUETA_ESTADO[estado]}{estado === 'umbral' ? ' (±10%)' : ''}</span>
-              </div>
-            ))}
-          </div>
-
           {mostrarTablaMargen ? (
-            <table className="tabla-operaciones tabla-margen">
-              <thead>
-                <tr>
-                  <CabeceraOrden orden={ordenMapa} clave="nombre">Parcela</CabeceraOrden>
-                  <CabeceraOrden orden={ordenMapa} clave="hanegadas">Hanegadas</CabeceraOrden>
-                  <CabeceraOrden orden={ordenMapa} clave="gastos">Gasto total</CabeceraOrden>
-                  <CabeceraOrden orden={ordenMapa} clave="ingresos">Ingreso total</CabeceraOrden>
-                  <CabeceraOrden orden={ordenMapa} clave="gastoPorHanegada">€/hanegada</CabeceraOrden>
-                  <CabeceraOrden orden={ordenMapa} clave="estado">Estado</CabeceraOrden>
-                </tr>
-              </thead>
-              <tbody>
-                {datosMapaOrdenados.map(d => (
-                  <tr key={d.parcelaId}>
-                    <td>{d.nombre}</td>
-                    <td>{formatoNumero(d.hanegadas)}</td>
-                    <td>{formatoEuro(d.gastos)}</td>
-                    <td>{formatoEuro(d.ingresos)}</td>
-                    <td>{formatoEuro(d.gastoPorHanegada)}</td>
-                    <td>
-                      <span className={`chip-estado chip-estado--${d.estado}`}>{ETIQUETA_ESTADO[d.estado]}</span>
-                    </td>
-                  </tr>
+            <>
+              <div className="leyenda-margen">
+                {Object.keys(ETIQUETA_ESTADO).map(estado => (
+                  <div className="leyenda-margen-item" key={estado}>
+                    <span className="leyenda-margen-swatch" style={{ backgroundColor: COLOR_ESTADO[estado] }}></span>
+                    <span>{ETIQUETA_ESTADO[estado]}{estado === 'umbral' ? ' (±10%)' : ''}</span>
+                  </div>
                 ))}
-              </tbody>
-            </table>
+              </div>
+              <table className="tabla-operaciones tabla-margen">
+                <thead>
+                  <tr>
+                    <CabeceraOrden orden={ordenMapa} clave="nombre">Parcela</CabeceraOrden>
+                    <CabeceraOrden orden={ordenMapa} clave="hanegadas">Hanegadas</CabeceraOrden>
+                    <CabeceraOrden orden={ordenMapa} clave="gastos">Gasto total</CabeceraOrden>
+                    <CabeceraOrden orden={ordenMapa} clave="ingresos">Ingreso total</CabeceraOrden>
+                    <CabeceraOrden orden={ordenMapa} clave="margenPorHanegada">Margen €/hng</CabeceraOrden>
+                    <CabeceraOrden orden={ordenMapa} clave="estado">Estado</CabeceraOrden>
+                  </tr>
+                </thead>
+                <tbody>
+                  {datosMapaOrdenados.map(d => (
+                    <tr key={d.parcelaId}>
+                      <td>{d.nombre}</td>
+                      <td>{formatoNumero(d.hanegadas)}</td>
+                      <td>{formatoEuro(d.gastos)}</td>
+                      <td>{formatoEuro(d.ingresos)}</td>
+                      <td>{formatoEuro(d.margenPorHanegada)}</td>
+                      <td>
+                        <span className={`chip-estado chip-estado--${d.estado}`}>{ETIQUETA_ESTADO[d.estado]}</span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </>
           ) : (
-            <DispersionRentabilidad datos={datosMapa} />
+            <BarrasMargenParcela datos={datosBarras} />
           )}
         </div>
       )}

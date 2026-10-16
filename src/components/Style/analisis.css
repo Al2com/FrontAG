@@ -256,7 +256,195 @@
   letter-spacing: .04em;
 }
 
+/* ===== REDISEÑO: KPI cards internas, resumen de rentabilidad y comparativa ===== */
+
+/* grid de 2 columnas de KPI cards (ingresos/gastos, tractor/mochila, etc.) */
+.analisis-kpis {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--esp-sm);
+  margin: var(--esp-sm) 0;
+}
+
+.analisis-kpi {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: var(--c-fondo-verde);
+  border-radius: var(--rad-md);
+  padding: 12px;
+}
+
+.analisis-kpi-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--c-texto-apagado);
+}
+
+.analisis-kpi-valor {
+  font-family: var(--font-mono);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--c-texto);
+}
+
+.analisis-kpi-sub {
+  font-size: 12px;
+  color: var(--c-texto-apagado);
+}
+
+/* fila de ganancia neta con su badge beneficio/pérdidas */
+.analisis-neto {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--esp-sm);
+  padding: var(--esp-sm) 0;
+}
+
+.analisis-neto-cifras {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.analisis-neto-label {
+  font-size: 12px;
+  color: var(--c-texto-apagado);
+}
+
+.analisis-neto-valor {
+  font-family: var(--font-mono);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.analisis-neto-hng {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--c-texto-apagado);
+}
+
+.analisis-neto.es-positivo .analisis-neto-valor { color: #2f5233; }
+.analisis-neto.es-negativo .analisis-neto-valor { color: #a32d2d; }
+
+.analisis-badge {
+  flex: 0 0 auto;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 999px;
+  color: #fff;
+}
+
+.analisis-badge.es-positivo { background: #2f5233; }
+.analisis-badge.es-negativo { background: #a32d2d; }
+
+/* barra de progreso simple del ratio gastos/ingresos */
+.analisis-ratio {
+  margin: 4px 0 var(--esp-xs);
+}
+
+.analisis-ratio-pista {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--c-borde);
+  overflow: hidden;
+}
+
+.analisis-ratio-relleno {
+  height: 100%;
+  border-radius: 4px;
+  background: #2f5233;
+  transition: width .25s ease;
+}
+
+.analisis-ratio-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--c-texto-apagado);
+}
+
+/* comparativa en dos barras CSS (parcela vs media/otra parcela) */
+.analisis-comp {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-xs);
+  margin: var(--esp-xs) 0 var(--esp-sm);
+}
+
+.analisis-comp-fila {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-sm);
+}
+
+.analisis-comp-etiqueta {
+  flex: 0 0 110px;
+  font-size: 12px;
+  color: var(--c-texto-apagado);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.analisis-comp-pista {
+  flex: 1 1 auto;
+  height: 14px;
+  border-radius: 7px;
+  background: var(--c-borde);
+  overflow: hidden;
+}
+
+.analisis-comp-relleno {
+  height: 100%;
+  border-radius: 7px;
+  transition: width .25s ease;
+}
+
+.analisis-comp-relleno--parcela { background: #2f5233; }
+.analisis-comp-relleno--resto { background: var(--c-borde-oscuro); }
+
+.analisis-comp-valor {
+  flex: 0 0 auto;
+  min-width: 90px;
+  text-align: right;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--c-texto);
+}
+
+/* leyenda HTML del gráfico de barras de rentabilidad (rentable/pérdidas) */
+.analisis-leyenda-chips {
+  display: flex;
+  gap: var(--esp-md);
+  margin: var(--esp-xs) 0 var(--esp-sm);
+}
+
+.analisis-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--c-texto-apagado);
+}
+
+.analisis-chip-swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
 @media (max-width: 768px) {
+  .analisis-kpi-valor { font-size: 18px; }
+  .analisis-comp-etiqueta { flex-basis: 84px; }
+  .analisis-comp-valor { min-width: 72px; }
   .analisis-parcela { margin: 0 0 var(--esp-md); }
   .analisis-parcela-cabecera { padding: 0 var(--esp-sm) var(--esp-sm); }
   .analisis-parcela-titulo { font-size: 17px; }

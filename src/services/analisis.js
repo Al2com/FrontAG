@@ -21,9 +21,4 @@ const getRentabilidad = (anio, parcelaId) => {
   return axios.get(`/api/analisis/rentabilidad?${params.toString()}`).then(res => res.data);
 };
 
-// rentabilidad total (todas las parcelas) por año, para el histórico
-const getRentabilidadHistorico = () => {
-  return axios.get('/api/analisis/rentabilidad-historico').then(res => res.data);
-};
-
-export default { getResumenParcela, getCostesMetodo, getRentabilidad, getRentabilidadHistorico };
+export default { getResumenParcela, getCostesMetodo, getRentabilidad };
